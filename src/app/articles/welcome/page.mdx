@@ -1,0 +1,69 @@
+import { JsonLd } from "@/components/json-ld";
+
+export const metadata = {
+  title: "Why we built Devize",
+  description:
+    "Home services operators are drowning in phones, tabs, and follow-ups. Here's the system we built to take that off their plate.",
+  alternates: { canonical: "/articles/welcome" },
+  openGraph: {
+    title: "Why we built Devize",
+    description:
+      "Home services operators are drowning in phones, tabs, and follow-ups. Here's the system we built to take that off their plate.",
+    url: "https://devize.ai/articles/welcome",
+    type: "article",
+    publishedTime: "2026-04-22",
+    authors: ["Devize"],
+  },
+};
+
+export const articleSchema = {
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  headline: "Why we built Devize",
+  description:
+    "Home services operators are drowning in phones, tabs, and follow-ups. Here's the system we built to take that off their plate.",
+  url: "https://devize.ai/articles/welcome",
+  datePublished: "2026-04-22",
+  dateModified: "2026-04-22",
+  author: { "@type": "Organization", name: "Devize", url: "https://devize.ai" },
+  publisher: {
+    "@type": "Organization",
+    name: "Devize",
+    url: "https://devize.ai",
+    logo: { "@type": "ImageObject", url: "https://devize.ai/devize-logo.svg" },
+  },
+  mainEntityOfPage: {
+    "@type": "WebPage",
+    "@id": "https://devize.ai/articles/welcome",
+  },
+};
+
+<JsonLd data={articleSchema} />
+
+<div className="mx-auto max-w-2xl px-6 py-24 md:py-32">
+
+<p className="text-xs uppercase tracking-[0.18em] text-[var(--color-ink-muted)] font-medium">Field note · 4 min read</p>
+
+# Why we built Devize
+
+The best HVAC shop I know answers maybe 60% of its after-hours calls. The owner is excellent at the work, his techs are booked three weeks out, and yet every night he's leaving money on the table the moment the phones roll to voicemail.
+
+He's not behind. He's just stuck in the phones.
+
+## The three things that actually move the number
+
+When we looked at shops that were growing without burning out their operators, three patterns kept showing up:
+
+- **Every call gets answered.** Not "tried to answer" — actually answered. With a real conversation, not a voicemail promise.
+- **Every job gets routed fast.** To the right tech, with the right parts, in a window the customer accepts.
+- **Every customer gets followed up.** Review requests. Reactivation. A reason to come back when their next need shows up.
+
+Sounds obvious. It's not, because each of those loops is its own job, and most shops don't have the headcount to run all three well.
+
+## So we built a system, not an app
+
+Devize is one system across all three. Voice agents up front. Dispatch in the middle. Follow-through on the back. No rip-and-replace on your CRM — we run alongside what you already use.
+
+That's the whole thesis. The rest is execution.
+
+</div>
