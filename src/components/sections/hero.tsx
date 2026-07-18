@@ -12,7 +12,7 @@ export default function Hero() {
         backgroundRepeat: "no-repeat",
       }}
     >
-      {/* Left-to-right darkening overlay — purple-tinted to blend with the image, strongest where text sits */}
+      {/* Left-to-right darkening overlay, purple-tinted to blend with the image, strongest where text sits */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0"
@@ -37,7 +37,7 @@ export default function Hero() {
         <div className="max-w-3xl">
           <div className="reveal inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 backdrop-blur px-3 py-1 text-xs font-medium text-white/80">
             <span className="brand-dot" aria-hidden="true" />
-            AI operating systems for home services
+            Revenue Recovery &amp; Retention for home services
           </div>
 
           <h1 className="reveal mt-6 font-[family-name:var(--font-display)] text-5xl md:text-7xl leading-[1.02] tracking-tight text-white font-medium">
@@ -45,13 +45,13 @@ export default function Hero() {
             <br />
             Book every job.
             <br />
-            <span className="text-[var(--color-brand-end)]">Never lose a customer.</span>
+            <span className="text-[var(--color-brand-end)]">Keep every customer.</span>
           </h1>
 
           <p className="reveal mt-6 max-w-xl text-lg text-white/70 leading-relaxed">
-            Devize builds the AI back office for home services shops — voice
-            agents, dispatch, follow-up, and reviews — running 24/7 so every
-            lead turns into revenue.
+            Two systems for the shop that&apos;s slammed: Revenue Recovery
+            answers every call in about two rings and books the job. Revenue
+            Retention keeps the customers you already paid to win.
           </p>
 
           <div className="reveal mt-8 flex flex-col sm:flex-row gap-3">

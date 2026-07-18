@@ -20,15 +20,15 @@ const spaceGrotesk = Space_Grotesk({
 export const metadata: Metadata = {
   metadataBase: new URL("https://devize.ai"),
   title: {
-    default: "Devize — AI operating systems for home services",
+    default: "Devize: Revenue Recovery & Retention for home services",
     template: "%s · Devize",
   },
   description:
-    "Devize builds AI operating systems for home services businesses — voice agents, dispatch, follow-up, and reviews that run 24/7.",
+    "Devize builds Revenue Recovery and Revenue Retention systems for home-service businesses: every call answered 24/7 and booked into the schedule, every customer followed up and won back.",
   openGraph: {
-    title: "Devize — AI operating systems for home services",
+    title: "Devize: Revenue Recovery & Retention for home services",
     description:
-      "Voice agents, dispatch, follow-up, reviews. Built for HVAC, plumbing, electrical, and the rest of the trades.",
+      "Every call answered and booked, 24/7. Every customer followed up and kept. Built for HVAC, plumbing, electrical, and the rest of the trades.",
     url: "https://devize.ai",
     siteName: "Devize",
     type: "website",
@@ -36,9 +36,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Devize — AI operating systems for home services",
+    title: "Devize: Revenue Recovery & Retention for home services",
     description:
-      "Voice agents, dispatch, follow-up, reviews. Built for HVAC, plumbing, electrical, and the rest of the trades.",
+      "Every call answered and booked, 24/7. Every customer followed up and kept. Built for HVAC, plumbing, electrical, and the rest of the trades.",
   },
   robots: {
     index: true,
@@ -59,7 +59,7 @@ const organizationSchema = {
   url: "https://devize.ai",
   logo: "https://devize.ai/devize-logo.svg",
   description:
-    "AI operating systems for home services businesses — voice agents, dispatch, follow-up, and reviews.",
+    "Devize builds Revenue Recovery and Revenue Retention systems for home-service businesses: 24/7 AI call answering that qualifies callers and books jobs into the schedule, plus post-job follow-up, review capture, appointment reminders, and maintenance-plan reactivation.",
   email: "admin@devize.ai",
 };
 

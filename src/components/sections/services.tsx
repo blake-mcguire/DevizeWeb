@@ -1,27 +1,29 @@
 const pillars = [
   {
     number: "01",
-    title: "Answer",
-    summary: "AI voice agents",
+    title: "Revenue Recovery",
+    summary: "Catch every call",
     body:
-      "Every call answered in two rings, 24/7. Quotes, bookings, and intake — handled without hiring a receptionist or losing jobs to voicemail.",
-    items: ["Inbound voice agent", "Call qualification", "Live transfer to techs"],
+      "Every inbound call answered in about two rings, 24/7: after hours, weekends, when every line is lit and your techs are in attics and crawlspaces. It qualifies the caller and books the job straight into your schedule, so the caller hangs up with an appointment.",
+    items: [
+      "Answers in about two rings, 24/7",
+      "Qualifies the caller: emergency, service, or tire-kicker",
+      "Books the job straight into your schedule",
+      "Live transfer to your team",
+    ],
   },
   {
     number: "02",
-    title: "Dispatch",
-    summary: "Schedule + route",
+    title: "Revenue Retention",
+    summary: "Keep every customer",
     body:
-      "Jobs routed to the right tech, with the right parts, in the right window. Your schedule fills itself while you focus on the work.",
-    items: ["Smart scheduling", "Tech dispatch", "ETA + status texts"],
-  },
-  {
-    number: "03",
-    title: "Follow through",
-    summary: "Reviews + reactivation",
-    body:
-      "Every job ends with a review request, a follow-up, and a plan to bring them back. The customers you already have become the customers you keep.",
-    items: ["Review capture", "Reactivation campaigns", "Upsell triggers"],
+      "You already paid to win these customers. Retention keeps them: post-job follow-up, review capture, appointment reminders, and win-back nudges when a maintenance plan lapses. Existing customers are the cheapest revenue you'll ever book, and this makes sure they book it with you.",
+    items: [
+      "Post-job follow-up and review capture",
+      "Appointment reminders and confirmations",
+      "Lapsed maintenance-plan win-back by text and call",
+      "Referral capture from happy customers",
+    ],
   },
 ];
 
@@ -31,20 +33,21 @@ export default function Services() {
       <div className="mx-auto max-w-6xl px-6 py-24 md:py-32">
         <div className="max-w-2xl">
           <p className="text-xs uppercase tracking-[0.18em] text-[var(--color-ink-muted)] font-medium">
-            The system
+            The systems
           </p>
           <h2 className="mt-4 font-[family-name:var(--font-display)] text-4xl md:text-5xl leading-[1.05] tracking-tight text-[var(--color-ink)] font-medium">
-            Three layers.
+            Recover the calls.
             <br />
-            One operating system.
+            Keep the customers.
           </h2>
           <p className="mt-6 text-lg text-[var(--color-ink-soft)] leading-relaxed">
-            Devize runs alongside your existing CRM and field software. You
-            don&apos;t rip anything out — you just stop losing jobs.
+            Two systems, one job: stop revenue from leaking out of a good
+            business. Devize runs alongside the CRM and field software you
+            already use.
           </p>
         </div>
 
-        <div className="mt-14 grid gap-5 md:grid-cols-3">
+        <div className="mt-14 grid gap-5 md:grid-cols-2">
           {pillars.map((p) => (
             <article
               key={p.number}

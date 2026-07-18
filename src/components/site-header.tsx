@@ -3,10 +3,10 @@ import Logo from "@/components/logo";
 import { Button } from "@/components/ui/button";
 
 const navLinks = [
-  { href: "/#services", label: "Services" },
+  { href: "/#services", label: "The systems" },
   { href: "/#how-it-works", label: "How it works" },
   { href: "/articles", label: "Articles" },
-  { href: "/#about", label: "About" },
+  { href: "/articles/welcome", label: "About" },
 ];
 
 export default function SiteHeader() {
@@ -15,7 +15,7 @@ export default function SiteHeader() {
       <div className="mx-auto max-w-6xl px-6 h-16 flex items-center justify-between gap-6">
         <Link
           href="/"
-          aria-label="Devize — home"
+          aria-label="Devize home"
           className="flex items-center -ml-1"
         >
           <Logo className="h-9 w-auto" />

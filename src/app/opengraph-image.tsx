@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 
-export const alt = "Devize — AI operating systems for home services";
+export const alt = "Devize: Revenue Recovery & Retention for home services";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -64,7 +64,7 @@ export default async function Image() {
               maxWidth: 1000,
             }}
           >
-            AI operating systems for home services.
+            Stop losing jobs to voicemail.
           </div>
           <div
             style={{
@@ -73,7 +73,7 @@ export default async function Image() {
               fontWeight: 400,
             }}
           >
-            Answer every call. Book every job. Never lose a customer.
+            Every call answered. Every job booked. Every customer kept.
           </div>
         </div>
       </div>

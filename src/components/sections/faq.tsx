@@ -1,23 +1,35 @@
 export const faqs = [
   {
-    q: "Is this a tool or a managed service?",
-    a: "Both. We build the system on top of your existing stack — voice, CRM, dispatch — and operate it with you. You get the platform plus the setup and tuning.",
+    q: "What's the difference between Revenue Recovery and Revenue Retention?",
+    a: "Recovery catches money leaking out the front of the business: the 7pm calls, the weekend calls, the calls that ring out while every tech is on a job. Retention protects the money you already earned: post-job follow-up, reviews, reminders, and win-backs when a maintenance plan goes quiet. Most shops leak from both ends. We plug both.",
   },
   {
-    q: "Do I have to replace my current software?",
-    a: "No. Devize integrates with what you already use (ServiceTitan, Housecall Pro, Jobber, and others). We add a layer, not a replacement.",
+    q: "Is this just a fancy answering service?",
+    a: "No. An answering service takes a message and hopes you call back before the customer dials the next shop. Devize answers in about two rings, qualifies the caller, and books the job straight into your schedule. The caller hangs up with a booked appointment.",
+  },
+  {
+    q: "Is this a tool or a managed service?",
+    a: "Both. We build both systems on top of the stack you already run (phones, CRM, field software) and operate them with you. You get the platform plus the setup, the scripts, and the ongoing tuning.",
+  },
+  {
+    q: "Will it work with the software I already run?",
+    a: "Yes. Devize runs alongside ServiceTitan, Housecall Pro, Jobber, and most CRMs and field platforms. Nothing gets ripped out. Bookings, reminders, and follow-ups land in the tools your team already lives in.",
   },
   {
     q: "How fast can we be live?",
-    a: "Most shops are taking real calls through Devize within two weeks. Full rollout across dispatch and follow-up typically lands inside 30–45 days.",
+    a: "Most shops are taking real calls through Revenue Recovery within two weeks. Retention (follow-up, reviews, reminders, plan win-backs) typically lands inside 30 to 45 days.",
   },
   {
     q: "What if the AI gets something wrong?",
-    a: "Every call is transcribed and reviewed. We tune the agent weekly. For anything outside its scope, it transfers live to your team — never stuck in a dead-end.",
+    a: "Every call is transcribed and reviewed. We tune the agent weekly. Anything outside its scope transfers live to your team, so a caller is never stuck in a dead end.",
+  },
+  {
+    q: "Will the follow-up texts annoy my customers?",
+    a: "No. Retention messages are service notifications to your existing customers: appointment reminders, post-job check-ins, a nudge when their maintenance plan lapses. Every message is about work you've done or work they're due for, and opting out takes one reply. It's the follow-up you'd send yourself if you ever got out of the truck.",
   },
   {
     q: "What does it cost?",
-    a: "Pricing is a function of call volume and scope. Most customers see payback inside the first month from recovered missed calls alone. We'll run the numbers together.",
+    a: "Straight answer: it depends on your call volume and how much of the system you run: Recovery, Retention, or both. The whole thing is built to pay for itself out of the calls you're currently missing. Book a demo and we'll run the numbers on your shop before you spend a dollar.",
   },
 ];
 

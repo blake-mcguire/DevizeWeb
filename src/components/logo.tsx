@@ -44,7 +44,7 @@ export default function Logo({
         </linearGradient>
       </defs>
 
-      {/* Wordmark — omitted when markOnly */}
+      {/* Wordmark, omitted when markOnly */}
       {!markOnly && (
         <g fill={inkFill}>
           <path d="M756.8,797.9c0,32.8-26.8,60.2-59.6,60c-32.5-0.2-59.6-26.6-59.6-58.8c0-32.7,26.9-60.8,60-60.8h33.9v-40.6h-34.5c-54.9,0-100.2,44-100.4,98.8c-0.3,55.7,44.1,101.9,101,101.9c55.9,0,100.2-44.7,100.2-101V601.6h-41V797.9z" />
@@ -56,7 +56,7 @@ export default function Logo({
         </g>
       )}
 
-      {/* Purple dot over "i" — the signature */}
+      {/* Purple dot over "i", the signature */}
       {!markOnly && (
         <path
           fill={gradFill}

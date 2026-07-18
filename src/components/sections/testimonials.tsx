@@ -7,7 +7,7 @@ const testimonials = [
   },
   {
     quote:
-      "It's not a chatbot. It talks to my customers the way my best CSR does — and it never has a bad day.",
+      "It talks to my customers the way my best CSR does, and it never has a bad day.",
     name: "Marcus T.",
     role: "GM, Plumbing company",
   },

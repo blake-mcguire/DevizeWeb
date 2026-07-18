@@ -5,12 +5,12 @@ import { JsonLd } from "@/components/json-ld";
 export const metadata: Metadata = {
   title: "Articles",
   description:
-    "Weekly updates, field notes, and deep dives on running an AI operating system for home services.",
+    "Weekly updates, field notes, and deep dives on recovering and retaining revenue in home services.",
   alternates: { canonical: "/articles" },
   openGraph: {
     title: "Articles · Devize",
     description:
-      "Weekly updates, field notes, and deep dives on running an AI operating system for home services.",
+      "Weekly updates, field notes, and deep dives on recovering and retaining revenue in home services.",
     url: "https://devize.ai/articles",
     type: "website",
   },

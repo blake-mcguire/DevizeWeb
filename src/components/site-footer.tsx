@@ -5,15 +5,15 @@ const footerNav = [
   {
     heading: "Product",
     links: [
-      { href: "/#services", label: "Services" },
+      { href: "/#services", label: "The systems" },
       { href: "/#how-it-works", label: "How it works" },
-      { href: "/#pricing", label: "Pricing" },
+      { href: "/#contact", label: "Book a demo" },
     ],
   },
   {
     heading: "Company",
     links: [
-      { href: "/#about", label: "About" },
+      { href: "/articles/welcome", label: "About" },
       { href: "/articles", label: "Articles" },
       { href: "/#contact", label: "Contact" },
     ],
@@ -21,8 +21,10 @@ const footerNav = [
   {
     heading: "Legal",
     links: [
-      { href: "/privacy", label: "Privacy" },
-      { href: "/terms", label: "Terms" },
+      { href: "/terms", label: "Service Terms" },
+      { href: "/privacy", label: "Privacy Policy" },
+      { href: "/sms-terms", label: "SMS Terms" },
+      { href: "/sms-consent", label: "SMS Consent" },
     ],
   },
 ];
@@ -32,12 +34,13 @@ export default function SiteFooter() {
     <footer className="relative z-10 border-t border-[var(--color-border)] bg-[var(--color-surface)]">
       <div className="mx-auto max-w-6xl px-6 py-16 grid grid-cols-1 gap-10 md:grid-cols-[1.5fr_repeat(3,1fr)]">
         <div className="max-w-sm">
-          <Link href="/" aria-label="Devize — home" className="inline-block">
+          <Link href="/" aria-label="Devize home" className="inline-block">
             <Logo className="h-8 w-auto" />
           </Link>
           <p className="mt-4 text-sm text-[var(--color-ink-soft)] leading-relaxed">
-            AI operating systems for home services. Voice, dispatch, follow-up,
-            and reviews — working while you sleep.
+            Revenue Recovery and Revenue Retention for home-service businesses.
+            Every call answered, every job booked, every customer kept, while
+            you&apos;re on the job.
           </p>
         </div>
 

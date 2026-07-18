@@ -1,6 +1,6 @@
 const stats = [
   { value: "24/7", label: "Call coverage" },
-  { value: "< 2s", label: "Answer time" },
+  { value: "~2 rings", label: "Answer time" },
   { value: "38%", label: "More booked jobs" },
   { value: "4×", label: "Review velocity" },
 ];
@@ -23,7 +23,7 @@ export default function Stats() {
             By the numbers
           </p>
           <h2 className="mt-3 font-[family-name:var(--font-display)] text-3xl md:text-4xl leading-tight tracking-tight font-medium max-w-xl">
-            A system that shows up in the P&amp;L.
+            Systems that show up in the P&amp;L.
           </h2>
 
           <div className="mt-12 grid gap-10 grid-cols-2 md:grid-cols-4">

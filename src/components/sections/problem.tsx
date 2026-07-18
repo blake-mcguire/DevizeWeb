@@ -1,7 +1,7 @@
 const statements = [
-  "You're not short on leads. You're short on the systems that turn them into jobs.",
-  "Every missed call is a competitor's win.",
-  "Good operators lose customers to bad follow-up — not bad work.",
+  "It's 7:04pm. Dead AC, ringing phone, and you're elbow-deep in a condenser across town. Eight in ten callers who hit voicemail never call back. They just dial the next name on Google.",
+  "One missed call costs you more than one job. It's the repair, the maintenance plan, the callbacks, and ten years of referrals, all handed to whoever answered first.",
+  "Good operators still lose customers to silence: the follow-up that never went out, the plan that quietly lapsed, the review nobody asked for.",
 ];
 
 export default function Problem() {
@@ -13,9 +13,9 @@ export default function Problem() {
             The problem
           </p>
           <h2 className="mt-4 font-[family-name:var(--font-display)] text-3xl md:text-4xl leading-tight tracking-tight text-[var(--color-ink)] font-medium">
-            You&apos;re not behind.
+            You&apos;re great at the work.
             <br />
-            You&apos;re just stuck in the phones.
+            You&apos;re drowning in the phones.
           </h2>
         </div>
 
