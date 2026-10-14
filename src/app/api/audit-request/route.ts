@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { copy, type ErrorCode } from "@/app/a/[token]/copy";
-import { auditFile, loadAuditPage } from "@/lib/audit-page";
+import { auditFile, filePlan, loadAuditPage } from "@/lib/audit-page";
 import {
   FIELD_NAME,
   FIELD_TEL,
@@ -28,6 +28,11 @@ import { allow, clientIp } from "@/lib/rate-limit";
  * The page then downloads at once, or shows "Finishing ..." and polls
  * /api/audit-status. plan_url is a round-1 page's separate plan (else null).
  *
+ * `plan` says whether the one file carries the plan (false for a round-1
+ * page, whose plan is the second file at plan_url): the page words its
+ * "Finishing ..." and "downloading" lines from it, not from what it was told
+ * at load time (the pipeline writes the truth into page.json when it builds).
+ *
  * JSON in, JSON out for the page's script. A plain form post (no JavaScript)
  * gets a 303 back to the page instead, with ?e=<code> on an error; the cookie
  * set on success makes the page show the download (or the finishing state).
@@ -36,6 +41,22 @@ import { allow, clientIp } from "@/lib/rate-limit";
  */
 
 type Body = { token?: unknown; name?: unknown; tel?: unknown; mobile?: unknown };
+
+/**
+ * The no-JavaScript answer: 303 back to the page, with a RELATIVE Location, so
+ * the browser stays on the host it posted to, which is the host the cookie
+ * is set on. (An absolute URL built from req.url is http://localhost:<port>
+ * under `next dev` whatever the Host header says: a visitor on 127.0.0.1 was
+ * sent to localhost, lost the cookie and saw the form again. On Vercel
+ * req.url should carry the public host, but nothing here depends on it.)
+ * The token is checked (validToken) before it gets here.
+ */
+function backToPage(token: string, code?: ErrorCode): NextResponse {
+  return new NextResponse(null, {
+    status: 303,
+    headers: { Location: `/a/${token}${code ? `?e=${code}` : ""}#get`, "Cache-Control": "no-store" },
+  });
+}
 
 async function readBody(req: NextRequest): Promise<{ body: Body; form: boolean }> {
   const type = req.headers.get("content-type") ?? "";
@@ -62,9 +83,7 @@ export async function POST(req: NextRequest) {
   const token = body.token;
 
   const fail = (code: ErrorCode, status: number) => {
-    if (form && validToken(token)) {
-      return NextResponse.redirect(new URL(`/a/${token}?e=${code}#get`, req.url), 303);
-    }
+    if (form && validToken(token)) return backToPage(token, code);
     return NextResponse.json({ ok: false, error: code, message: copy.errors[code] }, { status });
   };
 
@@ -103,14 +122,14 @@ export async function POST(req: NextRequest) {
 
   let res: NextResponse;
   if (form) {
-    res = NextResponse.redirect(new URL(`/a/${token}#get`, req.url), 303);
+    res = backToPage(token);
   } else {
     const file = await auditFile(page, { fresh: true });
     const plan = file ? await auditFile(page, { part: "plan" }) : null;
     res = NextResponse.json({
       ok: true,
       ready: !!file,
-      plan: page.plan,
+      plan: filePlan(page),
       file_url: file ? auditFileUrl(token) : null,
       plan_url: plan ? auditFileUrl(token, "plan") : null,
     });

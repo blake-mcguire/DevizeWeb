@@ -119,6 +119,8 @@ export const copy = {
   // Blake's wording (2026-10-14).
   finishing: (plan: boolean) => (plan ? "Finishing your plan, a few seconds…" : "Finishing your audit, a few seconds…"),
   finishingNote: "It downloads by itself when it is ready.",
+  // The same wait on a later visit (the form was sent before): nothing downloads by itself, a link shows instead.
+  finishingNoteLink: "The download link shows here when it is ready.",
   // Without JavaScript the page reloads itself every few seconds instead.
   finishingNoScript: "This page checks again by itself every few seconds.",
   checkAgain: "Check again",

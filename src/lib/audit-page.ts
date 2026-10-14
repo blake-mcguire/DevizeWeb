@@ -89,6 +89,15 @@ function asset(token: string, file: string, given: unknown): string | null {
   return safeUrl(given) ?? blobUrl(`audits/${token}/${file}`);
 }
 
+/**
+ * Whether the one file this page hands over carries the plan: page.json
+ * `plan`, except on a round-1 page, whose plan is a second file. The page,
+ * /api/audit-request and /api/audit-status all word the file from this.
+ */
+export function filePlan(page: AuditPage): boolean {
+  return page.plan && !page.legacy;
+}
+
 /** The one PDF a round-2 page hands over, at a fixed path. */
 export function pdfPathname(token: string): string {
   return `audits/${token}/plan.pdf`;
@@ -184,7 +193,10 @@ export async function loadAuditPage(token: string): Promise<AuditPage | null> {
  * itself (stat, not the CDN) whether audits/<token>/plan.pdf exists and was
  * uploaded after this page was built (created_at): a file from an earlier
  * build of the same token never counts. The status and file routes pass
- * fresh; the page's own first render does not need to.
+ * fresh, and so does the page's own render once this browser has sent the
+ * form (a reload a few seconds after the download must not fall back to the
+ * finishing state and download it again; round 3). Before the form is sent
+ * the page does not need to know.
  *
  * `part: "plan"` is a round-1 page's separate plan.
  */
@@ -197,7 +209,7 @@ export async function auditFile(
     const p = ownPdf(page, page.legacy_plan_url) ?? `audits/${page.token}/plan.pdf`;
     return { pathname: p, filename: downloadName(page.business, "plan") };
   }
-  const kind = page.plan && !page.legacy ? "audit-and-plan" : "audit";
+  const kind = filePlan(page) ? "audit-and-plan" : "audit";
   const filename = page.pdf_filename ?? downloadName(page.business, kind);
   if (page.pdf_url) {
     // Normally the public URL of audits/<token>/plan.pdf; anything that does

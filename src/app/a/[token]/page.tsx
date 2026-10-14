@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
-import { loadAuditPage } from "@/lib/audit-page";
+import { auditFile, filePlan as fileCarriesPlan, loadAuditPage } from "@/lib/audit-page";
 import { auditFileUrl, sentCookieName } from "@/lib/audit-validate";
 import AuditForm, { type Initial } from "./audit-form";
 import ViewBeacon from "./view-beacon";
@@ -53,8 +53,12 @@ export default async function AuditPage({ params, searchParams }: Props) {
   // page.plan is false when the PDF will not carry the plan: every line that names it changes.
   const hasPlan = page.plan;
   // The one file carries the plan, unless this is a round-1 page (its plan is a second file).
-  const filePlan = page.plan && !page.legacy;
-  const ready = !!page.pdf_url;
+  const filePlan = fileCarriesPlan(page);
+  // Once this browser has sent the form, ask the store itself when page.json
+  // (read through the CDN, up to a minute old) does not name the file yet: a
+  // reload just after the download then shows "ready" with a link, never the
+  // finishing state again (which would download it a second time; round 3).
+  const ready = !!page.pdf_url || (sent && !!(await auditFile(page, { fresh: true })));
   // Without JavaScript nothing polls: while the file is being built the page
   // reloads itself every NOSCRIPT_EVERY seconds, counting in ?wait=, and says
   // what the script says after two minutes. (Each reload changes ?wait=: a
