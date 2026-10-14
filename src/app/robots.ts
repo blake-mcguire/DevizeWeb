@@ -8,7 +8,8 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/api/", "/_next/"],
+        // /a/ holds one page per prospect, keyed by a secret token: never crawled.
+        disallow: ["/api/", "/_next/", "/a/"],
       },
     ],
     sitemap: `${SITE_URL}/sitemap.xml`,

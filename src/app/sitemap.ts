@@ -8,6 +8,8 @@ const articles: Array<{ slug: string; lastModified: string }> = [
   { slug: "welcome", lastModified: "2026-04-22" },
 ];
 
+// Never list /a/<token> here: those are private prospect pages (noindex, and
+// disallowed in robots.ts). This sitemap is an explicit list, so they stay out.
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
 

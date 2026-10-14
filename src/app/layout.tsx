@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
 import "./globals.css";
-import SiteHeader from "@/components/site-header";
-import SiteFooter from "@/components/site-footer";
 import { JsonLd } from "@/components/json-ld";
 
 const inter = Inter({
@@ -54,7 +52,10 @@ export const metadata: Metadata = {
 
 const GTM_ID = "GTM-NMJGLMFD";
 
-const gtmScript = `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+// Skipped on /a/<token> (the prospect audit pages): the token in that URL is
+// the only key to the page, so it is not handed to analytics, and the page
+// stays light. The page's own view beacon measures visits there.
+const gtmScript = `(function(w,d,s,l,i){if(w.location.pathname.indexOf('/a/')===0)return;w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
@@ -95,9 +96,9 @@ export default function RootLayout({
           />
         </noscript>
         {/* End Google Tag Manager (noscript) */}
-        <SiteHeader />
-        <main className="relative flex-1 z-0">{children}</main>
-        <SiteFooter />
+        {/* Site chrome (header, main, footer) lives in (site)/layout.tsx so the
+            prospect pages under /a/ can render without the marketing nav. */}
+        {children}
         <JsonLd data={organizationSchema} />
       </body>
     </html>
