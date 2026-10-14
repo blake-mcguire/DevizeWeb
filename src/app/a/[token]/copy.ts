@@ -13,6 +13,12 @@
  * greeting, short sentences, no question marks, a person doing the work
  * ("I ran"), dentists get practice/patients, HVAC gets shop/homeowner.
  * Every number comes from page.json; none is written here.
+ *
+ * The plan is optional (2026-10-14 integration): page.json's plan_pdf_url is
+ * null whenever the pipeline did not upload plan.pdf (its own plan copy is
+ * still a draft, or the plan could not be built). Every line that names the
+ * plan therefore takes `plan` and has a no-plan wording, so the page never
+ * promises a file it cannot hand over, and it says what the emails say.
  */
 
 export const COPY_STATUS: "draft" | "approved" = "draft";
@@ -48,7 +54,7 @@ export const copy = {
       : `You never came up in the top three.`),
   byline: (p: { persona_name: string; scanned_on: string }) =>
     p.scanned_on ? `${p.persona_name}, Devize. Searched on ${p.scanned_on}.` : `${p.persona_name}, Devize.`,
-  jumpToForm: "Get the full audit and the plan",
+  jumpToForm: (plan: boolean) => (plan ? "Get the full audit and the plan" : "Get the full audit"),
 
   // ---- The map ---------------------------------------------------------------
   mapAlt: (f: Find) =>
@@ -77,19 +83,24 @@ export const copy = {
   top3Cell: (n: number | null, pins: number) => (n === null ? "not seen" : `${n} of ${pins}`),
 
   // ---- What they get -----------------------------------------------------------
-  coverHeading: "What the full audit and the plan cover",
-  coverBullets: (place_noun: "practice" | "shop") => [
+  coverHeading: (plan: boolean) => (plan ? "What the full audit and the plan cover" : "What the full audit covers"),
+  coverBullets: (place_noun: "practice" | "shop", plan: boolean) => [
     `Your Google listing, point by point, next to the ${PLURAL[place_noun]} above you.`,
     `How far your listing reaches from your own address, and where it stops.`,
-    `A one-page plan: the changes I would make first, in order.`,
+    plan
+      ? `A one-page plan: the changes I would make first, in order.`
+      : `The fixes I would make first, in order.`,
   ],
 
   // ---- The form ----------------------------------------------------------------
-  formHeading: "Get the full audit and the plan",
-  formIntro: "Leave your name and mobile. Both open on this page straight away.",
+  formHeading: (plan: boolean) => (plan ? "Get the full audit and the plan" : "Get the full audit"),
+  formIntro: (plan: boolean) =>
+    plan
+      ? "Leave your name and mobile. Both open on this page straight away."
+      : "Leave your name and mobile. It opens on this page straight away.",
   nameLabel: "Name",
   mobileLabel: "Mobile",
-  submit: "Open my audit and plan",
+  submit: (plan: boolean) => (plan ? "Open my audit and plan" : "Open my audit"),
   submitting: "Opening",
   consent: (w: Who) =>
     `By sending this, you agree that ${
@@ -98,12 +109,15 @@ export const copy = {
   legalLinks: { smsTerms: "SMS Terms", privacy: "Privacy", terms: "Terms" },
 
   // ---- After they send it ----------------------------------------------------
-  doneHeading: "Here they are.",
+  doneHeading: (plan: boolean) => (plan ? "Here they are." : "Here it is."),
   viewAudit: "View your audit",
   viewPlan: "View your plan",
-  doneCall: (w: Who) => `${callers(w)} will call you shortly.`,
-  doneEmail: (w: Who) =>
-    `${(w.persona_first || "Blake").trim()} is emailing you a copy as well.`,
+  // No "shortly": nobody calls at night or on a Sunday. DRAFT for Blake: the
+  // emailed copy is not certain either. landing_poll holds it (and never
+  // retries) when sending or the persona's mailbox is paused, the address is
+  // suppressed or landing.email_copy is off, so decide whether this line stays.
+  doneCall: (w: Who) => `${callers(w)} will call you.`,
+  doneEmail: "A copy is on its way by email.",
 
   // ---- Errors (shown under the form) ---------------------------------------------
   errors: {

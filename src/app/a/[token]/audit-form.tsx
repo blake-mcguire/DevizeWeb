@@ -3,11 +3,14 @@
 import { useRef, useState } from "react";
 import { copy, type ErrorCode } from "./copy";
 
-type Links = { audit: string; plan: string };
+/** plan is null when the page carries no plan (page.json plan_pdf_url null). */
+type Links = { audit: string; plan: string | null };
 
 type Props = {
   token: string;
   personaFirst: string;
+  /** Whether this page hands over a plan as well as the audit: picks the form's wording. */
+  hasPlan: boolean;
   /** Set when this browser already sent the form (the cookie), so a reload shows the buttons. */
   initialLinks: Links | null;
   /** Set when a no-JavaScript post bounced back with ?e=<code>. */
@@ -22,7 +25,7 @@ const primary =
 const secondary =
   "inline-flex w-full items-center justify-center gap-2 rounded-full h-12 px-6 text-base font-medium text-[var(--color-ink)] bg-white border border-[var(--color-ink)]/20 transition-[transform,border-color] hover:-translate-y-[1px] hover:border-[var(--color-ink)]/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--color-brand)]";
 
-export default function AuditForm({ token, personaFirst, initialLinks, initialError }: Props) {
+export default function AuditForm({ token, personaFirst, hasPlan, initialLinks, initialError }: Props) {
   const [links, setLinks] = useState<Links | null>(initialLinks);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(initialError ? copy.errors[initialError] : null);
@@ -45,10 +48,11 @@ export default function AuditForm({ token, personaFirst, initialLinks, initialEr
         ok?: boolean;
         error?: ErrorCode;
         audit_pdf_url?: string;
-        plan_pdf_url?: string;
+        plan_pdf_url?: string | null;
       };
-      if (res.ok && data.ok && data.audit_pdf_url && data.plan_pdf_url) {
-        setLinks({ audit: data.audit_pdf_url, plan: data.plan_pdf_url });
+      // The audit is always there; the plan only when the page has one.
+      if (res.ok && data.ok && data.audit_pdf_url) {
+        setLinks({ audit: data.audit_pdf_url, plan: data.plan_pdf_url || null });
         requestAnimationFrame(() => doneRef.current?.focus());
         return;
       }
@@ -68,18 +72,20 @@ export default function AuditForm({ token, personaFirst, initialLinks, initialEr
           tabIndex={-1}
           className="font-[family-name:var(--font-display)] text-2xl tracking-tight font-medium text-[var(--color-ink)] focus:outline-none"
         >
-          {copy.doneHeading}
+          {copy.doneHeading(!!links.plan)}
         </h2>
         <div className="mt-5 grid gap-3">
           <a href={links.audit} target="_blank" rel="noopener" className={primary}>
             {copy.viewAudit}
           </a>
-          <a href={links.plan} target="_blank" rel="noopener" className={secondary}>
-            {copy.viewPlan}
-          </a>
+          {links.plan && (
+            <a href={links.plan} target="_blank" rel="noopener" className={secondary}>
+              {copy.viewPlan}
+            </a>
+          )}
         </div>
         <p className="mt-5 text-[0.95rem] leading-relaxed text-[var(--color-ink)]">
-          {copy.doneCall(who)} {copy.doneEmail(who)}
+          {copy.doneCall(who)} {copy.doneEmail}
         </p>
       </div>
     );
@@ -90,9 +96,9 @@ export default function AuditForm({ token, personaFirst, initialLinks, initialEr
     // number in the URL); the route answers that with a redirect back here.
     <form method="post" action="/api/audit-request" onSubmit={onSubmit}>
       <h2 className="font-[family-name:var(--font-display)] text-2xl tracking-tight font-medium text-[var(--color-ink)]">
-        {copy.formHeading}
+        {copy.formHeading(hasPlan)}
       </h2>
-      <p className="mt-2 text-[0.95rem] leading-relaxed text-[var(--color-ink-soft)]">{copy.formIntro}</p>
+      <p className="mt-2 text-[0.95rem] leading-relaxed text-[var(--color-ink-soft)]">{copy.formIntro(hasPlan)}</p>
 
       <input type="hidden" name="token" value={token} />
       <div className="mt-5 space-y-4">
@@ -135,7 +141,7 @@ export default function AuditForm({ token, personaFirst, initialLinks, initialEr
       )}
 
       <button type="submit" disabled={busy} className={`${primary} mt-5`}>
-        {busy ? copy.submitting : copy.submit}
+        {busy ? copy.submitting : copy.submit(hasPlan)}
       </button>
 
       <p className="mt-4 text-xs leading-relaxed text-[var(--color-ink-muted)]">

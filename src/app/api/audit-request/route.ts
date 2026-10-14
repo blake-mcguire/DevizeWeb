@@ -9,8 +9,9 @@ import { allow, clientIp } from "@/lib/rate-limit";
  * POST /api/audit-request  {token, name, mobile}
  *
  * Validates, writes submissions/<iso>-<token>.json for the pipeline (which
- * emails the copy, alerts Blake and stops the sequence), and returns the two
- * PDF links so the page can show them at once.
+ * emails the copy, alerts Blake and stops the sequence), and returns the PDF
+ * links so the page can show them at once: the audit always, the plan only
+ * when the page has one (plan_pdf_url is null otherwise).
  *
  * JSON in, JSON out for the page's script. A plain form post (no JavaScript)
  * gets a 303 back to the page instead, with ?e=<code> on an error; the
@@ -88,7 +89,7 @@ export async function POST(req: NextRequest) {
     : NextResponse.json({
         ok: true,
         audit_pdf_url: page.audit_pdf_url,
-        plan_pdf_url: page.plan_pdf_url,
+        plan_pdf_url: page.plan_pdf_url ?? null,
       });
   res.cookies.set(sentCookieName(token), "1", {
     httpOnly: true,

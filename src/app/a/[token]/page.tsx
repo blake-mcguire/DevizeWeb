@@ -42,6 +42,8 @@ export default async function AuditPage({ params, searchParams }: Props) {
     business: page.business,
   };
   const cols = copy.tableColumns(page.place_noun);
+  // plan_pdf_url is null when the pipeline uploaded no plan with this page: every line that names it changes.
+  const hasPlan = !!page.plan_pdf_url;
   const bands = [
     { key: "top3", n: page.top3 },
     { key: "mid", n: page.mid },
@@ -64,7 +66,7 @@ export default async function AuditPage({ params, searchParams }: Props) {
             href="#get"
             className="lg:hidden mt-4 inline-flex items-center gap-2 text-sm font-medium text-[var(--color-brand)] underline underline-offset-4"
           >
-            {copy.jumpToForm}
+            {copy.jumpToForm(hasPlan)}
             <span aria-hidden="true">↓</span>
           </a>
 
@@ -160,10 +162,10 @@ export default async function AuditPage({ params, searchParams }: Props) {
 
           <section className="mt-10">
             <h2 className="font-[family-name:var(--font-display)] text-xl tracking-tight font-medium text-[var(--color-ink)]">
-              {copy.coverHeading}
+              {copy.coverHeading(hasPlan)}
             </h2>
             <ul className="mt-3 space-y-2.5">
-              {copy.coverBullets(page.place_noun).map((b) => (
+              {copy.coverBullets(page.place_noun, hasPlan).map((b) => (
                 <li key={b} className="flex gap-3 text-[0.95rem] leading-relaxed text-[var(--color-ink)]">
                   <span className="brand-dot mt-[0.55rem] shrink-0" aria-hidden="true" />
                   {b}
@@ -178,6 +180,7 @@ export default async function AuditPage({ params, searchParams }: Props) {
             <AuditForm
               token={token}
               personaFirst={page.persona_first}
+              hasPlan={hasPlan}
               initialLinks={sent ? { audit: page.audit_pdf_url, plan: page.plan_pdf_url } : null}
               initialError={sent ? null : bounced}
             />

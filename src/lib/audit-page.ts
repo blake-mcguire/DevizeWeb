@@ -34,7 +34,8 @@ export type AuditPage = {
   sender_email: string;
   map_url: string;
   audit_pdf_url: string;
-  plan_pdf_url: string;
+  /** null when the pipeline uploaded no plan.pdf with this page (the contract allows it). */
+  plan_pdf_url: string | null;
   created_at: string;
   expires_at: string | null;
 };
@@ -102,8 +103,12 @@ export async function loadAuditPage(token: string): Promise<AuditPage | null> {
 
   const map = asset(token, "map.png", raw.map_url);
   const audit = asset(token, "audit.pdf", raw.audit_pdf_url);
-  const plan = asset(token, "plan.pdf", raw.plan_pdf_url);
-  if (!audit || !plan) return null; // nothing to hand over: do not take their number
+  // The plan is optional: the pipeline writes plan_pdf_url null whenever it
+  // uploaded no plan.pdf. Only a page.json that names the plan gets a plan
+  // link; there is no fixed-path fallback here, which would point at a file
+  // that was never uploaded (a 404 one click after the form).
+  const plan = isStr(raw.plan_pdf_url) ? asset(token, "plan.pdf", raw.plan_pdf_url) : null;
+  if (!audit) return null; // nothing to hand over: do not take their number
 
   return {
     v: 1,
