@@ -2,7 +2,7 @@ import "server-only";
 
 import { blobUrl, getJSON, pathnameOfUrl, stat } from "@/lib/blob-store";
 import { validToken } from "@/lib/audit-validate";
-import { downloadName } from "@/lib/download-name";
+import { cleanFilename, downloadName } from "@/lib/download-name";
 
 /** One row of "who came up instead of you", exactly as the pipeline writes it. */
 export type AuditRow = {
@@ -53,6 +53,8 @@ export type AuditPage = {
   /** The file, once the pipeline has built it (pdf_url; a round-1 page's audit_pdf_url). null until then. */
   pdf_url: string | null;
   pdf_built_at: string | null;
+  /** The download's name as the pipeline gave it (page.json pdf_filename), or null: the site names it the same way. */
+  pdf_filename: string | null;
   /** A round-1 page (audit_pdf_url, no pdf_url). */
   legacy: boolean;
   /** Round-1 pages only: their separate plan.pdf, a second download. */
@@ -165,6 +167,7 @@ export async function loadAuditPage(token: string): Promise<AuditPage | null> {
     plan,
     pdf_url: pdf ?? legacyAudit,
     pdf_built_at: isStr(raw.pdf_built_at) ? raw.pdf_built_at : null,
+    pdf_filename: legacyAudit ? null : cleanFilename(raw.pdf_filename),
     legacy: !!legacyAudit,
     legacy_plan_url: legacyPlan,
     created_at: isStr(raw.created_at) ? raw.created_at : "",
@@ -195,11 +198,12 @@ export async function auditFile(
     return { pathname: p, filename: downloadName(page.business, "plan") };
   }
   const kind = page.plan && !page.legacy ? "audit-and-plan" : "audit";
+  const filename = page.pdf_filename ?? downloadName(page.business, kind);
   if (page.pdf_url) {
     // Normally the public URL of audits/<token>/plan.pdf; anything that does
     // not resolve to this page's own folder falls back to the fixed path.
     const fixed = page.legacy ? `audits/${page.token}/audit.pdf` : pdfPathname(page.token);
-    return { pathname: ownPdf(page, page.pdf_url) ?? fixed, filename: downloadName(page.business, kind) };
+    return { pathname: ownPdf(page, page.pdf_url) ?? fixed, filename };
   }
   if (!fresh) return null;
   const built = Date.parse(page.created_at);
@@ -208,7 +212,7 @@ export async function auditFile(
   try {
     const st = await stat(pathname);
     if (st && st.size > 0 && st.uploadedAt.getTime() >= built) {
-      return { pathname, filename: downloadName(page.business, kind) };
+      return { pathname, filename };
     }
   } catch (err) {
     console.error("[audit-page] stat failed", err instanceof Error ? err.message : err);

@@ -10,26 +10,36 @@ const SUFFIX = {
 } as const;
 
 /**
- * "<Business> - Google Map Audit and Plan.pdf": the business as page.json
- * names it, made safe for every file system. A colon becomes " - " ("Pure
- * Smiles: Dr. Yap" gives "Pure Smiles - Dr. Yap - Google Map Audit and
- * Plan.pdf"), a slash "-" ("A/C" gives "A-C"); the characters Windows
- * refuses and control characters go; no leading dot; at most 100 characters
- * of name.
+ * "<Business> - Google Map Audit and Plan.pdf", the same name the pipeline
+ * gives the file (landing.pdf_filename, which page.json carries as
+ * pdf_filename and the emailed copy uses): every run of / \ : * ? " < > |
+ * and control characters becomes one space, spaces and dots go from both
+ * ends, whitespace collapses, at most 120 characters of name.
  */
 export function downloadName(business: string, kind: keyof typeof SUFFIX): string {
-  const safe = business
+  const name =
+    business
+      .normalize("NFC")
+      .replace(/[\\/:*?"<>|\p{Cc}]+/gu, " ")
+      .replace(/^[ .]+|[ .]+$/g, "")
+      .replace(/\s+/g, " ")
+      .slice(0, 120) || "Your business";
+  return `${name} - ${SUFFIX[kind]}.pdf`;
+}
+
+/**
+ * page.json's pdf_filename, if it is a usable file name (the same characters
+ * refused as above, ends in .pdf), else null and the caller names it.
+ */
+export function cleanFilename(input: unknown): string | null {
+  if (typeof input !== "string") return null;
+  const name = input
     .normalize("NFC")
-    .replace(/\p{Cc}/gu, "")
-    .replace(/\s*:\s*/g, " - ")
-    .replace(/[/\\]/g, "-")
-    .replace(/[*?"<>|]/g, "")
+    .replace(/[\\/:*?"<>|\p{Cc}]+/gu, " ")
     .replace(/\s+/g, " ")
     .trim()
-    .replace(/^[.\s-]+/, "")
-    .slice(0, 100)
-    .trim();
-  return `${safe || "Your business"} - ${SUFFIX[kind]}.pdf`;
+    .replace(/^\.+/, "");
+  return name.length >= 5 && name.length <= 200 && /\.pdf$/i.test(name) ? name : null;
 }
 
 /**
