@@ -11,12 +11,25 @@ export function validToken(token: unknown): token is string {
 }
 
 /**
- * Set on a successful submit, scoped to /a/<token>, so a reload shows the
- * audit and plan buttons again instead of the form.
+ * Set on a successful submit. The page reads it (a reload shows the download,
+ * or the finishing state, instead of the form) and /api/audit-file requires
+ * it: the file goes only to a browser that sent this token's form. Path "/"
+ * so both /a/<token> and /api/audit-file receive it; the value is only "1".
  */
 export function sentCookieName(token: string): string {
   return `da_${token}`;
 }
+
+export const SENT_COOKIE_MAX_AGE = 60 * 60 * 24 * 30;
+
+/** Where a page's file downloads from (/api/audit-file). part "plan" is a round-1 page's separate plan. */
+export function auditFileUrl(token: string, part?: "plan"): string {
+  return `/api/audit-file?token=${encodeURIComponent(token)}${part ? `&part=${part}` : ""}`;
+}
+
+/** The form's two field names. "tel" and "name" are what phones and browsers autofill from a saved contact. */
+export const FIELD_NAME = "name";
+export const FIELD_TEL = "tel";
 
 /** User agents that are machines, not a person opening the link (mail scanners, previews, headless). */
 export const MACHINE_UA =
@@ -37,15 +50,22 @@ export function cleanName(input: unknown): string | null {
 /**
  * A US number in E.164 (+1XXXXXXXXXX), or null.
  *
- * Accepts the usual ways people type one: (713) 555-2368, 713.555.2368,
- * +1 713 555 2368, 1-713-555-2368. Rejects what cannot be a real NANP line:
+ * Accepts the usual ways people type one, and what autofill fills in:
+ * (713) 555-2368, 713.555.2368, +1 713 555 2368, +17135552368,
+ * 1-713-555-2368. Rejects what cannot be a real NANP line:
  * an area code or exchange starting 0 or 1, N11 codes (411, 911), the
  * 555-01XX fiction block, one digit repeated, and 123-456-7890. Whether it is
  * a mobile cannot be told from the digits; the label asks for one.
  */
 export function usMobileE164(input: unknown): string | null {
   if (typeof input !== "string") return null;
-  const raw = input.trim();
+  // What autofill and a pasted contact card can carry around the digits:
+  // invisible direction marks and joiners, odd spaces, typographic dashes.
+  const raw = input
+    .normalize("NFKC")
+    .replace(/[\u200B-\u200F\u202A-\u202E\u2060-\u2069\uFEFF]/g, "")
+    .replace(/[\u2010-\u2015\u2212]/g, "-")
+    .trim();
   if (raw.length > 32) return null;
   if (/[^\d\s().+-]/.test(raw)) return null; // letters, extensions, anything odd
   let digits = raw.replace(/\D/g, "");

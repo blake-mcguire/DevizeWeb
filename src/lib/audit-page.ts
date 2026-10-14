@@ -1,7 +1,8 @@
 import "server-only";
 
-import { blobUrl, getJSON } from "@/lib/blob-store";
+import { blobUrl, getJSON, pathnameOfUrl, stat } from "@/lib/blob-store";
 import { validToken } from "@/lib/audit-validate";
+import { downloadName } from "@/lib/download-name";
 
 /** One row of "who came up instead of you", exactly as the pipeline writes it. */
 export type AuditRow = {
@@ -12,7 +13,17 @@ export type AuditRow = {
   me: boolean;
 };
 
-/** audits/<token>/page.json, v1. Written by the pipeline before the email goes out. */
+/**
+ * audits/<token>/page.json, v1, as the page uses it. The pipeline writes it
+ * before the email goes out, with the map but WITHOUT the PDF (round 2,
+ * 2026-10-14: files are built on click). On the first view or submission it
+ * builds one PDF (the three-page audit, then the one-page plan when the plan
+ * travels), uploads it to audits/<token>/plan.pdf and rewrites page.json with
+ * pdf_url and pdf_built_at.
+ *
+ * Round-1 pages (audit_pdf_url and plan_pdf_url, two files, built ahead) are
+ * still read: their audit is the file, their plan a second download.
+ */
 export type AuditPage = {
   v: 1;
   token: string;
@@ -33,12 +44,25 @@ export type AuditPage = {
   persona_name: string;
   sender_email: string;
   map_url: string;
-  audit_pdf_url: string;
-  /** null when the pipeline uploaded no plan.pdf with this page (the contract allows it). */
-  plan_pdf_url: string | null;
+  /**
+   * Whether the file this page hands over carries the plan: page.json `plan`
+   * (true/false, set when the page is built and rewritten with the truth when
+   * the PDF is). A round-1 page without the field: whether it named a plan.
+   */
+  plan: boolean;
+  /** The file, once the pipeline has built it (pdf_url; a round-1 page's audit_pdf_url). null until then. */
+  pdf_url: string | null;
+  pdf_built_at: string | null;
+  /** A round-1 page (audit_pdf_url, no pdf_url). */
+  legacy: boolean;
+  /** Round-1 pages only: their separate plan.pdf, a second download. */
+  legacy_plan_url: string | null;
   created_at: string;
   expires_at: string | null;
 };
+
+/** What /api/audit-file streams for a page, and what the download is called. */
+export type AuditFile = { pathname: string; filename: string };
 
 const isStr = (x: unknown): x is string => typeof x === "string" && x.trim().length > 0;
 const isNum = (x: unknown): x is number => typeof x === "number" && Number.isFinite(x);
@@ -61,6 +85,11 @@ function safeUrl(u: unknown): string | null {
 
 function asset(token: string, file: string, given: unknown): string | null {
   return safeUrl(given) ?? blobUrl(`audits/${token}/${file}`);
+}
+
+/** The one PDF a round-2 page hands over, at a fixed path. */
+export function pdfPathname(token: string): string {
+  return `audits/${token}/plan.pdf`;
 }
 
 /**
@@ -102,13 +131,14 @@ export async function loadAuditPage(token: string): Promise<AuditPage | null> {
     : [];
 
   const map = asset(token, "map.png", raw.map_url);
-  const audit = asset(token, "audit.pdf", raw.audit_pdf_url);
-  // The plan is optional: the pipeline writes plan_pdf_url null whenever it
-  // uploaded no plan.pdf. Only a page.json that names the plan gets a plan
-  // link; there is no fixed-path fallback here, which would point at a file
-  // that was never uploaded (a 404 one click after the form).
-  const plan = isStr(raw.plan_pdf_url) ? asset(token, "plan.pdf", raw.plan_pdf_url) : null;
-  if (!audit) return null; // nothing to hand over: do not take their number
+  // The file. A missing pdf_url means "not built yet", never "look anyway":
+  // it is built on the first view, so there is no fixed-path fallback here.
+  const pdf = isStr(raw.pdf_url) ? raw.pdf_url.trim() : null;
+  // Round 1: two files built ahead; the audit is the file, the plan a second
+  // download when the page named one (plan_pdf_url null means no plan).
+  const legacyAudit = pdf ? null : safeUrl(raw.audit_pdf_url);
+  const legacyPlan = legacyAudit ? safeUrl(raw.plan_pdf_url) : null;
+  const plan = typeof raw.plan === "boolean" ? raw.plan : !!legacyPlan;
 
   return {
     v: 1,
@@ -132,9 +162,65 @@ export async function loadAuditPage(token: string): Promise<AuditPage | null> {
     persona_name: isStr(raw.persona_name) ? raw.persona_name.trim() : "Blake McGuire",
     sender_email: isStr(raw.sender_email) ? raw.sender_email.trim() : "",
     map_url: map ?? "",
-    audit_pdf_url: audit,
-    plan_pdf_url: plan,
+    plan,
+    pdf_url: pdf ?? legacyAudit,
+    pdf_built_at: isStr(raw.pdf_built_at) ? raw.pdf_built_at : null,
+    legacy: !!legacyAudit,
+    legacy_plan_url: legacyPlan,
     created_at: isStr(raw.created_at) ? raw.created_at : "",
     expires_at: isStr(raw.expires_at) ? raw.expires_at : null,
   };
+}
+
+/**
+ * The file to hand over for this page, or null while it is not built.
+ *
+ * page.json is read through the Blob CDN, which may serve the copy from
+ * before the rewrite for up to a minute after the pipeline adds pdf_url. So
+ * when page.json does not name the file yet, `fresh` also asks the store
+ * itself (stat, not the CDN) whether audits/<token>/plan.pdf exists and was
+ * uploaded after this page was built (created_at): a file from an earlier
+ * build of the same token never counts. The status and file routes pass
+ * fresh; the page's own first render does not need to.
+ *
+ * `part: "plan"` is a round-1 page's separate plan.
+ */
+export async function auditFile(
+  page: AuditPage,
+  { fresh = false, part = "main" }: { fresh?: boolean; part?: "main" | "plan" } = {},
+): Promise<AuditFile | null> {
+  if (part === "plan") {
+    if (!page.legacy_plan_url) return null;
+    const p = ownPdf(page, page.legacy_plan_url) ?? `audits/${page.token}/plan.pdf`;
+    return { pathname: p, filename: downloadName(page.business, "plan") };
+  }
+  const kind = page.plan && !page.legacy ? "audit-and-plan" : "audit";
+  if (page.pdf_url) {
+    // Normally the public URL of audits/<token>/plan.pdf; anything that does
+    // not resolve to this page's own folder falls back to the fixed path.
+    const fixed = page.legacy ? `audits/${page.token}/audit.pdf` : pdfPathname(page.token);
+    return { pathname: ownPdf(page, page.pdf_url) ?? fixed, filename: downloadName(page.business, kind) };
+  }
+  if (!fresh) return null;
+  const built = Date.parse(page.created_at);
+  if (!Number.isFinite(built)) return null;
+  const pathname = pdfPathname(page.token);
+  try {
+    const st = await stat(pathname);
+    if (st && st.size > 0 && st.uploadedAt.getTime() >= built) {
+      return { pathname, filename: downloadName(page.business, kind) };
+    }
+  } catch (err) {
+    console.error("[audit-page] stat failed", err instanceof Error ? err.message : err);
+  }
+  return null;
+}
+
+/** The store pathname of a PDF URL (or bare pathname) from page.json, only when it is a PDF in this page's own folder. */
+function ownPdf(page: AuditPage, url: string): string | null {
+  const p = /^audits\//.test(url) ? url : pathnameOfUrl(url);
+  return p && p.startsWith(`audits/${page.token}/`) && !p.slice(`audits/${page.token}/`.length).includes("/") &&
+    p.endsWith(".pdf")
+    ? p
+    : null;
 }

@@ -1,6 +1,6 @@
 import "server-only";
 
-import { get, list as blobList, put } from "@vercel/blob";
+import { BlobNotFoundError, get, head, list as blobList, put } from "@vercel/blob";
 
 /**
  * One storage layer for the audit funnel, shared by the page, the route
@@ -10,11 +10,17 @@ import { get, list as blobList, put } from "@vercel/blob";
  * reads the same relative pathnames:
  *
  *   audits/<token>/page.json        written by the pipeline, read here
- *   audits/<token>/map.png          written by the pipeline
- *   audits/<token>/audit.pdf        written by the pipeline
- *   audits/<token>/plan.pdf         written by the pipeline
+ *   audits/<token>/map.png          written by the pipeline ahead of the email
+ *   audits/<token>/plan.pdf         the ONE file handed over: the audit, then
+ *                                   the plan when it travels. Built by the
+ *                                   pipeline on the first view or submission,
+ *                                   streamed here by /api/audit-file; page.json
+ *                                   is then rewritten with pdf_url (2026-10-14,
+ *                                   round 2)
+ *   audits/<token>/audit.pdf        round 1 only (pages that still name it)
  *   submissions/<iso>-<token>.json  written here, read by the pipeline
- *   views/<iso>-<token>.json        written here, read by the pipeline
+ *   views/<iso>-<token>.json        written here, read by the pipeline (a view
+ *                                   is also what asks for the PDF to be built)
  *   leads/<iso>-<rand>.json         written here (the homepage demo form)
  *
  * <iso> is isoCompact(): UTC, basic ISO 8601, to the second (20261014T153012Z).
@@ -116,6 +122,72 @@ export async function putJSON(
     cacheControlMaxAge: 60,
   });
   return { pathname: res.pathname, url: res.url };
+}
+
+/**
+ * Size and upload time of a blob, asked of the store itself rather than the
+ * CDN (head(), not the public URL), so a file uploaded a moment ago is seen
+ * at once. Null when there is no such blob. Throws on a storage error.
+ */
+export async function stat(pathname: string): Promise<{ size: number; uploadedAt: Date } | null> {
+  assertSafePathname(pathname);
+  const mock = await mockFs();
+  if (mock) return mock.statFile(pathname);
+  try {
+    const res = await head(pathname);
+    return { size: res.size, uploadedAt: res.uploadedAt };
+  } catch (err) {
+    if (err instanceof BlobNotFoundError) return null;
+    throw err;
+  }
+}
+
+/** A blob's bytes as a stream (for a route to pass straight on), or null when there is none. size only when exact. */
+export async function openStream(
+  pathname: string,
+): Promise<{ stream: ReadableStream<Uint8Array>; size: number | null } | null> {
+  assertSafePathname(pathname);
+  const mock = await mockFs();
+  if (mock) {
+    const bytes = await mock.readBytes(pathname);
+    if (!bytes) return null;
+    const stream = new Response(new Uint8Array(bytes)).body;
+    return stream ? { stream, size: bytes.byteLength } : null;
+  }
+  const res = await get(pathname, { access: "public" });
+  if (!res || res.statusCode !== 200 || !res.stream) return null;
+  // No size: the fetch underneath undoes any content-encoding, so the CDN's
+  // content-length may not be the length of this stream.
+  return { stream: res.stream as ReadableStream<Uint8Array>, size: null };
+}
+
+/**
+ * The store pathname a URL in page.json points at (a public Blob URL of this
+ * store, or the dev mock's /blob-mock/<path>), or null when it points
+ * anywhere else.
+ */
+export function pathnameOfUrl(url: string): string | null {
+  let pathname: string | null = null;
+  if (url.startsWith("/blob-mock/")) {
+    pathname = isMock() ? url.slice("/blob-mock/".length) : null;
+  } else {
+    try {
+      const u = new URL(url);
+      const id = storeId();
+      if (u.protocol === "https:" && id && u.hostname === `${id}.public.blob.vercel-storage.com`.toLowerCase()) {
+        pathname = decodeURIComponent(u.pathname.slice(1));
+      }
+    } catch {
+      pathname = null;
+    }
+  }
+  if (!pathname) return null;
+  try {
+    assertSafePathname(pathname);
+  } catch {
+    return null;
+  }
+  return pathname;
 }
 
 export type ListedBlob = { pathname: string; url: string; size: number; uploadedAt: Date };

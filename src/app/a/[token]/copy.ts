@@ -14,11 +14,16 @@
  * ("I ran"), dentists get practice/patients, HVAC gets shop/homeowner.
  * Every number comes from page.json; none is written here.
  *
- * The plan is optional (2026-10-14 integration): page.json's plan_pdf_url is
- * null whenever the pipeline did not upload plan.pdf (its own plan copy is
- * still a draft, or the plan could not be built). Every line that names the
- * plan therefore takes `plan` and has a no-plan wording, so the page never
- * promises a file it cannot hand over, and it says what the emails say.
+ * The plan is optional (2026-10-14 integration): page.json's `plan` is false
+ * whenever the PDF will not carry it (the plan's own copy is still a draft,
+ * or it could not be built). Every line that names the plan therefore takes
+ * `plan` and has a no-plan wording, so the page never promises a file it
+ * cannot hand over, and it says what the emails say.
+ *
+ * Round 2 (Blake, 2026-10-14): one PDF (the audit, then the plan), built when
+ * the page is first opened, downloaded by ONE button after a name and a
+ * mobile. If it is not built yet the page says so and waits up to two
+ * minutes; after that it says the file comes by email and who will call.
  */
 
 export const COPY_STATUS: "draft" | "approved" = "draft";
@@ -94,29 +99,54 @@ export const copy = {
 
   // ---- The form ----------------------------------------------------------------
   formHeading: (plan: boolean) => (plan ? "Get the full audit and the plan" : "Get the full audit"),
+  // Says what happens: one PDF, a download, nothing "opens on this page".
   formIntro: (plan: boolean) =>
     plan
-      ? "Leave your name and mobile. Both open on this page straight away."
-      : "Leave your name and mobile. It opens on this page straight away.",
+      ? "Leave your name and mobile. The audit and the plan download as one PDF."
+      : "Leave your name and mobile. The audit downloads as a PDF.",
   nameLabel: "Name",
   mobileLabel: "Mobile",
-  submit: (plan: boolean) => (plan ? "Open my audit and plan" : "Open my audit"),
-  submitting: "Opening",
+  // Blake's wording (2026-10-14), one button.
+  submit: (plan: boolean) => (plan ? "Get the plan now" : "Get the audit now"),
+  submitting: "Sending",
   consent: (w: Who) =>
     `By sending this, you agree that ${
       callers(w) === "Blake" ? "Blake McGuire from Devize" : `${w.persona_first} or Blake McGuire from Devize`
     } may call or text you about your audit. Message and data rates may apply; reply STOP to opt out of texts.`,
   legalLinks: { smsTerms: "SMS Terms", privacy: "Privacy", terms: "Terms" },
 
-  // ---- After they send it ----------------------------------------------------
-  doneHeading: (plan: boolean) => (plan ? "Here they are." : "Here it is."),
-  viewAudit: "View your audit",
-  viewPlan: "View your plan",
-  // No "shortly": nobody calls at night or on a Sunday. DRAFT for Blake: the
-  // emailed copy is not certain either. landing_poll holds it (and never
-  // retries) when sending or the persona's mailbox is paused, the address is
-  // suppressed or landing.email_copy is off, so decide whether this line stays.
+  // ---- After they send it: the PDF is still being built ------------------------
+  // Blake's wording (2026-10-14).
+  finishing: (plan: boolean) => (plan ? "Finishing your plan, a few seconds…" : "Finishing your audit, a few seconds…"),
+  finishingNote: "It downloads by itself when it is ready.",
+  // Without JavaScript the page reloads itself every few seconds instead.
+  finishingNoScript: "This page checks again by itself every few seconds.",
+  checkAgain: "Check again",
+  // After two minutes without the file. DRAFT for Blake: "by email" holds only
+  // while landing.email_copy is on and the pipeline's copy is approved; the
+  // pipeline builds the file on the submission either way.
+  lateHeading: "This is taking longer than it should.",
+  lateBody: (plan: boolean, w: Who) =>
+    `Your ${plan ? "audit and plan" : "audit"} will come by email instead, and ${callers(w)} will call you.`,
+
+  // ---- After they send it: the download -----------------------------------------
+  // `started`: this visit started the download; false on a later visit (a reload), which starts nothing by itself.
+  doneHeading: (plan: boolean, started: boolean) =>
+    started
+      ? plan
+        ? "Your audit and plan are downloading."
+        : "Your audit is downloading."
+      : plan
+        ? "Your audit and plan are ready."
+        : "Your audit is ready.",
+  download: (plan: boolean) => (plan ? "Download the audit and plan" : "Download the audit"),
+  // A round-1 page's separate plan.
+  downloadPlan: "Download the plan",
+  // No "shortly": nobody calls at night or on a Sunday.
   doneCall: (w: Who) => `${callers(w)} will call you.`,
+  // DRAFT for Blake: the emailed copy is not certain. landing_poll holds it
+  // (and never retries) when sending or the persona's mailbox is paused, the
+  // address is suppressed or landing.email_copy is off.
   doneEmail: "A copy is on its way by email.",
 
   // ---- Errors (shown under the form) ---------------------------------------------

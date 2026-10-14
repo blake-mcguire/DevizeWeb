@@ -53,6 +53,16 @@ export async function readBytes(pathname: string): Promise<Uint8Array | null> {
   }
 }
 
+export async function statFile(pathname: string): Promise<{ size: number; uploadedAt: Date } | null> {
+  try {
+    const st = await fs.stat(need(pathname));
+    return st.isFile() ? { size: st.size, uploadedAt: st.mtime } : null;
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code === "ENOENT") return null;
+    throw err;
+  }
+}
+
 export async function writeText(pathname: string, body: string, allowOverwrite: boolean): Promise<void> {
   const file = need(pathname);
   await fs.mkdir(path.dirname(file), { recursive: true });

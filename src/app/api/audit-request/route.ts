@@ -1,24 +1,41 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { copy, type ErrorCode } from "@/app/a/[token]/copy";
-import { loadAuditPage } from "@/lib/audit-page";
-import { cleanName, sentCookieName, usMobileE164, validToken } from "@/lib/audit-validate";
+import { auditFile, loadAuditPage } from "@/lib/audit-page";
+import {
+  FIELD_NAME,
+  FIELD_TEL,
+  SENT_COOKIE_MAX_AGE,
+  auditFileUrl,
+  cleanName,
+  sentCookieName,
+  usMobileE164,
+  validToken,
+} from "@/lib/audit-validate";
 import { isoCompact, putJSON } from "@/lib/blob-store";
 import { allow, clientIp } from "@/lib/rate-limit";
 
 /**
- * POST /api/audit-request  {token, name, mobile}
+ * POST /api/audit-request  {token, name, tel}
  *
  * Validates, writes submissions/<iso>-<token>.json for the pipeline (which
- * emails the copy, alerts Blake and stops the sequence), and returns the PDF
- * links so the page can show them at once: the audit always, the plan only
- * when the page has one (plan_pdf_url is null otherwise).
+ * builds the PDF if the page's first view has not already, alerts Blake,
+ * stops the sequence and may email a copy), sets the cookie that lets this
+ * browser download the file, and says whether the file is ready:
+ *
+ *   {ok: true, ready: true,  plan, file_url: "/api/audit-file?token=...", plan_url}
+ *   {ok: true, ready: false, plan, file_url: null, plan_url: null}
+ *
+ * The page then downloads at once, or shows "Finishing ..." and polls
+ * /api/audit-status. plan_url is a round-1 page's separate plan (else null).
  *
  * JSON in, JSON out for the page's script. A plain form post (no JavaScript)
- * gets a 303 back to the page instead, with ?e=<code> on an error; the
- * cookie set on success makes the page show the buttons.
+ * gets a 303 back to the page instead, with ?e=<code> on an error; the cookie
+ * set on success makes the page show the download (or the finishing state).
+ * The number may come as "tel" (the field's name, so autofill fills it) or
+ * "mobile" (round 1).
  */
 
-type Body = { token?: unknown; name?: unknown; mobile?: unknown };
+type Body = { token?: unknown; name?: unknown; tel?: unknown; mobile?: unknown };
 
 async function readBody(req: NextRequest): Promise<{ body: Body; form: boolean }> {
   const type = req.headers.get("content-type") ?? "";
@@ -57,9 +74,9 @@ export async function POST(req: NextRequest) {
   const page = await loadAuditPage(token);
   if (!page) return fail("gone", 404);
 
-  const name = cleanName(body.name);
+  const name = cleanName(body[FIELD_NAME]);
   if (!name) return fail("name", 400);
-  const mobile = usMobileE164(body.mobile);
+  const mobile = usMobileE164(body[FIELD_TEL] ?? body.mobile);
   if (!mobile) return fail("mobile", 400);
 
   const now = new Date();
@@ -84,19 +101,27 @@ export async function POST(req: NextRequest) {
   }
   console.log("[audit-request] stored", pathname);
 
-  const res = form
-    ? NextResponse.redirect(new URL(`/a/${token}#get`, req.url), 303)
-    : NextResponse.json({
-        ok: true,
-        audit_pdf_url: page.audit_pdf_url,
-        plan_pdf_url: page.plan_pdf_url ?? null,
-      });
+  let res: NextResponse;
+  if (form) {
+    res = NextResponse.redirect(new URL(`/a/${token}#get`, req.url), 303);
+  } else {
+    const file = await auditFile(page, { fresh: true });
+    const plan = file ? await auditFile(page, { part: "plan" }) : null;
+    res = NextResponse.json({
+      ok: true,
+      ready: !!file,
+      plan: page.plan,
+      file_url: file ? auditFileUrl(token) : null,
+      plan_url: plan ? auditFileUrl(token, "plan") : null,
+    });
+  }
+  res.headers.set("Cache-Control", "no-store");
   res.cookies.set(sentCookieName(token), "1", {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
-    path: `/a/${token}`,
-    maxAge: 60 * 60 * 24 * 30,
+    path: "/",
+    maxAge: SENT_COOKIE_MAX_AGE,
   });
   return res;
 }

@@ -1,8 +1,8 @@
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { loadAuditPage } from "@/lib/audit-page";
-import { sentCookieName } from "@/lib/audit-validate";
-import AuditForm from "./audit-form";
+import { auditFileUrl, sentCookieName } from "@/lib/audit-validate";
+import AuditForm, { type Initial } from "./audit-form";
 import ViewBeacon from "./view-beacon";
 import { copy, type ErrorCode } from "./copy";
 
@@ -13,12 +13,20 @@ import { copy, type ErrorCode } from "./copy";
  * writes before the email goes out. The page asks for a name and a mobile
  * only; the business, its email and its audit are already known from the
  * token. Missing, malformed and expired tokens all get the same 404.
+ *
+ * The PDF is built when the page is first opened (the view beacon asks for
+ * it), so it is usually ready by the time the form is sent; when it is not,
+ * the form waits for it (audit-form.tsx).
  */
 
 type Props = {
   params: Promise<{ token: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
+
+// No-JavaScript wait: a reload every 5 s, 24 times (the script's two minutes).
+const NOSCRIPT_EVERY = 5;
+const NOSCRIPT_TRIES = 24;
 
 // The map's own pin colours (grid_map.py COLOURS), so the counts match the picture.
 const BAND_DOT = { top3: "#2E9E5B", mid: "#E0A500", absent: "#8E8A80" } as const;
@@ -42,8 +50,28 @@ export default async function AuditPage({ params, searchParams }: Props) {
     business: page.business,
   };
   const cols = copy.tableColumns(page.place_noun);
-  // plan_pdf_url is null when the pipeline uploaded no plan with this page: every line that names it changes.
-  const hasPlan = !!page.plan_pdf_url;
+  // page.plan is false when the PDF will not carry the plan: every line that names it changes.
+  const hasPlan = page.plan;
+  // The one file carries the plan, unless this is a round-1 page (its plan is a second file).
+  const filePlan = page.plan && !page.legacy;
+  const ready = !!page.pdf_url;
+  // Without JavaScript nothing polls: while the file is being built the page
+  // reloads itself every NOSCRIPT_EVERY seconds, counting in ?wait=, and says
+  // what the script says after two minutes. (Each reload changes ?wait=: a
+  // refresh to the same URL with a #fragment would not reload at all.)
+  const waited = typeof sp.wait === "string" && /^\d{1,3}$/.test(sp.wait) ? Number(sp.wait) : 0;
+  const initial: Initial = !sent
+    ? null
+    : ready
+      ? {
+          kind: "done",
+          fileUrl: auditFileUrl(token),
+          planUrl: page.legacy_plan_url ? auditFileUrl(token, "plan") : null,
+        }
+      : waited >= NOSCRIPT_TRIES
+        ? { kind: "late" }
+        : { kind: "finishing" };
+  const nextCheck = `/a/${token}?wait=${waited + 1}#get`;
   const bands = [
     { key: "top3", n: page.top3 },
     { key: "mid", n: page.mid },
@@ -181,9 +209,24 @@ export default async function AuditPage({ params, searchParams }: Props) {
               token={token}
               personaFirst={page.persona_first}
               hasPlan={hasPlan}
-              initialLinks={sent ? { audit: page.audit_pdf_url, plan: page.plan_pdf_url } : null}
+              filePlan={filePlan}
+              initial={initial}
               initialError={sent ? null : bounced}
             />
+            {initial?.kind === "finishing" && (
+              // Without JavaScript nothing polls: the page reloads itself
+              // until the file is there, and the link does the same by hand.
+              <noscript>
+                <meta httpEquiv="refresh" content={`${NOSCRIPT_EVERY}; url=${nextCheck}`} />
+                <p className="mt-4 text-[0.95rem] leading-relaxed text-[var(--color-ink)]">{copy.finishingNoScript}</p>
+                <a
+                  href={nextCheck}
+                  className="mt-4 inline-flex items-center text-sm font-medium text-[var(--color-brand)] underline underline-offset-4"
+                >
+                  {copy.checkAgain}
+                </a>
+              </noscript>
+            )}
           </div>
         </aside>
       </div>
