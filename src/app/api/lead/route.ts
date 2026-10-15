@@ -7,11 +7,14 @@ type LeadPayload = {
   company?: string;
   email?: string;
   trade?: string;
+  town?: string;
+  // No longer on the form (2026-10-15). Kept so an old cached page that still
+  // sends it does not lose the value.
   callVolume?: string;
   message?: string;
 };
 
-const FIELDS = ["name", "company", "email", "trade", "callVolume", "message"] as const;
+const FIELDS = ["name", "company", "email", "trade", "town", "callVolume", "message"] as const;
 
 function validEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -28,7 +31,7 @@ export async function POST(request: NextRequest) {
   const { name, company, email } = body;
   if (!name || !company || !email) {
     return Response.json(
-      { error: "Name, company, and email are required." },
+      { error: "Please fill in your name, business name and email." },
       { status: 400 }
     );
   }

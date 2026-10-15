@@ -1,49 +1,62 @@
-const pillars = [
+type Pillar = {
+  id?: string;
+  number: string;
+  title: string;
+  summary: string;
+  body: string;
+  items: string[];
+  footnote?: string;
+};
+
+const pillars: Pillar[] = [
   {
     number: "01",
-    title: "Revenue Recovery",
-    summary: "Catch every call",
+    title: "Local SEO",
+    summary: "Show up on the map",
     body:
-      "Every inbound call answered in about two rings, 24/7: after hours, weekends, when every line is lit and your techs are in attics and crawlspaces. It qualifies the caller and books the job straight into your schedule, so the caller hangs up with an appointment.",
+      "Google picks the names on its map by how well a listing matches the search, how close it is, and how well known the business is. We work on the parts you can change, starting with your Google listing, your Google Business Profile.",
     items: [
-      "Answers in about two rings, 24/7",
-      "Qualifies the caller: emergency, service, or tire-kicker",
-      "Books the job straight into your schedule",
-      "Live transfer to your team",
+      "Your Google listing: categories, services, hours, photos, posts and questions",
+      "Every customer asked for a review, every review answered",
+      "A page on your site for each service and town",
+      "The same name, address and phone everywhere you're listed",
     ],
   },
   {
+    id: "aeo",
     number: "02",
-    title: "Revenue Retention",
-    summary: "Keep every customer",
+    title: "AEO",
+    summary: "Be the answer",
     body:
-      "You already paid to win these customers. Retention keeps them: post-job follow-up, review capture, appointment reminders, and win-back nudges when a maintenance plan lapses. Existing customers are the cheapest revenue you'll ever book, and this makes sure they book it with you.",
+      "Ask ChatGPT or Google's AI for a dentist or an AC company nearby and it names a few. It builds that answer from what it can read: your Google listing, your website, your reviews, and sites like Yelp. We make sure they all say the same clear things about you.",
     items: [
-      "Post-job follow-up and review capture",
-      "Appointment reminders and confirmations",
-      "Lapsed maintenance-plan win-back by text and call",
-      "Referral capture from happy customers",
+      "Facts machines can read: services, hours, towns served, structured data",
+      "Plain answers to the questions customers ask before they call",
+      "Mentions on the directories and local sites these tools read. Earned, never bought.",
     ],
+    footnote:
+      "Nobody outside these companies sees exactly how they choose. We work on what they read.",
   },
 ];
 
 export default function Services() {
   return (
-    <section id="services" className="relative">
+    <section id="services" className="relative scroll-mt-16">
       <div className="mx-auto max-w-6xl px-6 py-24 md:py-32">
         <div className="max-w-2xl">
           <p className="text-xs uppercase tracking-[0.18em] text-[var(--color-ink-muted)] font-medium">
-            The systems
+            The work
           </p>
           <h2 className="mt-4 font-[family-name:var(--font-display)] text-4xl md:text-5xl leading-[1.05] tracking-tight text-[var(--color-ink)] font-medium">
-            Recover the calls.
+            Local SEO and AEO,
             <br />
-            Keep the customers.
+            done for you.
           </h2>
           <p className="mt-6 text-lg text-[var(--color-ink-soft)] leading-relaxed">
-            Two systems, one job: stop revenue from leaking out of a good
-            business. Devize runs alongside the CRM and field software you
-            already use.
+            Local SEO is the work that helps you show up on Google&apos;s map.
+            AEO, answer engine optimization, is the work that helps AI
+            assistants name you when someone nearby asks who to call. Most of
+            it is the same groundwork.
           </p>
         </div>
 
@@ -51,7 +64,8 @@ export default function Services() {
           {pillars.map((p) => (
             <article
               key={p.number}
-              className="group relative rounded-2xl border border-[var(--color-border)] bg-white p-7 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_-20px_rgba(28,42,57,0.15)] hover:border-[var(--color-ink)]/15"
+              id={p.id}
+              className="group relative scroll-mt-24 flex flex-col rounded-2xl border border-[var(--color-border)] bg-white p-7 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_-20px_rgba(28,42,57,0.15)] hover:border-[var(--color-ink)]/15"
             >
               <div className="flex items-center justify-between">
                 <span className="brand-text-gradient font-[family-name:var(--font-display)] text-2xl font-medium tracking-tight">
@@ -73,18 +87,29 @@ export default function Services() {
 
               <ul className="mt-6 space-y-2 text-sm text-[var(--color-ink)]/80">
                 {p.items.map((item) => (
-                  <li key={item} className="flex items-center gap-2">
+                  <li key={item} className="flex gap-2">
                     <span
-                      className="inline-block h-1.5 w-1.5 rounded-full bg-[var(--color-brand)]"
+                      className="mt-[0.5em] inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-brand)]"
                       aria-hidden="true"
                     />
                     {item}
                   </li>
                 ))}
               </ul>
+
+              {p.footnote && (
+                <p className="mt-auto pt-6 text-xs text-[var(--color-ink-muted)] leading-relaxed">
+                  {p.footnote}
+                </p>
+              )}
             </article>
           ))}
         </div>
+
+        <p className="mt-8 text-center text-sm text-[var(--color-ink-muted)] max-w-2xl mx-auto">
+          We won&apos;t promise a guaranteed spot or results in weeks, and we
+          won&apos;t do anything that gets a listing suspended.
+        </p>
       </div>
     </section>
   );

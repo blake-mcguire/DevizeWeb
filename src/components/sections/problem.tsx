@@ -1,7 +1,7 @@
 const statements = [
-  "It's 7:04pm. Dead AC, ringing phone, and you're elbow-deep in a condenser across town. Eight in ten callers who hit voicemail never call back. They just dial the next name on Google.",
-  "One missed call costs you more than one job. It's the repair, the maintenance plan, the callbacks, and ten years of referrals, all handed to whoever answered first.",
-  "Good operators still lose customers to silence: the follow-up that never went out, the plan that quietly lapsed, the review nobody asked for.",
+  'Search "dentist" or "ac repair" on a phone and Google shows a map with three businesses under it. Those get looked at first. Everyone else is a scroll away.',
+  "Ask ChatGPT or Google's AI who to call and you get a few names, not a page of links.",
+  "Good reviews alone don't put you there. Google weighs how well your listing matches the search, how close you are, and how well known you are. Two of those three can be worked on.",
 ];
 
 export default function Problem() {
@@ -15,7 +15,7 @@ export default function Problem() {
           <h2 className="mt-4 font-[family-name:var(--font-display)] text-3xl md:text-4xl leading-tight tracking-tight text-[var(--color-ink)] font-medium">
             You&apos;re great at the work.
             <br />
-            You&apos;re drowning in the phones.
+            Google only shows a few names.
           </h2>
         </div>
 

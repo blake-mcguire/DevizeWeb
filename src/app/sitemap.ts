@@ -1,15 +1,11 @@
 import type { MetadataRoute } from "next";
 
-const SITE_URL = "https://devize.ai";
-
-// Ordered newest-first. When adding articles, extend this list, or swap to a
-// fs.readdir scan once there are more than a handful.
-const articles: Array<{ slug: string; lastModified: string }> = [
-  { slug: "welcome", lastModified: "2026-04-22" },
-];
+const SITE_URL = "https://www.devize.ai";
 
 // Never list /a/<token> here: those are private prospect pages (noindex, and
 // disallowed in robots.ts). This sitemap is an explicit list, so they stay out.
+// The articles section was unpublished on 2026-10-15 (it described the old
+// offer); add its URLs back here when a new piece is published.
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
 
@@ -20,18 +16,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly",
       priority: 1.0,
     },
-    {
-      url: `${SITE_URL}/articles`,
-      lastModified: now,
-      changeFrequency: "weekly",
-      priority: 0.9,
-    },
-    ...articles.map((a) => ({
-      url: `${SITE_URL}/articles/${a.slug}`,
-      lastModified: new Date(a.lastModified),
-      changeFrequency: "monthly" as const,
-      priority: 0.7,
-    })),
     // Legal / A2P compliance pages. Carriers fetch these during 10DLC vetting.
     ...[
       { path: "/terms", updated: "2026-07-18" },

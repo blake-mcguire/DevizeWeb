@@ -1,6 +1,7 @@
 import { ImageResponse } from "next/og";
 
-export const alt = "Devize: Revenue Recovery & Retention for home services";
+export const alt =
+  "Devize: Your prospects are searching for your services, but are they finding you?";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -53,7 +54,7 @@ export default async function Image() {
           </div>
         </div>
 
-        {/* Bottom block: headline + tagline */}
+        {/* Bottom block: headline + subline */}
         <div style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
           <div
             style={{
@@ -64,7 +65,8 @@ export default async function Image() {
               maxWidth: 1000,
             }}
           >
-            Stop losing jobs to voicemail.
+            Your prospects are searching for your services, but are they
+            finding you?
           </div>
           <div
             style={{
@@ -73,7 +75,7 @@ export default async function Image() {
               fontWeight: 400,
             }}
           >
-            Every call answered. Every job booked. Every customer kept.
+            Local SEO and AEO for local service businesses.
           </div>
         </div>
       </div>

@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-const SITE_URL = "https://devize.ai";
+const SITE_URL = "https://www.devize.ai";
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -9,7 +9,8 @@ export default function robots(): MetadataRoute.Robots {
         userAgent: "*",
         allow: "/",
         // /a/ holds one page per prospect, keyed by a secret token: never crawled.
-        disallow: ["/api/", "/_next/", "/a/"],
+        // /_next/ is not blocked: Google needs those files to render the pages.
+        disallow: ["/api/", "/a/"],
       },
     ],
     sitemap: `${SITE_URL}/sitemap.xml`,

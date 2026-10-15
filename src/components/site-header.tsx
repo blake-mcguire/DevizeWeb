@@ -3,10 +3,10 @@ import Logo from "@/components/logo";
 import { Button } from "@/components/ui/button";
 
 const navLinks = [
-  { href: "/#services", label: "The systems" },
   { href: "/#how-it-works", label: "How it works" },
-  { href: "/articles", label: "Articles" },
-  { href: "/articles/welcome", label: "About" },
+  { href: "/#services", label: "Local SEO" },
+  { href: "/#aeo", label: "AEO" },
+  { href: "/#faq", label: "FAQ" },
 ];
 
 export default function SiteHeader() {
@@ -35,7 +35,7 @@ export default function SiteHeader() {
 
         <div className="flex items-center gap-2">
           <Button href="/#contact" size="sm">
-            Book a demo
+            Free map audit
           </Button>
         </div>
       </div>

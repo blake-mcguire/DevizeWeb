@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
 import "./globals.css";
-import { JsonLd } from "@/components/json-ld";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -16,27 +15,29 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://devize.ai"),
+  metadataBase: new URL("https://www.devize.ai"),
   title: {
-    default: "Devize: Revenue Recovery & Retention for home services",
+    default: "Local SEO and AEO for Local Service Businesses · Devize",
     template: "%s · Devize",
   },
   description:
-    "Devize builds Revenue Recovery and Revenue Retention systems for home-service businesses: every call answered 24/7 and booked into the schedule, every customer followed up and won back.",
+    "Devize does local SEO and AEO for dentists, HVAC companies and other local service businesses. See where you show up with a free map audit.",
   openGraph: {
-    title: "Devize: Revenue Recovery & Retention for home services",
+    title:
+      "Your prospects are searching for your services, but are they finding you?",
     description:
-      "Every call answered and booked, 24/7. Every customer followed up and kept. Built for HVAC, plumbing, electrical, and the rest of the trades.",
-    url: "https://devize.ai",
+      "Local SEO and AEO for dentists, HVAC companies and other local service businesses. Start with a free Google map audit.",
+    url: "https://www.devize.ai",
     siteName: "Devize",
     type: "website",
     locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Devize: Revenue Recovery & Retention for home services",
+    title:
+      "Your prospects are searching for your services, but are they finding you?",
     description:
-      "Every call answered and booked, 24/7. Every customer followed up and kept. Built for HVAC, plumbing, electrical, and the rest of the trades.",
+      "Local SEO and AEO for dentists, HVAC companies and other local service businesses. Start with a free Google map audit.",
   },
   robots: {
     index: true,
@@ -60,17 +61,6 @@ new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
 })(window,document,'script','dataLayer','${GTM_ID}');`;
-
-const organizationSchema = {
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  name: "Devize",
-  url: "https://devize.ai",
-  logo: "https://devize.ai/devize-logo.svg",
-  description:
-    "Devize builds Revenue Recovery and Revenue Retention systems for home-service businesses: 24/7 AI call answering that qualifies callers and books jobs into the schedule, plus post-job follow-up, review capture, appointment reminders, and maintenance-plan reactivation.",
-  email: "admin@devize.ai",
-};
 
 export default function RootLayout({
   children,
@@ -99,7 +89,6 @@ export default function RootLayout({
         {/* Site chrome (header, main, footer) lives in (site)/layout.tsx so the
             prospect pages under /a/ can render without the marketing nav. */}
         {children}
-        <JsonLd data={organizationSchema} />
       </body>
     </html>
   );
