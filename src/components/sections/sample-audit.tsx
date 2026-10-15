@@ -1,11 +1,21 @@
 import { MARKS } from "@/lib/marks";
 import { cn } from "@/lib/cn";
 // The anonymised sample (2026-10-15): a real scan of one Houston-area general
-// dentist, with every name removed. The same file is served at
-// /sample/sample.json, beside the PDF and the map it describes. Never swap in
-// an invented business: replace these files with another real, anonymised
-// scan instead.
-import sample from "../../../public/sample/sample.json";
+// dentist, with every name removed, built and checked by the sample pass
+// (outside this repo). src/data/sample.json holds only the fields this file
+// reads; it is imported at build time and never served. The PDF and the map
+// PNGs are in public/sample/. Review counts are banded (the sample's "under
+// 100", the others' to the nearest 100) and photo and category counts are
+// ranges, so no practice can be picked out from a listing export.
+//
+// Never swap in an invented business: replace these files with another real,
+// anonymised scan. Whatever practice a sample comes from must first be
+// suppressed in the outreach pipeline so it can never be emailed and then
+// find its own numbers here: that is `sampleSourceSuppressed` in
+// src/lib/launch-gate.json, which blocks production builds until it is true.
+// The practice's id is kept in the pipeline's suppression list and the sample
+// pass, never in this repo.
+import sample from "@/data/sample.json";
 
 export const SAMPLE_LABEL = sample.label; // "Real scan, names removed"
 const PDF_URL = "/sample/sample-audit.pdf";
@@ -23,23 +33,34 @@ const counts = {
 
 const phrases = scan.phrases.map((p) => `“${p}”`).join(" and ");
 
+const NOT_A_CLIENT = "The practice is not a Devize client.";
+
 const mapAlt = `Map of ${sample.map.pins} search spots within ${scan.radius_miles} miles of a dental practice, ${scan.spacing_miles} miles apart. Every pin is grey: the practice was not in the first twenty at any of them.`;
 
-function SampleMapImage({ eager = false, className }: { eager?: boolean; className?: string }) {
+function SampleMapImage({
+  hero = false,
+  className,
+}: {
+  /** The hero card: loaded eagerly, and the PNG without the in-image ring
+      label, which renders at 5-6px there (the caption says "within 10 miles"). */
+  hero?: boolean;
+  className?: string;
+}) {
   const [w, h] = sample.map.size_css_px;
+  const files = hero ? sample.map.hero_files : sample.map.files;
   return (
     // A plain <img>: one small PNG at 1x and 2x, the same choice the audit
     // page makes for its map. next/image would add an optimizer hop for
     // nothing.
     // eslint-disable-next-line @next/next/no-img-element
     <img
-      src={`/sample/${sample.map.files["1x"]}`}
-      srcSet={`/sample/${sample.map.files["1x"]} ${w}w, /sample/${sample.map.files["2x"]} ${w * 2}w`}
+      src={`/sample/${files["1x"]}`}
+      srcSet={`/sample/${files["1x"]} ${w}w, /sample/${files["2x"]} ${w * 2}w`}
       sizes="(min-width: 1024px) 480px, 100vw"
       width={w}
       height={h}
       alt={mapAlt}
-      loading={eager ? "eager" : "lazy"}
+      loading={hero ? "eager" : "lazy"}
       className={cn("block w-full h-auto rounded-xl bg-[#F3F0E8]", className)}
     />
   );
@@ -88,7 +109,7 @@ export function SampleMapCard() {
         </p>
         <LabelChip />
       </div>
-      <SampleMapImage eager className="mt-3" />
+      <SampleMapImage hero className="mt-3" />
       <figcaption className="mt-3">
         <p className="text-[0.95rem] leading-snug text-[var(--color-ink)]">
           A Houston-area dentist rated {practice.stars.toFixed(1)} stars on{" "}
@@ -96,7 +117,8 @@ export function SampleMapCard() {
           <strong className="font-semibold">
             {sample.headline.top3} of {sample.headline.of}
           </strong>{" "}
-          searches within {scan.radius_miles} miles.
+          searches within {scan.radius_miles} miles.{" "}
+          <span className="text-[var(--color-ink-soft)]">{NOT_A_CLIENT}</span>
         </p>
         <Legend className="mt-2.5" />
         <a
@@ -120,7 +142,7 @@ const RESULT = {
 type Result = keyof typeof RESULT;
 
 export default function SampleAudit() {
-  const rows = sample.who_came_up_both_phrases.rows;
+  const rows = sample.who_came_up.rows;
   return (
     <section id="sample" className="scroll-mt-16">
       <div className="mx-auto max-w-6xl px-6 pt-24 md:pt-32">
@@ -137,15 +159,20 @@ export default function SampleAudit() {
             the Houston area, run on a phone on Monday, 12 October 2026, by the
             same code that builds every audit. We took out the practice&apos;s
             name, address, phone and website, and the names of the other
-            practices. Review counts are rounded to the nearest 10. Every other
-            number is as measured. The practice is not a Devize client, and
-            this is not a before-and-after.
+            practices. So that no practice can be picked out, review counts are
+            rounded (the sample&apos;s shown as under 100, the others&apos; to
+            the nearest 100) and photo counts are shown as ranges. Stars,
+            searches and every check result are as measured. {NOT_A_CLIENT} This
+            is not a before-and-after.
           </p>
         </div>
 
-        <div className="mt-12 grid gap-6 lg:grid-cols-2 items-start">
+        {/* grid-cols-1 is minmax(0,1fr): without it the table's minimum width
+            (inside overflow-x-auto) pushed the column, and the page scrolled
+            sideways below 352px. min-w-0 on the children does the same at lg. */}
+        <div className="mt-12 grid grid-cols-1 gap-6 lg:grid-cols-2 items-start">
           {/* The map */}
-          <figure className="rounded-2xl border border-[var(--color-border)] bg-white p-5 md:p-6">
+          <figure className="min-w-0 rounded-2xl border border-[var(--color-border)] bg-white p-5 md:p-6">
             <p className="text-sm font-medium text-[var(--color-ink)]">
               The “{sample.map.phrase_drawn}” searches, one at each of {sample.map.pins} spots
             </p>
@@ -158,7 +185,7 @@ export default function SampleAudit() {
             </figcaption>
           </figure>
 
-          <div className="space-y-6">
+          <div className="min-w-0 space-y-6">
             {/* The three counts */}
             <div className="rounded-2xl border border-[var(--color-border)] bg-white p-5 md:p-6">
               <p className="text-sm font-medium text-[var(--color-ink)]">
@@ -222,7 +249,7 @@ export default function SampleAudit() {
                           <td className="py-2.5 px-2 sm:px-3 text-right tabular-nums text-[var(--color-ink)]">
                             {r.stars.toFixed(1)}
                           </td>
-                          <td className="py-2.5 px-2 sm:px-3 text-right tabular-nums text-[var(--color-ink)]">
+                          <td className="py-2.5 px-2 sm:px-3 text-right tabular-nums text-[var(--color-ink)] whitespace-nowrap">
                             {r.reviews}
                           </td>
                           <td className="py-2.5 pl-2 sm:pl-3 text-right tabular-nums text-[var(--color-ink)] whitespace-nowrap">
@@ -236,7 +263,8 @@ export default function SampleAudit() {
               </div>
               <p className="mt-3 text-sm text-[var(--color-ink-soft)] leading-relaxed">
                 The sample practice has the best rating of the four and the
-                fewest reviews. Review counts are rounded to the nearest 10.
+                fewest reviews. Review counts are rounded so no practice can be
+                picked out.
               </p>
             </div>
           </div>

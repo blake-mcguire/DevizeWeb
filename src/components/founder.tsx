@@ -36,10 +36,12 @@ export function FounderAvatar({
   const src = founderPhotoSrc();
   const box = cn("shrink-0 rounded-full", className);
   if (src) {
+    // alt="": the name is printed right beside every avatar, so a screen
+    // reader would otherwise say it twice.
     return (
       <Image
         src={src}
-        alt={FOUNDER.name}
+        alt=""
         width={size}
         height={size}
         className={cn(box, "object-cover")}

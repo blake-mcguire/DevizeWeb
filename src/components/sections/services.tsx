@@ -23,8 +23,8 @@ const pillars: Pillar[] = [
     items: [
       "Your Google listing: categories, services, hours, photos, posts and questions",
       "A routine to ask every customer for a review, and a reply to every review",
-      "A useful page on your site for each service and each town you serve",
-      "The same name, address and phone everywhere you're listed",
+      "A useful page for each service and town you serve, built up over the months (up to 2 a month)",
+      "Your details checked on the main directories and corrected where we can, with you claiming any that only the owner can change",
     ],
   },
   {
@@ -37,7 +37,7 @@ const pillars: Pillar[] = [
     items: [
       "Facts machines can read: services, hours, towns served, structured data",
       "Plain answers to the questions customers ask before they call",
-      "Your business listed, and mentioned, on the directories and local sites AI answers often draw from",
+      "Your details checked on the directories AI answers often draw from, and corrected where we can",
     ],
     footnote:
       "Nobody outside these companies sees exactly how they choose. We work on what they read.",

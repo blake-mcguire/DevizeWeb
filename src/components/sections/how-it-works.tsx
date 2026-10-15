@@ -22,7 +22,11 @@ const steps = [
 ];
 
 // The audit's 21 checks (completeness.CHECKS in the audit pipeline): 1 + 15 + 5.
-// Add none and drop none without changing the audit itself.
+// Add none and drop none without changing the audit itself. Two labels follow
+// the printed audit rather than completeness.py, because the PDF is what a
+// visitor compares this list with (the sample, and every audit printed since
+// 2026-10-14): a review "in the last 30 days" earns the full points (inside
+// 90 earns part), and the owner photo counts "in the last year".
 const CHECKS = [
   {
     group: "The map",
@@ -36,12 +40,12 @@ const CHECKS = [
       "Verified",
       "Rated 4.5 or better",
       "20 or more reviews",
-      "A review in the last 90 days",
+      "A review in the last 30 days",
       "A new review every month",
       "You answer your reviews",
       "You answer them within a week",
       "Photos, next to similar businesses near you",
-      "A photo of your own from this year",
+      "A photo of your own in the last year",
       "Hours for all seven days",
       "A description",
       "Posts",

@@ -9,11 +9,12 @@
  * Decided by Blake on 2026-10-15, so NOT draft: the $750 flat monthly price,
  * local SEO and AEO included, month to month with cancel any time, the free
  * audit, and his photo and name by the call to action.
+ *
+ * The gate is real (2026-10-15, pass 2 review): a Vercel production build
+ * fails until `offerCopyConfirmed` is true in src/lib/launch-gate.json. Set it
+ * once every DRAFT here and in faq.tsx is confirmed or changed.
  * ============================================================================
  */
-
-/** Flip to false once Blake has confirmed every DRAFT line in this file. */
-export const OFFER_COPY_IS_DRAFT = true;
 
 export const EMAIL = "admin@devize.ai";
 
@@ -42,7 +43,9 @@ export const PRICE = {
 
 // DRAFT: every quantity in this list (4 posts, 2 business days, up to 2 pages,
 // the review routine in the first month) is a proposal for Blake to confirm or
-// change. Keep only what he can deliver every month for every client.
+// change. Keep only what he can deliver every month for every client. Once
+// confirmed, the Order template should list these same items and the fee
+// (terms 3.1 points to this list).
 export const MONTHLY_WORK: { title: string; detail: string }[] = [
   {
     title: "Your Google listing kept complete and current", // DRAFT
@@ -54,19 +57,28 @@ export const MONTHLY_WORK: { title: string; detail: string }[] = [
   },
   {
     title: "Every review answered within 2 business days", // DRAFT (quantity)
-    detail: "In words you've signed off on, and never confirming someone is a patient or a customer.", // DRAFT
+    // The clock can only be ours if the sign-off is once, on the wording and
+    // approach, not on each reply (FAQ and terms 3.4 say the same).
+    detail: "In wording you sign off on once, at the start, so no reply waits on you. Never confirming someone is a patient or a customer.", // DRAFT
   },
   {
     title: "A simple routine so every customer is asked for a review", // DRAFT
     detail: "Set up in your first month. No paying for reviews and no asking only happy customers.", // DRAFT (timing)
   },
   {
-    title: "Up to 2 new service or town pages on your site a month", // DRAFT (quantity)
-    detail: "Written for your customers. Never copy-paste pages with the town name swapped.", // DRAFT
+    title: "Up to 2 new service or town pages for your site a month", // DRAFT (quantity)
+    detail: "Written for your customers, never copy-paste pages with the town name swapped, until each service and town you serve has its own. If someone else runs your site, we send them the pages to put up.", // DRAFT
   },
   {
-    title: "Your business details checked across the main directories", // DRAFT
-    detail: "The same name, address and phone everywhere you're listed.", // DRAFT
+    // The AEO part of "Local SEO and AEO included", as a buyer can see it.
+    title: "Your site's facts kept machine-readable", // DRAFT
+    detail: "Structured data for your services, hours and towns, and plain answers on your pages to the questions customers ask before they call.", // DRAFT
+  },
+  {
+    // One directory deliverable, worded the same in services.tsx (both cards)
+    // and terms 3.2: checked and corrected, not "listed everywhere".
+    title: "Your business details checked on the main directories", // DRAFT
+    detail: "Corrected where we can, with you claiming any that only the owner can change. The same name, address and phone everywhere you're listed.", // DRAFT
   },
   {
     title: "The same map re-run every month", // DRAFT
@@ -116,11 +128,19 @@ export const FOUNDER = {
   townShort: "Willis, TX",
   /**
    * Dropped into public/ this file replaces the initials avatar with no code
-   * change (the check runs when the page is built). Any shape works: it is
-   * shown as a cropped circle.
+   * change (the check runs when the page is built). Use a square or portrait
+   * photo at least 256px wide: it is shown as a cropped circle, and next/image
+   * sizes by width before the crop, so a landscape photo comes out soft.
+   * Testing the swap locally: clear .next/dev/cache/images first, or the dev
+   * server can serve an older /blake.jpg for up to 4 hours.
    */
   photoFile: "blake.jpg",
   // DRAFT: Blake's own suggested wording for the line by the call to action.
+  // True while the reply funnel runs in draft mode (the scraper's
+  // autopilot.json funnel_mode "draft": Blake sends each audit himself). If
+  // funnel_mode goes to "auto", reword this, the bio's first line and the
+  // FAQ's "He runs every audit himself", for example "Every audit comes from
+  // me, and I answer every email myself."
   chip: "I run every audit myself.",
   // DRAFT: the founder block's two or three sentences.
   bio: [

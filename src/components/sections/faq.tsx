@@ -5,7 +5,8 @@ import { EMAIL, FOUNDER, PRICE } from "@/lib/offer-copy";
 // New or changed on 2026-10-15 (site pass 2): cost, contract, who you deal
 // with, website access, and what goes on a page. The answers marked DRAFT are
 // wording for Blake to confirm; the price and month-to-month lines come from
-// src/lib/offer-copy.ts.
+// src/lib/offer-copy.ts. Production builds stay blocked until they are
+// confirmed (offerCopyConfirmed in src/lib/launch-gate.json).
 export const faqs = [
   {
     q: "What's in the free audit?",
@@ -24,11 +25,13 @@ export const faqs = [
   {
     q: "Who will I be dealing with?",
     // DRAFT
+    // "He runs every audit himself" holds while the reply funnel is in draft
+    // mode; see FOUNDER.chip in src/lib/offer-copy.ts before switching to auto.
     a: `${FOUNDER.name}, who runs Devize from ${FOUNDER.town}. He runs every audit himself. Write to him at ${EMAIL}.`,
   },
   {
     q: "What is AEO, and how is it different from SEO?",
-    a: "AEO stands for answer engine optimization. When someone asks ChatGPT, Google's AI or another assistant for a local business, it answers with a few names instead of a list of links. AEO is making your business easy for those tools to read and trust: the same facts everywhere, plain answers to common questions, and mentions on the sites they already use. It sits on the same foundations as SEO. Google says there's nothing extra to do to appear in its AI answers beyond the basics of good SEO.",
+    a: "AEO stands for answer engine optimization. When someone asks ChatGPT, Google's AI or another assistant for a local business, it answers with a few names instead of a list of links. AEO is making your business easy for those tools to read and trust: the same facts everywhere, plain answers to common questions, and consistent listings on the sites they already use. It sits on the same foundations as SEO. Google says there's nothing extra to do to appear in its AI answers beyond the basics of good SEO.",
   },
   {
     q: "Can you guarantee I'll be in the top three?",
@@ -40,11 +43,11 @@ export const faqs = [
   },
   {
     q: "Do you do the work, or do I?",
-    a: "We do it. There's no software to learn. Once you've added us as a manager on your Google listing, there's nothing for you to log into. Each month you get the new Google map and a short note on what we did. We don't track AI answers yet. We'll ask you for photos of your work and the few answers only you know, and you sign off on how we reply to reviews before anything goes out in your name.",
+    a: "We do it. There's no software to learn. Once you've added us as a manager on your Google listing, there's nothing for you to log into. Each month you get the new Google map and a short note on what we did. We don't track AI answers yet. We'll ask you for photos of your work and the few answers only you know, and you sign off once, at the start, on how we reply to reviews in your name.",
   },
   {
     q: "Do I need a new website?",
-    a: "Probably not. We work with the site you have: a useful page for each service and each town you serve, and the same phone and address as your listing. If your site can't be edited or doesn't work on a phone, the audit will show it, and we'll talk it through.",
+    a: "Probably not. We work with the site you have: a useful page for each service and town you serve, built up over the months (up to 2 a month), and the same phone and address as your listing. If your site can't be edited or doesn't work on a phone, the audit will show it, and we'll talk it through.",
   },
   {
     q: "Do you need access to my website?",

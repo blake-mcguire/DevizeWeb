@@ -20,6 +20,14 @@ import {
  * already paid for), and 3.1 no longer leaves the term to the Order. The fee
  * itself still lives in the Order. DRAFT: Blake and counsel to confirm 3.1
  * and 3.5, in particular billing in advance and no part-month refunds.
+ *
+ * Pass 2 review (2026-10-15), also DRAFT: 3.1 ties the standard fee to the
+ * list published on the price card; 3.2 words the directory work the way the
+ * site does (checked and corrected, the owner claims what only the owner can
+ * change); 3.4 makes the review sign-off a one-time sign-off on the wording,
+ * which is what lets the site promise replies within 2 business days; 3.5
+ * covers a start on the 29th to 31st. Production builds stay blocked until
+ * termsConfirmed is true in src/lib/launch-gate.json.
  */
 export const metadata: Metadata = {
   title: "Service Terms",
@@ -52,19 +60,19 @@ export default function TermsPage() {
 
       <H2 id="s3">3. The monthly local SEO and AEO service</H2>
       <P>
-        3.1 <strong>Your proposal or order.</strong>{" "}The monthly service is governed by the written proposal or order you accept (the &ldquo;<strong>Order</strong>&rdquo;), together with these Terms. The Order sets out the work and the flat monthly fee. If the Order and these Terms conflict, the Order controls, except for section 3.5: the service is month to month whatever the Order says.
+        3.1 <strong>Your proposal or order.</strong>{" "}The monthly service is governed by the written proposal or order you accept (the &ldquo;<strong>Order</strong>&rdquo;), together with these Terms. The Order sets out the work and the flat monthly fee. The work for the standard monthly fee is the list published at devize.ai/#price on the date you accept the Order. If the Order and these Terms conflict, the Order controls, except for section 3.5: the service is month to month whatever the Order says.
       </P>
       <P>
-        3.2 <strong>The work.</strong>{" "}Depending on your Order, the work can include: your Google Business Profile (categories, services, description, hours, photos, posts and questions); a routine for asking customers for reviews and replying to them; service and town pages on your website; consistent business listings across directories; clear facts about your business that search engines and AI assistants can read; and a monthly rerun of the same map searches as your progress report.
+        3.2 <strong>The work.</strong>{" "}Depending on your Order, the work can include: your Google Business Profile (categories, services, description, hours, photos, posts and questions); a routine for asking customers for reviews and replying to them; service and town pages on your website; your business details checked on the main directories and corrected where Devize can (some directories let only the owner make changes, and you make those); clear facts about your business that search engines and AI assistants can read; and a monthly rerun of the same map searches as your progress report.
       </P>
       <P>
         3.3 <strong>Access and ownership.</strong>{" "}You add Devize as a manager on your Google Business Profile, and give us access to your website or put us in touch with the person who runs it. You remain the owner of your Google Business Profile, your website and your accounts, and you can remove Devize&apos;s access at any time.
       </P>
       <P>
-        3.4 <strong>Your part.</strong>{" "}You give us accurate facts about your business, photos of your work where you can, and sign-off on how we reply to reviews before anything goes out in your name.
+        3.4 <strong>Your part.</strong>{" "}You give us accurate facts about your business, photos of your work where you can, and a one-time sign-off, at the start, on how we reply to reviews in your name.
       </P>
       <P>
-        3.5 <strong>Month to month, and cancelling.</strong>{" "}The monthly service runs month to month, with no minimum term. Each month of service starts on the same day of the month as the first. The flat monthly fee is charged at the start of each month of service, in advance. You or Devize can cancel at any time by email (section 7.3). A cancellation takes effect at the end of the month already paid for: the work continues until then, no further fee is charged after it, and the fee for that month is not refunded in part. When the service ends, you remove Devize as a manager of your Google Business Profile and from your website (or Devize removes itself), and everything Devize made for you, such as pages, posts and changes to your listing, stays yours.
+        3.5 <strong>Month to month, and cancelling.</strong>{" "}The monthly service runs month to month, with no minimum term. Each month of service starts on the same day of the month as the first, or on the last day of a shorter month. The flat monthly fee is charged at the start of each month of service, in advance. You or Devize can cancel at any time by email (section 7.3). A cancellation takes effect at the end of the month already paid for: the work continues until then, no further fee is charged after it, and the fee for that month is not refunded in part. When the service ends, you remove Devize as a manager of your Google Business Profile and from your website (or Devize removes itself), and everything Devize made for you, such as pages, posts and changes to your listing, stays yours.
       </P>
 
       <H2 id="s4">4. No guarantee of results</H2>

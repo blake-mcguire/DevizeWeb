@@ -1,0 +1,143 @@
+{
+  "label": "Real scan, names removed",
+  "practice": {
+    "stars": 5.0,
+    "reviews": "under 100"
+  },
+  "scan": {
+    "spots": 79,
+    "radius_miles": 10,
+    "spacing_miles": 2,
+    "phrases": [
+      "dentist",
+      "dentist near me"
+    ],
+    "searches_total": 158
+  },
+  "headline": {
+    "top3": 0,
+    "of": 158,
+    "leader_sentence": "Practice A was in the top three for 35 of the same 158."
+  },
+  "per_phrase": [
+    {
+      "top3": 0,
+      "fourth_to_twentieth": 0,
+      "not_in_first_twenty": 79
+    },
+    {
+      "top3": 0,
+      "fourth_to_twentieth": 0,
+      "not_in_first_twenty": 79
+    }
+  ],
+  "map": {
+    "files": {
+      "1x": "sample-map.png",
+      "2x": "sample-map@2x.png"
+    },
+    "hero_files": {
+      "1x": "sample-map-hero.png",
+      "2x": "sample-map-hero@2x.png"
+    },
+    "size_css_px": [
+      560,
+      450
+    ],
+    "phrase_drawn": "dentist",
+    "pins": 79
+  },
+  "who_came_up": {
+    "rows": [
+      {
+        "practice": "Practice A",
+        "stars": 4.8,
+        "reviews": "about 600",
+        "top3": 35,
+        "of": 158
+      },
+      {
+        "practice": "Practice B",
+        "stars": 4.9,
+        "reviews": "about 700",
+        "top3": 18,
+        "of": 158
+      },
+      {
+        "practice": "Practice C",
+        "stars": 4.9,
+        "reviews": "about 500",
+        "top3": 16,
+        "of": 158
+      },
+      {
+        "practice": "Sample Dental Practice",
+        "stars": 5.0,
+        "reviews": "under 100",
+        "top3": 0,
+        "of": 158,
+        "is_sample": true
+      }
+    ]
+  },
+  "site_section_checks": [
+    {
+      "check": "In the top three on the map",
+      "result": "fail",
+      "finding": "0 of 158 searches. Not in the first twenty at any of them."
+    },
+    {
+      "check": "Rated 4.5 stars or better",
+      "result": "pass",
+      "finding": "5.0 stars"
+    },
+    {
+      "check": "20 or more reviews",
+      "result": "pass",
+      "finding": "Between 20 and 100 reviews."
+    },
+    {
+      "check": "Reviews like the practices that come up instead",
+      "result": "fail",
+      "finding": "Under 100 reviews. The three practices that came up most show about 500 to 700."
+    },
+    {
+      "check": "Answers its reviews",
+      "result": "partial",
+      "finding": "Replied to 34 of the last 50."
+    },
+    {
+      "check": "Answers inside a week",
+      "result": "fail",
+      "finding": "Replies land about 10 days after the review."
+    },
+    {
+      "check": "Posts on the Google listing",
+      "result": "fail",
+      "finding": "0 posts on the listing."
+    },
+    {
+      "check": "Service and town pages on the website",
+      "result": "pass",
+      "finding": "About 20 of the roughly 60 site pages we read name a service; 1 names a nearby town."
+    }
+  ],
+  "checks_summary": "4 of the 24 things we checked on your listing and site show a gap, and 1 passes in part.",
+  "recommended_fixes": [
+    {
+      "fix": "The leading practices near you have more reviews",
+      "how": "Ask for a review after every visit, the same day."
+    },
+    {
+      "fix": "Reviews answered late",
+      "how": "Reply to every review within a week, in your own words. Never confirm they are a patient or mention their care."
+    },
+    {
+      "fix": "No posts on the profile",
+      "how": "One post a month, with what is new at the practice."
+    }
+  ],
+  "pdf": {
+    "pages": 3
+  }
+}
