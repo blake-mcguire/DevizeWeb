@@ -1,9 +1,30 @@
+import { EMAIL, FOUNDER, PRICE } from "@/lib/offer-copy";
+
 // Feeds both the visible list below and the FAQPage JSON-LD on the home page,
 // so the structured data always matches what a visitor reads.
+// New or changed on 2026-10-15 (site pass 2): cost, contract, who you deal
+// with, website access, and what goes on a page. The answers marked DRAFT are
+// wording for Blake to confirm; the price and month-to-month lines come from
+// src/lib/offer-copy.ts.
 export const faqs = [
   {
     q: "What's in the free audit?",
-    a: "We run the searches your customers run from dozens of spots around your business and show where you came up: in the top three, fourth to twentieth, or nowhere in the first twenty, and who came up instead. Then 21 checks on your Google listing, your reviews and your website, and the fixes we'd make first, in order. We only need your business name, your town and an email to send it to.",
+    a: "We run the searches your customers run from dozens of spots around your business and show where you came up: in the top three, fourth to twentieth, or nowhere in the first twenty, and who came up instead. Then 21 checks on your Google listing, your reviews and your website, and the fixes we'd make first, in order. We only need your business name, your town and an email to send it to. There's a real one, with the names taken out, in the sample audit on this page.",
+  },
+  {
+    q: "What does it cost?",
+    // DRAFT (wording; the price is Blake's decision)
+    a: `${PRICE.headline} ${PRICE.included} ${PRICE.term} ${PRICE.audit} There's nothing to sign to get it, and you see where you stand before you pay for anything.`,
+  },
+  {
+    q: "Is there a contract?",
+    // DRAFT (wording; month to month is Blake's decision, and /terms v2.0 says so)
+    a: `No long contract. ${PRICE.term} Tell us by email, and the cancellation takes effect at the end of the month you've already paid for. Your listing, your site and every page we wrote stay yours.`,
+  },
+  {
+    q: "Who will I be dealing with?",
+    // DRAFT
+    a: `${FOUNDER.name}, who runs Devize from ${FOUNDER.town}. He runs every audit himself. Write to him at ${EMAIL}.`,
   },
   {
     q: "What is AEO, and how is it different from SEO?",
@@ -22,12 +43,18 @@ export const faqs = [
     a: "We do it. There's no software to learn. Once you've added us as a manager on your Google listing, there's nothing for you to log into. Each month you get the new Google map and a short note on what we did. We don't track AI answers yet. We'll ask you for photos of your work and the few answers only you know, and you sign off on how we reply to reviews before anything goes out in your name.",
   },
   {
-    q: "What does it cost?",
-    a: "A flat monthly fee. We go over it after you've seen your audit, so you know what you'd be paying for. The audit is free, and there's nothing to sign.",
-  },
-  {
     q: "Do I need a new website?",
     a: "Probably not. We work with the site you have: a useful page for each service and each town you serve, and the same phone and address as your listing. If your site can't be edited or doesn't work on a phone, the audit will show it, and we'll talk it through.",
+  },
+  {
+    q: "Do you need access to my website?",
+    // DRAFT
+    a: "Yes, for the monthly work, because the service and town pages go on your site. Either you give us a login, or we write the pages and send them to the person who runs your site to put up. The free audit needs no access at all: it reads what anyone can see.",
+  },
+  {
+    q: "What goes on a service or town page?",
+    // DRAFT
+    a: "One service, or one town, per page. What you do there and for whom, the questions people ask before they call, photos of real jobs, and the same name, phone and address as your Google listing. Each page is written for that service or town. We never copy one page and swap the town name.",
   },
   {
     q: "Do you need access to my Google listing?",

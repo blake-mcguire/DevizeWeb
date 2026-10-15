@@ -4,8 +4,10 @@ import { Button } from "@/components/ui/button";
 
 const navLinks = [
   { href: "/#how-it-works", label: "How it works" },
+  { href: "/#sample", label: "Sample audit" },
   { href: "/#services", label: "Local SEO" },
   { href: "/#aeo", label: "AEO" },
+  { href: "/#price", label: "Price" },
   { href: "/#faq", label: "FAQ" },
 ];
 
@@ -21,7 +23,7 @@ export default function SiteHeader() {
           <Logo className="h-9 w-auto" />
         </Link>
 
-        <nav className="hidden md:flex items-center gap-7">
+        <nav className="hidden lg:flex items-center gap-6">
           {navLinks.map((link) => (
             <Link
               key={link.href}
@@ -34,7 +36,9 @@ export default function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <Button href="/#contact" size="sm">
+          {/* A plain <a> to the hero form's slot: on a phone it opens the
+              form in place (hashchange and :target, see audit-form.tsx). */}
+          <Button href="/#audit" size="sm" native>
             Free map audit
           </Button>
         </div>

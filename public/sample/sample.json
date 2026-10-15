@@ -1,0 +1,449 @@
+{
+  "label": "Real scan, names removed",
+  "what_this_is": "A real Google Listing and Map Audit of one Houston-area dental practice, run on 12 October 2026 by the same code that builds every audit. The practice's name, address, phone, website, email and owner, and every other practice's name, are removed. Ratings, review counts (rounded to the nearest 10), search counts and check results are as measured.",
+  "practice": {
+    "name": "Sample Dental Practice",
+    "trade": "dentist (general practice, not a specialist)",
+    "area": "Houston area",
+    "stars": 5.0,
+    "reviews": 90,
+    "reviews_rounded_to": 10,
+    "listing_score": 62,
+    "listing_score_of": 100
+  },
+  "scan": {
+    "date": "12 October 2026",
+    "when": "Mon 12 Oct, 10:31 am to 12:59 pm, Houston time",
+    "device": "phone",
+    "spots": 79,
+    "radius_miles": 10,
+    "spacing_miles": 2,
+    "phrases": [
+      "dentist",
+      "dentist near me"
+    ],
+    "searches_total": 158,
+    "demand_line": "Google counts about 128,630 searches a month for a dentist in the Houston area."
+  },
+  "headline": {
+    "top3": 0,
+    "of": 158,
+    "in_first_twenty": 0,
+    "sentence": "In the top three at 0 of 158 searches within 10 miles, and not in the first twenty at any of them.",
+    "leader": "Practice A",
+    "leader_top3": 35,
+    "leader_sentence": "Practice A was in the top three for 35 of the same 158.",
+    "contrast": "5.0 stars on 90 reviews, higher than all three practices that came up instead.",
+    "email_diagnosis": "Here is the part that does not add up. You are rated 5.0 stars. That is higher than all three of the practices above you, and you still do not come up in the top three."
+  },
+  "per_phrase": [
+    {
+      "phrase": "dentist",
+      "spots": 79,
+      "top3": 0,
+      "fourth_to_twentieth": 0,
+      "not_in_first_twenty": 79
+    },
+    {
+      "phrase": "dentist near me",
+      "spots": 79,
+      "top3": 0,
+      "fourth_to_twentieth": 0,
+      "not_in_first_twenty": 79
+    }
+  ],
+  "map": {
+    "files": {
+      "1x": "sample-map.png",
+      "2x": "sample-map@2x.png"
+    },
+    "size_css_px": [
+      560,
+      450
+    ],
+    "phrase_drawn": "dentist",
+    "pins": 79,
+    "green_top3": 0,
+    "yellow_4_to_20": 0,
+    "grey_not_in_first_20": 79,
+    "legend": "Each pin is one real Google search on a phone, two miles apart, within 10 miles of the practice (purple). Green: in the top three. Yellow: fourth to twentieth. Grey: not in the first twenty.",
+    "basemap": "none: the street map, scale bar and credit are removed so the pin pattern cannot place the practice"
+  },
+  "who_came_up": {
+    "phrase": "dentist",
+    "of": 79,
+    "note": "The three practices that held the top three most often near the sample practice, on the phrase the map draws.",
+    "rows": [
+      {
+        "practice": "Practice A",
+        "is_sample": false,
+        "stars": 4.8,
+        "reviews": 620,
+        "top3": 19,
+        "of": 79,
+        "top3_text": "19 of 79"
+      },
+      {
+        "practice": "Practice B",
+        "is_sample": false,
+        "stars": 4.9,
+        "reviews": 750,
+        "top3": 11,
+        "of": 79,
+        "top3_text": "11 of 79"
+      },
+      {
+        "practice": "Practice C",
+        "is_sample": false,
+        "stars": 4.9,
+        "reviews": 550,
+        "top3": 8,
+        "of": 79,
+        "top3_text": "8 of 79"
+      },
+      {
+        "practice": "Sample Dental Practice",
+        "is_sample": true,
+        "stars": 5.0,
+        "reviews": 90,
+        "top3": 0,
+        "of": 79,
+        "top3_text": "0 of 79"
+      }
+    ]
+  },
+  "who_came_up_both_phrases": {
+    "phrases": [
+      "dentist",
+      "dentist near me"
+    ],
+    "of": 158,
+    "note": "The audit PDF's own table: top-three counts over both phrases.",
+    "rows": [
+      {
+        "practice": "Practice A",
+        "stars": 4.8,
+        "reviews": 620,
+        "top3": 35,
+        "of": 158
+      },
+      {
+        "practice": "Practice B",
+        "stars": 4.9,
+        "reviews": 750,
+        "top3": 18,
+        "of": 158
+      },
+      {
+        "practice": "Practice C",
+        "stars": 4.9,
+        "reviews": 550,
+        "top3": 16,
+        "of": 158
+      },
+      {
+        "practice": "Sample Dental Practice",
+        "stars": 5.0,
+        "reviews": 90,
+        "top3": 0,
+        "of": 158,
+        "is_sample": true
+      }
+    ]
+  },
+  "reach": [
+    {
+      "miles": "0 to 2 miles",
+      "searches": 8,
+      "top3": 0
+    },
+    {
+      "miles": "2 to 4 miles",
+      "searches": 18,
+      "top3": 0
+    },
+    {
+      "miles": "4 to 6 miles",
+      "searches": 32,
+      "top3": 0
+    },
+    {
+      "miles": "6 to 8 miles",
+      "searches": 42,
+      "top3": 0
+    },
+    {
+      "miles": "8 to 10 miles",
+      "searches": 58,
+      "top3": 0
+    }
+  ],
+  "checks_summary": "4 of the 24 things we checked on your listing and site show a gap, and 1 passes in part.",
+  "site_section_checks": [
+    {
+      "check": "In the top three on the map",
+      "result": "fail",
+      "finding": "0 of 158 searches. Not in the first twenty at any of them.",
+      "audit_label": "You come up in the top three"
+    },
+    {
+      "check": "Rated 4.5 stars or better",
+      "result": "pass",
+      "finding": "5.0 stars",
+      "audit_label": "Rated 4.5 or better"
+    },
+    {
+      "check": "20 or more reviews",
+      "result": "pass",
+      "finding": "90 reviews",
+      "audit_label": "20 or more reviews"
+    },
+    {
+      "check": "Reviews like the practices that come up instead",
+      "result": "fail",
+      "finding": "90 reviews. The three practices that came up most show 550 to 750.",
+      "audit_label": "Reviews like the leading practices"
+    },
+    {
+      "check": "Answers its reviews",
+      "result": "partial",
+      "finding": "Replied to 34 of the last 50.",
+      "audit_label": "You answer your reviews"
+    },
+    {
+      "check": "Answers inside a week",
+      "result": "fail",
+      "finding": "Replies land about 10 days after the review.",
+      "audit_label": "You answer them inside a week"
+    },
+    {
+      "check": "Posts on the Google listing",
+      "result": "fail",
+      "finding": "0 posts on the listing.",
+      "audit_label": "You post on your listing"
+    },
+    {
+      "check": "Service and town pages on the website",
+      "result": "pass",
+      "finding": "19 of the 61 site pages we read name a service; 1 names a nearby town.",
+      "audit_label": "Service and town pages on your site"
+    }
+  ],
+  "all_checks": [
+    {
+      "check": "You come up in the top three",
+      "result": "fail"
+    },
+    {
+      "check": "You answer them inside a week",
+      "result": "fail"
+    },
+    {
+      "check": "You post on your listing",
+      "result": "fail"
+    },
+    {
+      "check": "Reviews like the leading practices",
+      "result": "fail"
+    },
+    {
+      "check": "You answer your reviews",
+      "result": "partial"
+    },
+    {
+      "check": "The right category on your listing",
+      "result": "pass"
+    },
+    {
+      "check": "Rated 4.5 or better",
+      "result": "pass"
+    },
+    {
+      "check": "Your listing is verified",
+      "result": "pass"
+    },
+    {
+      "check": "Extra categories, like the leading practices",
+      "result": "pass"
+    },
+    {
+      "check": "20 or more reviews",
+      "result": "pass"
+    },
+    {
+      "check": "A review in the last 30 days",
+      "result": "pass"
+    },
+    {
+      "check": "As many photos as the typical Houston practice",
+      "result": "pass"
+    },
+    {
+      "check": "Hours set for all seven days",
+      "result": "pass"
+    },
+    {
+      "check": "A photo of your own in the last year",
+      "result": "pass"
+    },
+    {
+      "check": "Your listing says what you do",
+      "result": "pass"
+    },
+    {
+      "check": "No question left unanswered",
+      "result": "pass"
+    },
+    {
+      "check": "The listing opens a working site",
+      "result": "pass"
+    },
+    {
+      "check": "The site fits a phone",
+      "result": "pass"
+    },
+    {
+      "check": "Stars like the leading practices",
+      "result": "pass"
+    },
+    {
+      "check": "Photos like the leading practices",
+      "result": "pass"
+    },
+    {
+      "check": "Your site shows your listing's number",
+      "result": "pass"
+    },
+    {
+      "check": "Home page names your work and town",
+      "result": "pass"
+    },
+    {
+      "check": "Service and town pages on your site",
+      "result": "pass"
+    },
+    {
+      "check": "A review every month",
+      "result": "pass"
+    }
+  ],
+  "listing_points": [
+    {
+      "part": "You come up in the top three",
+      "earned": 0.0,
+      "possible": 30
+    },
+    {
+      "part": "The right category on your listing",
+      "earned": 10,
+      "possible": 10
+    },
+    {
+      "part": "Extra categories, like the leading practices",
+      "earned": 6,
+      "possible": 6
+    },
+    {
+      "part": "Your listing is verified",
+      "earned": 8,
+      "possible": 8
+    },
+    {
+      "part": "Rated 4.5 or better",
+      "earned": 10,
+      "possible": 10
+    },
+    {
+      "part": "20 or more reviews",
+      "earned": 6,
+      "possible": 6
+    },
+    {
+      "part": "A review in the last 30 days",
+      "earned": 6,
+      "possible": 6
+    },
+    {
+      "part": "You answer your reviews",
+      "earned": 5.0,
+      "possible": 10
+    },
+    {
+      "part": "You answer them inside a week",
+      "earned": 0.0,
+      "possible": 2
+    },
+    {
+      "part": "As many photos as the typical Houston practice",
+      "earned": 4,
+      "possible": 4
+    },
+    {
+      "part": "A photo of your own in the last year",
+      "earned": 2,
+      "possible": 2
+    },
+    {
+      "part": "Hours set for all seven days",
+      "earned": 3,
+      "possible": 3
+    },
+    {
+      "part": "Your listing says what you do",
+      "earned": 1,
+      "possible": 1
+    },
+    {
+      "part": "You post on your listing",
+      "earned": 0.0,
+      "possible": 1
+    },
+    {
+      "part": "No question left unanswered",
+      "earned": 1,
+      "possible": 1
+    }
+  ],
+  "recommended_fixes": [
+    {
+      "fix": "The leading practices near you have more reviews",
+      "how": "Ask for a review after every visit, the same day."
+    },
+    {
+      "fix": "Reviews answered late",
+      "how": "Reply to every review within a week, in your own words. Never confirm they are a patient or mention their care."
+    },
+    {
+      "fix": "No posts on the profile",
+      "how": "One post a month, with what is new at the practice."
+    }
+  ],
+  "anonymisation": {
+    "removed": [
+      "practice name (now 'Sample Dental Practice')",
+      "street address, suite and ZIP",
+      "town (now 'Houston area')",
+      "phone number",
+      "website, booking link, contact page and social links",
+      "email address",
+      "the owner's name (it was in the listing description)",
+      "every other practice's name (now 'Practice A', 'B', 'C')",
+      "the nearby town named by one site page",
+      "the street map under the pins, its scale bar and its credit"
+    ],
+    "kept": [
+      "star ratings",
+      "review counts, rounded to the nearest 10",
+      "search counts and positions",
+      "every check result",
+      "the scan date and time",
+      "photo counts and categories"
+    ],
+    "checked": "every check result, count and score was compared before and after anonymising: identical"
+  },
+  "pdf": {
+    "file": "sample-audit.pdf",
+    "pages": 3,
+    "made_by": "the reply funnel's own audit build (strategy_document.funnel_pack), from an anonymised copy of the store"
+  }
+}

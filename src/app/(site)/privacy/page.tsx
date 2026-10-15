@@ -33,10 +33,11 @@ export default function PrivacyPage() {
 
       <H2>Information We Collect</H2>
       <P>
-        <strong>When you ask for an audit on this website:</strong>{" "}your name,
-        business name, email, type of business, town, and the search you want
-        to show up for, if you add it. We also keep the time of the request and
-        your browser&apos;s user agent.
+        <strong>When you ask for an audit on this website:</strong>{" "}your
+        business name, town and email, and, if you add them, your name and the
+        search you want to show up for. We also keep the time of the request,
+        which of the page&apos;s two forms you used, and your browser&apos;s
+        user agent.
       </P>
       <P>
         <strong>On a Devize audit page:</strong>{" "}your name, your mobile number,

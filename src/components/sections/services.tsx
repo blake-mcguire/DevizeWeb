@@ -1,3 +1,5 @@
+import { PRICE, WONT_DO } from "@/lib/offer-copy";
+
 type Pillar = {
   id?: string;
   number: string;
@@ -6,12 +8,15 @@ type Pillar = {
   body: string;
   items: string[];
   footnote?: string;
+  /** A small tag under the title. */
+  tag?: string;
 };
 
 const pillars: Pillar[] = [
   {
     number: "01",
     title: "Local SEO",
+    tag: `Included in the ${PRICE.display} monthly fee`,
     summary: "Show up on the map",
     body:
       "Google picks the names on its map by how well a listing matches the search, how close it is, and how well known the business is. We work on the parts you can change, starting with your Google listing, your Google Business Profile.",
@@ -36,6 +41,7 @@ const pillars: Pillar[] = [
     ],
     footnote:
       "Nobody outside these companies sees exactly how they choose. We work on what they read.",
+    tag: `Included in the ${PRICE.display} monthly fee`,
   },
 ];
 
@@ -80,6 +86,11 @@ export default function Services() {
               <p className="mt-1 text-sm text-[var(--color-ink-muted)] uppercase tracking-[0.12em]">
                 {p.summary}
               </p>
+              {p.tag && (
+                <p className="mt-3 inline-flex self-start items-center gap-1.5 rounded-full border border-[var(--color-brand)]/25 bg-[var(--color-brand)]/[0.07] px-2.5 py-0.5 text-xs font-medium text-[var(--color-brand)]">
+                  {p.tag}
+                </p>
+              )}
 
               <p className="mt-5 text-[0.95rem] text-[var(--color-ink-soft)] leading-relaxed">
                 {p.body}
@@ -106,10 +117,32 @@ export default function Services() {
           ))}
         </div>
 
-        <p className="mt-8 text-center text-sm text-[var(--color-ink-muted)] max-w-2xl mx-auto">
-          We won&apos;t promise a guaranteed spot or results in weeks, and we
-          won&apos;t do anything that breaks Google&apos;s rules for listings.
-        </p>
+        {/* What we won't do: the line that used to sit small and grey under
+            the cards, now a block a careful owner can't miss. Wording in
+            src/lib/offer-copy.ts (DRAFT). */}
+        <div id="wont-do" className="mt-5 scroll-mt-24 rounded-2xl border border-[var(--color-ink)]/15 bg-[var(--color-surface-raised)] p-7 md:p-10">
+          <h3 className="font-[family-name:var(--font-display)] text-2xl md:text-[1.75rem] text-[var(--color-ink)] font-medium tracking-tight">
+            What we won&apos;t do
+          </h3>
+          <ul className="mt-6 grid gap-x-10 gap-y-5 md:grid-cols-2 lg:grid-cols-3">
+            {WONT_DO.map((w) => (
+              <li key={w.title} className="flex gap-3">
+                <span
+                  aria-hidden="true"
+                  className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-[#B3261E]/30 bg-[#B3261E]/[0.07] text-[#B3261E]"
+                >
+                  <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
+                    <path d="M2.5 2.5l7 7m0-7l-7 7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+                  </svg>
+                </span>
+                <div>
+                  <p className="font-medium text-[var(--color-ink)] leading-snug">{w.title}</p>
+                  <p className="mt-1 text-sm text-[var(--color-ink-soft)] leading-relaxed">{w.detail}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
     </section>
   );

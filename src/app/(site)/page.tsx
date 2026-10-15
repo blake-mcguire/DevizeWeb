@@ -2,11 +2,15 @@ import type { Metadata } from "next";
 import Hero from "@/components/sections/hero";
 import Problem from "@/components/sections/problem";
 import HowItWorks from "@/components/sections/how-it-works";
+import SampleAudit from "@/components/sections/sample-audit";
 import Services from "@/components/sections/services";
+import Price from "@/components/sections/price";
 import WhoItsFor from "@/components/sections/who-its-for";
 import Faq, { faqs } from "@/components/sections/faq";
 import Contact from "@/components/sections/contact";
+import { FounderSection } from "@/components/founder";
 import { JsonLd } from "@/components/json-ld";
+import { PRICE } from "@/lib/offer-copy";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/" },
@@ -72,9 +76,25 @@ const serviceSchemas = [
     name: "Local SEO and AEO",
     serviceType: "Local search engine optimization",
     description:
-      "Monthly work on your Google Business Profile, reviews, service and town pages, listings across directories, and facts AI assistants can read, with the same map searches rerun each month.",
+      "Monthly work on your Google Business Profile, reviews, service and town pages, listings across directories, and facts AI assistants can read, with the same map searches rerun each month. Month to month.",
     provider: { "@id": ORG_ID },
     areaServed: US,
+    // $750 a month, flat (Blake, 2026-10-15). The visible price card says the
+    // same; both read PRICE in src/lib/offer-copy.ts.
+    offers: {
+      "@type": "Offer",
+      url: `${SITE_URL}/#price`,
+      price: String(PRICE.amount),
+      priceCurrency: PRICE.currency,
+      priceSpecification: {
+        "@type": "UnitPriceSpecification",
+        price: String(PRICE.amount),
+        priceCurrency: PRICE.currency,
+        unitCode: "MON",
+        unitText: "month",
+        referenceQuantity: { "@type": "QuantitativeValue", value: 1, unitCode: "MON" },
+      },
+    },
   },
 ];
 
@@ -105,9 +125,12 @@ export default function Home() {
       <Hero />
       <Problem />
       <HowItWorks />
+      <SampleAudit />
       <Services />
+      <Price />
       <WhoItsFor />
       <Faq />
+      <FounderSection />
       <Contact />
       <JsonLd
         data={[organizationSchema, ...serviceSchemas, websiteSchema, faqSchema]}

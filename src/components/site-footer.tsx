@@ -6,8 +6,10 @@ const footerNav = [
     heading: "The service",
     links: [
       { href: "/#how-it-works", label: "How it works" },
+      { href: "/#sample", label: "Sample audit" },
       { href: "/#services", label: "Local SEO" },
       { href: "/#aeo", label: "AEO" },
+      { href: "/#price", label: "Price" },
       { href: "/#faq", label: "FAQ" },
       { href: "/#contact", label: "Free map audit" },
     ],

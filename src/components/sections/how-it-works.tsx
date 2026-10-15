@@ -1,4 +1,7 @@
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import { MARKS } from "@/lib/marks";
+import { SAMPLE_LABEL } from "@/components/sections/sample-audit";
 
 const steps = [
   {
@@ -17,13 +20,6 @@ const steps = [
     body: "Each month we rerun the same searches from the same spots and send you the new map, so you can see what moved.",
   },
 ];
-
-// The same three labels and colours the audit page (/a/<token>) uses.
-const MARKS = [
-  { key: "top3", label: "In the top three", color: "#2E9E5B" },
-  { key: "mid", label: "Fourth to twentieth", color: "#E0A500" },
-  { key: "absent", label: "Nowhere in the first twenty", color: "#8E8A80" },
-] as const;
 
 // The audit's 21 checks (completeness.CHECKS in the audit pipeline): 1 + 15 + 5.
 // Add none and drop none without changing the audit itself.
@@ -211,7 +207,7 @@ export default function HowItWorks() {
             </div>
           </div>
 
-          <MapGrid />
+          <SamplePage />
         </div>
       </div>
     </section>
@@ -219,71 +215,33 @@ export default function HowItWorks() {
 }
 
 /**
- * An abstract grid of search spots around one business, each dot in one of
- * the three mark colours. Not a real or invented business: no names, no
- * place, no numbers.
+ * Page one of the real sample audit (names removed), as the picture of what
+ * the audit looks like. It links to the sample section, which has the map,
+ * the counts and the PDF. Replaced the abstract "Illustration" grid on
+ * 2026-10-15, now that a real scan can be shown.
  */
-function MapGrid() {
-  const cols = 7;
-  const rows = 7;
-  const gap = 40;
-  const pad = 30;
-  const cx = (cols - 1) / 2;
-  const cy = (rows - 1) / 2;
-  const size = pad * 2 + gap * (cols - 1);
-
-  const dots: { x: number; y: number; color: string }[] = [];
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
-      // Closer to the business means more likely to come up near the top,
-      // nudged off-centre so the pattern does not look drawn with a compass.
-      const d = Math.hypot(c - cx - 0.6, (r - cy + 0.4) * 1.15);
-      const mark = d < 1.6 ? MARKS[0] : d < 3.1 ? MARKS[1] : MARKS[2];
-      dots.push({ x: pad + c * gap, y: pad + r * gap, color: mark.color });
-    }
-  }
-
+function SamplePage() {
   return (
-    <figure className="mx-auto w-full max-w-xs md:max-w-none">
-      <svg
-        viewBox={`0 0 ${size} ${size}`}
-        aria-hidden="true"
-        className="block w-full h-auto rounded-xl bg-[var(--color-surface-raised)] border border-[var(--color-border)]"
+    // Not on a phone: the sample section, with the same audit, comes next.
+    <figure className="hidden md:block w-full">
+      <a
+        href="#sample"
+        className="group block overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-raised)] shadow-[0_18px_40px_-24px_rgba(28,42,57,0.35)] transition-transform hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brand)]"
       >
-        {/* A plain map shape: two soft roads and a river, nothing real. */}
-        <path
-          d={`M0 ${size * 0.62} C ${size * 0.3} ${size * 0.55}, ${size * 0.55} ${size * 0.75}, ${size} ${size * 0.68}`}
-          stroke="rgba(28,42,57,0.08)"
-          strokeWidth="14"
-          fill="none"
+        <Image
+          src="/sample/previews/sample-audit-page-1@2x.png"
+          width={1632}
+          height={2112}
+          sizes="(min-width: 768px) 380px, 90vw"
+          alt="Page one of the sample audit: the listing score, the searches counted, the map of every search spot, and a table of the practice against the three that came up instead."
+          className="block w-full h-auto"
         />
-        <path
-          d={`M${size * 0.38} 0 C ${size * 0.42} ${size * 0.35}, ${size * 0.3} ${size * 0.6}, ${size * 0.36} ${size}`}
-          stroke="rgba(28,42,57,0.06)"
-          strokeWidth="10"
-          fill="none"
-        />
-        <path
-          d={`M${size} ${size * 0.12} C ${size * 0.75} ${size * 0.2}, ${size * 0.7} ${size * 0.05}, ${size * 0.5} 0`}
-          stroke="rgba(90,31,191,0.08)"
-          strokeWidth="12"
-          fill="none"
-        />
-        {dots.map((d, i) => (
-          <circle key={i} cx={d.x} cy={d.y} r="9" fill={d.color} fillOpacity="0.9" />
-        ))}
-        {/* The business itself */}
-        <circle
-          cx={pad + (cx + 0.6) * gap}
-          cy={pad + (cy - 0.4) * gap}
-          r="7"
-          fill="#FFFFFF"
-          stroke="#5A1FBF"
-          strokeWidth="3"
-        />
-      </svg>
-      <figcaption className="mt-3 text-center text-xs uppercase tracking-[0.14em] text-[var(--color-ink-muted)]">
-        Illustration
+      </a>
+      <figcaption className="mt-3 text-center text-sm text-[var(--color-ink-soft)]">
+        Page one of a real audit. {SAMPLE_LABEL}.{" "}
+        <a href="#sample" className="font-medium text-[var(--color-brand)] underline underline-offset-4 decoration-[var(--color-brand)]/30 hover:decoration-[var(--color-brand)]">
+          See the sample
+        </a>
       </figcaption>
     </figure>
   );

@@ -25,6 +25,17 @@
   --color-ink-muted: #5F6978;
 }
 
+/* The hero's audit form on a phone starts closed behind one button
+   (audit-form.tsx). Without JavaScript that button is a plain link to the
+   form's slot, and these two rules open the form in place when the slot is
+   the URL's target. With JavaScript the component does the same with state. */
+.audit-slot:target .audit-body {
+  display: block;
+}
+.audit-slot:target .audit-open {
+  display: none;
+}
+
 @theme inline {
   --color-ink: var(--color-ink);
   --color-ink-soft: var(--color-ink-soft);

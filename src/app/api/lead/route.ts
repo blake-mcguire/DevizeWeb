@@ -15,12 +15,19 @@ import { allow, clientIp } from "@/lib/rate-limit";
  * on the host it posted to.
  */
 
-const FIELDS = ["name", "company", "email", "trade", "town", "callVolume", "message"] as const;
-// callVolume is no longer on the form (2026-10-15). Kept so an old cached
-// page that still sends it does not lose the value.
+/**
+ * The form's fields (2026-10-15, pass 2): business name, town and email are
+ * required; your name and the search you want to show up for are optional.
+ * No phone field. `trade` and `callVolume` are no longer on the form; they are
+ * kept so an old cached page that still sends them does not lose the value.
+ */
+const FIELDS = ["company", "town", "email", "name", "message", "trade", "callVolume"] as const;
 
-/** Required on the form, so required here too. */
-const REQUIRED = ["name", "company", "email", "town"] as const;
+/** Required on the form, so required here too. Change the two together. */
+const REQUIRED = ["company", "town", "email"] as const;
+
+/** Which form sent it: the hero's or the contact section's. Anything else is dropped. */
+const SOURCES = new Set(["hero", "contact"]);
 
 /** The hidden honeypot input. People never see it; a bot that fills it is dropped. */
 const HONEYPOT = "website";
@@ -85,11 +92,13 @@ export async function POST(request: NextRequest) {
   }
   if (REQUIRED.some((f) => !lead[f])) return fail("fields", 400);
   if (!validEmail(lead.email)) return fail("email", 400);
+  const source = typeof body.source === "string" && SOURCES.has(body.source) ? body.source : undefined;
 
   const now = new Date();
   const record = {
     v: 1,
     ...lead,
+    ...(source ? { source } : {}),
     received_at: now.toISOString(),
     user_agent: (request.headers.get("user-agent") ?? "").slice(0, 400),
   };

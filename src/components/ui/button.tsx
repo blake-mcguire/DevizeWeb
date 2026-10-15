@@ -35,6 +35,12 @@ const sizes: Record<Size, string> = {
 type LinkButtonProps = CommonProps &
   Omit<ComponentProps<typeof Link>, "className" | "children"> & {
     href: string;
+    /**
+     * Render a plain <a> instead of next/link. For in-page anchors that must
+     * set the URL's :target and fire hashchange (the header's audit button
+     * opens the hero form that way); next/link's own scroll does neither.
+     */
+    native?: boolean;
   };
 
 type NativeButtonProps = CommonProps &
@@ -54,7 +60,14 @@ export function Button(props: LinkButtonProps | NativeButtonProps) {
   const classes = cn(base, variants[variant], sizes[size], className);
 
   if ("href" in rest && rest.href) {
-    const { href, ...linkRest } = rest as LinkButtonProps;
+    const { href, native, ...linkRest } = rest as LinkButtonProps;
+    if (native) {
+      return (
+        <a href={href} className={classes}>
+          {children}
+        </a>
+      );
+    }
     return (
       <Link href={href} className={classes} {...linkRest}>
         {children}

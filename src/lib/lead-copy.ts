@@ -7,7 +7,7 @@
 export const LEAD_THANKS = "Thanks. We'll run your searches and email your audit to you.";
 
 export const LEAD_ERRORS = {
-  fields: "Please fill in your name, business name, email and town.",
+  fields: "Please fill in your business name, town and email.",
   email: "Please provide a valid email.",
   rate: "Too many requests. Please try again in a few minutes, or email admin@devize.ai.",
 } as const;
