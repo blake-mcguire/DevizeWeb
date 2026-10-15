@@ -74,6 +74,12 @@ export default function TermsPage() {
       <P>
         3.5 <strong>Month to month, and cancelling.</strong>{" "}The monthly service runs month to month, with no minimum term. Each month of service starts on the same day of the month as the first, or on the last day of a shorter month. The flat monthly fee is charged at the start of each month of service, in advance. You or Devize can cancel at any time by email (section 7.3). A cancellation takes effect at the end of the month already paid for: the work continues until then, no further fee is charged after it, and the fee for that month is not refunded in part. When the service ends, you remove Devize as a manager of your Google Business Profile and from your website (or Devize removes itself), and everything Devize made for you, such as pages, posts and changes to your listing, stays yours.
       </P>
+      <P>
+        3.6 <strong>Ownership and handover.</strong>{" "}{/* DRAFT (2026-10-15): Blake and counsel to confirm */}Once paid for, the pages, posts, photos you supply, text and other content Devize creates for your business are yours. Devize publishes them only to places you own or control (your Google Business Profile, your website, or hosting and code accounts in your name) and never in an account you would have to keep paying Devize for. When the service ends, Devize hands over every page and file it made for you before removing its access.
+      </P>
+      <P>
+        3.7 <strong>Optional website rebuild.</strong>{" "}{/* DRAFT (2026-10-15): Blake and counsel to confirm, including when the fee is paid and the refund rule */}If your Order includes it, Devize rebuilds your website for the one-time fee in the Order. The site is built on your domain, in hosting and code accounts in your name, with no hosting fee charged by Devize. The site made for your business is yours once paid for; the underlying template components are licensed to you, without a time limit, for your own business. If the monthly service ends, the site keeps running in your account and Devize hands over its files.
+      </P>
 
       <H2 id="s4">4. No guarantee of results</H2>
       <P>

@@ -1,4 +1,4 @@
-import { EMAIL, FOUNDER, PRICE } from "@/lib/offer-copy";
+import { EMAIL, FOUNDER, PRICE, REBUILD } from "@/lib/offer-copy";
 
 // Feeds both the visible list below and the FAQPage JSON-LD on the home page,
 // so the structured data always matches what a visitor reads.
@@ -21,6 +21,11 @@ export const faqs = [
     q: "Is there a contract?",
     // DRAFT (wording; month to month is Blake's decision, and /terms v2.0 says so)
     a: `No long contract. ${PRICE.term} Tell us by email, and the cancellation takes effect at the end of the month you've already paid for. Your listing, your site and every page we wrote stay yours.`,
+  },
+  {
+    q: "What happens if I cancel?",
+    // DRAFT (wording; "keep everything" is Blake's promise, 2026-10-15)
+    a: `${PRICE.keep} The work runs to the end of the month you've paid for. Your Google listing, your reviews and your site were always in your name, and if we rebuilt your site, it keeps running in your own account with no fee. We hand over every page and file before we remove our access.`,
   },
   {
     q: "Who will I be dealing with?",
@@ -47,7 +52,8 @@ export const faqs = [
   },
   {
     q: "Do I need a new website?",
-    a: "Probably not. We work with the site you have: a useful page for each service and town you serve, built up over the months (up to 2 a month), and the same phone and address as your listing. If your site can't be edited or doesn't work on a phone, the audit will show it, and we'll talk it through.",
+    // DRAFT (wording; the $997 add-on and its ownership are Blake's decisions, 2026-10-15)
+    a: `Probably not. We work with the site you have: a useful page for each service and town you serve, built up over the months (up to 2 a month), and the same phone and address as your listing. If your site is slow, hard to edit or doesn't work on a phone, we can rebuild it for ${REBUILD.display} one time, on your own domain and in accounts in your name. There's no hosting fee, and it stays yours if you cancel.`,
   },
   {
     q: "Do you need access to my website?",

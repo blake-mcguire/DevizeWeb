@@ -4,6 +4,6 @@
   "_offerCopyConfirmed": "Blake has confirmed or changed every line marked DRAFT in src/lib/offer-copy.ts (the monthly work quantities, the price card's why line, the founder chip and bio, What we won't do) and in src/components/sections/faq.tsx.",
   "termsConfirmed": false,
   "_termsConfirmed": "Blake and counsel have confirmed the DRAFT clauses of /terms v2.0 (3.1, 3.2, 3.4, 3.5) in src/app/(site)/terms/page.tsx, and the Order template lists the same monthly work and fee as the price card.",
-  "sampleSourceSuppressed": false,
+  "sampleSourceSuppressed": true,
   "_sampleSourceSuppressed": "The practice the public sample (public/sample/) is built from can never be emailed by the outreach pipeline: its website domain and every address it has are suppressed in the live store, and the sample pass's ship_gate.py prints PASS. Any new sample must clear the same gate before this goes back to true."
 }

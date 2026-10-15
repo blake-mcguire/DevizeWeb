@@ -33,8 +33,31 @@ export const PRICE = {
   audit: "The audit is free.",
   /** One line by the call to action. */
   ctaLine: "If you want the monthly work: $750 a month, flat. Month to month. Cancel any time.",
+  /** Blake, 2026-10-15: "Cancel any time and keep everything we built." Not draft. */
+  keep: "Cancel any time and keep everything we built: your listing, your reviews and every page we write.",
+  /** The same promise for the price card, which already says "Cancel any time" on the line above. */
+  keepShort: "Keep everything we built if you leave: your listing, your reviews and every page we write.",
   // DRAFT: why the price is what it is, in plain words (research: say why, never call it "the market rate").
   why: "One focused job: your Google listing, your map, your site's pages and the facts AI assistants read. No software to learn and no long contract.",
+} as const;
+
+// ---------------------------------------------------------------------------
+// Optional website rebuild (Blake, 2026-10-15: "add on website rebuild for 997")
+// ---------------------------------------------------------------------------
+
+// The price and ownership are Blake's decisions; the wording is DRAFT. Built on Devize's
+// template, in accounts in the client's name (their domain, a free hosting account they
+// own), so there is no hosting fee and nothing stops working if they cancel.
+// Scope: Devize Audit Scraper/documents/research/site-template-scope-2026-10-15.md.
+export const REBUILD = {
+  amount: 997,
+  currency: "USD",
+  display: "$997",
+  title: "Optional: website rebuild",
+  priceLine: "$997 one time. You own it.",
+  // DRAFT
+  detail:
+    "A fast new site on your own domain: a page for each service and town you serve, your own photos, and the same name, phone and address as your Google listing. Built in accounts in your name, with no hosting fee. If you cancel, it stays up and it stays yours.",
 } as const;
 
 // ---------------------------------------------------------------------------
@@ -108,7 +131,7 @@ export const WONT_DO: { title: string; detail: string }[] = [
   },
   {
     title: "Nothing that isn't yours", // DRAFT
-    detail: "You own your Google listing and your site, and every page we write for it stays yours.", // DRAFT
+    detail: "You own your Google listing and your site. Cancel any time and keep everything we built, every page included. Nothing we make lives in an account you'd have to keep paying for.", // DRAFT
   },
   {
     title: "Nothing that risks a suspension", // DRAFT

@@ -10,7 +10,7 @@ import Faq, { faqs } from "@/components/sections/faq";
 import Contact from "@/components/sections/contact";
 import { FounderSection } from "@/components/founder";
 import { JsonLd } from "@/components/json-ld";
-import { PRICE } from "@/lib/offer-copy";
+import { PRICE, REBUILD } from "@/lib/offer-copy";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/" },
@@ -95,6 +95,17 @@ const serviceSchemas = [
         referenceQuantity: { "@type": "QuantitativeValue", value: 1, unitCode: "MON" },
       },
     },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name: "Website rebuild",
+    serviceType: "Website design for local service businesses",
+    description:
+      "A fast new website on the client's own domain, built in accounts in the client's name, with a page for each service and town served. One-time fee; no hosting fee; the site stays the client's if they cancel.",
+    provider: { "@id": ORG_ID },
+    areaServed: US,
+    offers: { "@type": "Offer", url: `${SITE_URL}/#rebuild`, price: String(REBUILD.amount), priceCurrency: REBUILD.currency },
   },
 ];
 

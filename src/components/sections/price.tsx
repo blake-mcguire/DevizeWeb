@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { FounderChip } from "@/components/founder";
-import { MONTHLY_WORK, PRICE } from "@/lib/offer-copy";
+import { MONTHLY_WORK, PRICE, REBUILD } from "@/lib/offer-copy";
 
 /**
  * The price card and what it buys (2026-10-15, Blake: show the price). Every
@@ -45,6 +45,7 @@ export default function Price() {
                 {[
                   `Flat. ${PRICE.included}`,
                   PRICE.term,
+                  PRICE.keepShort,
                   PRICE.audit + " See where you stand before you pay for anything.",
                 ].map((line) => (
                   <li key={line} className="flex gap-3">
@@ -82,6 +83,17 @@ export default function Price() {
               ))}
             </ul>
           </div>
+        </div>
+
+        {/* Optional add-on (Blake, 2026-10-15) */}
+        <div id="rebuild" className="mt-5 scroll-mt-16 rounded-3xl border border-[var(--color-border)] bg-white p-8 md:p-10 grid gap-4 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] md:items-center">
+          <div>
+            <h3 className="font-[family-name:var(--font-display)] text-2xl md:text-[1.75rem] text-[var(--color-ink)] font-medium tracking-tight">
+              {REBUILD.title}
+            </h3>
+            <p className="mt-2 text-lg font-medium text-[var(--color-ink)]">{REBUILD.priceLine}</p>
+          </div>
+          <p className="text-[var(--color-ink-soft)] leading-relaxed">{REBUILD.detail}</p>
         </div>
       </div>
     </section>
