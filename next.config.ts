@@ -3,6 +3,15 @@ import createMDX from "@next/mdx";
 
 const nextConfig: NextConfig = {
   pageExtensions: ["js", "jsx", "ts", "tsx", "md", "mdx"],
+  async redirects() {
+    return [
+      // The articles section was unpublished on 2026-10-15 (it described the
+      // old offer). The live sitemap listed /articles and /articles/welcome,
+      // so send those URLs home instead of to a 404.
+      { source: "/articles", destination: "/", permanent: true },
+      { source: "/articles/:path*", destination: "/", permanent: true },
+    ];
+  },
   async headers() {
     return [
       {

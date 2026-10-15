@@ -1,4 +1,11 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+
+// The tab reads "Page not found · Devize" instead of the site's default title.
+export const metadata: Metadata = {
+  title: "Page not found",
+  robots: { index: false, follow: true },
+};
 
 /**
  * 404 for URLs that match no route. Deliberately small: Next ships this tree
@@ -7,7 +14,7 @@ import Link from "next/link";
  */
 export default function NotFound() {
   return (
-    <main className="relative flex-1 z-0">
+    <main className="site-chrome relative flex-1 z-0">
       <div className="mx-auto max-w-2xl px-6 py-32 text-center">
         <p className="text-xs uppercase tracking-[0.18em] text-[var(--color-ink-muted)] font-medium">
           404

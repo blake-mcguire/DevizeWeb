@@ -1,5 +1,5 @@
 const statements = [
-  'Search "dentist" or "ac repair" on a phone and Google shows a map with three businesses under it. Those get looked at first. Everyone else is a scroll away.',
+  "Search “dentist” or “ac repair” on a phone and Google shows a map with three businesses under it. Those get looked at first. Everyone else is a tap away.",
   "Ask ChatGPT or Google's AI who to call and you get a few names, not a page of links.",
   "Good reviews alone don't put you there. Google weighs how well your listing matches the search, how close you are, and how well known you are. Two of those three can be worked on.",
 ];

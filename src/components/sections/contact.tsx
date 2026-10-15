@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { LEAD_THANKS } from "@/lib/lead-copy";
 
 type Status = "idle" | "submitting" | "success" | "error";
 
@@ -65,16 +67,17 @@ export default function Contact() {
           </p>
 
           <ul className="mt-8 space-y-3 text-sm text-[var(--color-ink-soft)]">
-            <li className="flex items-center gap-3">
-              <span className="brand-dot" aria-hidden="true" />
+            <li className="flex gap-3">
+              <span className="brand-dot mt-[0.55em] shrink-0" aria-hidden="true" />
               Free. Nothing to sign.
             </li>
-            <li className="flex items-center gap-3">
-              <span className="brand-dot" aria-hidden="true" />
-              No logins. We only use what anyone can see on Google.
+            <li className="flex gap-3">
+              <span className="brand-dot mt-[0.55em] shrink-0" aria-hidden="true" />
+              No logins. We only use what anyone can see on Google and on your
+              website.
             </li>
-            <li className="flex items-center gap-3">
-              <span className="brand-dot" aria-hidden="true" />
+            <li className="flex gap-3">
+              <span className="brand-dot mt-[0.55em] shrink-0" aria-hidden="true" />
               <span>
                 Rather write? Email{" "}
                 <a
@@ -92,22 +95,42 @@ export default function Contact() {
           </p>
         </div>
 
+        {/* method and action are the no-JavaScript path (or a submit before the
+            script loads): a plain POST to /api/lead, which answers with a 303
+            to /thanks. Without them the browser would GET the homepage with
+            the visitor's details in the URL. With JavaScript, handleSubmit
+            calls preventDefault and posts JSON instead. */}
         <form
+          method="post"
+          action="/api/lead"
           onSubmit={handleSubmit}
           className="rounded-2xl border border-[var(--color-border)] bg-white p-6 md:p-8 space-y-4"
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Field label="Your name" name="name" required />
-            <Field label="Business name" name="company" required />
+            <Field label="Your name" name="name" autoComplete="name" required />
+            <Field label="Business name" name="company" autoComplete="organization" required />
           </div>
-          <Field label="Email" name="email" type="email" required />
+          <Field label="Email" name="email" type="email" autoComplete="email" required />
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Field
               label="What you do"
               name="trade"
-              placeholder="Dentist, HVAC, plumbing, roofing…"
+              placeholder="e.g. dentist, HVAC"
             />
-            <Field label="Town" name="town" placeholder="e.g. Conroe, TX" required />
+            <Field
+              label="Town"
+              name="town"
+              placeholder="e.g. Conroe, TX"
+              autoComplete="address-level2"
+              required
+            />
+          </div>
+
+          {/* Honeypot: hidden from people and screen readers. /api/lead drops
+              any submission that fills it in. */}
+          <div aria-hidden="true" className="absolute -left-[9999px] h-px w-px overflow-hidden">
+            <label htmlFor="website">Leave this empty</label>
+            <input id="website" name="website" type="text" tabIndex={-1} autoComplete="off" />
           </div>
 
           <div>
@@ -122,27 +145,46 @@ export default function Contact() {
               name="message"
               rows={3}
               className="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-soft)] px-4 py-3 text-[0.95rem] text-[var(--color-ink)] placeholder:text-[var(--color-ink-muted)] focus:outline-none focus:border-[var(--color-brand)] focus:ring-4 focus:ring-[var(--color-brand)]/10 transition"
-              placeholder="e.g. emergency dentist, ac repair"
+              placeholder="e.g. dentist near me, ac repair"
             />
           </div>
 
           <div className="pt-2 flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
-            <p className="text-xs text-[var(--color-ink-muted)]">
-              We&apos;ll never share your info.
+            <p className="text-xs text-[var(--color-ink-muted)] leading-relaxed">
+              We use this only to send your audit and talk to you about it. We
+              don&apos;t sell it.{" "}
+              <Link
+                href="/privacy"
+                className="underline underline-offset-2 hover:text-[var(--color-ink)]"
+              >
+                Privacy Policy
+              </Link>
             </p>
-            <Button type="submit" disabled={status === "submitting"}>
-              {status === "submitting" ? "Sending…" : "Send me my audit"}
+            {/* Disabled once sent, so a second click can't send the same
+                request twice. */}
+            <Button
+              type="submit"
+              disabled={status === "submitting" || status === "success"}
+              className="shrink-0"
+            >
+              {status === "submitting"
+                ? "Sending…"
+                : status === "success"
+                  ? "Sent"
+                  : "Send me my audit"}
             </Button>
           </div>
 
-          {status === "success" && (
-            <p className="text-sm text-[var(--color-brand)] font-medium pt-2">
-              Thanks. We&apos;ll run your searches and email your audit to you.
-            </p>
-          )}
-          {status === "error" && (
-            <p className="text-sm text-red-600 pt-2">{errorMsg}</p>
-          )}
+          <div role="status" aria-live="polite">
+            {status === "success" && (
+              <p className="text-sm text-[var(--color-brand)] font-medium pt-2">
+                {LEAD_THANKS}
+              </p>
+            )}
+            {status === "error" && (
+              <p className="text-sm text-red-600 pt-2">{errorMsg}</p>
+            )}
+          </div>
         </form>
       </div>
     </section>
@@ -154,12 +196,14 @@ function Field({
   name,
   type = "text",
   placeholder,
+  autoComplete,
   required,
 }: {
   label: string;
   name: string;
   type?: string;
   placeholder?: string;
+  autoComplete?: string;
   required?: boolean;
 }) {
   return (
@@ -177,6 +221,7 @@ function Field({
         type={type}
         required={required}
         placeholder={placeholder}
+        autoComplete={autoComplete}
         className="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-soft)] px-4 py-3 text-[0.95rem] text-[var(--color-ink)] placeholder:text-[var(--color-ink-muted)] focus:outline-none focus:border-[var(--color-brand)] focus:ring-4 focus:ring-[var(--color-brand)]/10 transition"
       />
     </div>

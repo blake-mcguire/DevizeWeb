@@ -17,8 +17,8 @@ const pillars: Pillar[] = [
       "Google picks the names on its map by how well a listing matches the search, how close it is, and how well known the business is. We work on the parts you can change, starting with your Google listing, your Google Business Profile.",
     items: [
       "Your Google listing: categories, services, hours, photos, posts and questions",
-      "Every customer asked for a review, every review answered",
-      "A page on your site for each service and town",
+      "A routine to ask every customer for a review, and a reply to every review",
+      "A useful page on your site for each service and each town you serve",
       "The same name, address and phone everywhere you're listed",
     ],
   },
@@ -28,11 +28,11 @@ const pillars: Pillar[] = [
     title: "AEO",
     summary: "Be the answer",
     body:
-      "Ask ChatGPT or Google's AI for a dentist or an AC company nearby and it names a few. It builds that answer from what it can read: your Google listing, your website, your reviews, and sites like Yelp. We make sure they all say the same clear things about you.",
+      "Ask ChatGPT or Google's AI for a dentist or an AC company nearby and it names a few. Google's AI reads your Google listing and your website. ChatGPT and other assistants search the web: your site, your reviews, and directories like Yelp. We work to make all of them say the same clear things about you.",
     items: [
       "Facts machines can read: services, hours, towns served, structured data",
       "Plain answers to the questions customers ask before they call",
-      "Mentions on the directories and local sites these tools read. Earned, never bought.",
+      "Your business listed, and mentioned, on the directories and local sites AI answers often draw from",
     ],
     footnote:
       "Nobody outside these companies sees exactly how they choose. We work on what they read.",
@@ -108,7 +108,7 @@ export default function Services() {
 
         <p className="mt-8 text-center text-sm text-[var(--color-ink-muted)] max-w-2xl mx-auto">
           We won&apos;t promise a guaranteed spot or results in weeks, and we
-          won&apos;t do anything that gets a listing suspended.
+          won&apos;t do anything that breaks Google&apos;s rules for listings.
         </p>
       </div>
     </section>

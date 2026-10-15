@@ -69,13 +69,8 @@ export default function SiteFooter() {
       </div>
 
       <div className="border-t border-[var(--color-border)]">
-        <div className="mx-auto max-w-6xl px-6 py-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-[var(--color-ink-muted)]">
+        <div className="mx-auto max-w-6xl px-6 py-6 text-xs text-[var(--color-ink-muted)]">
           <p>© {new Date().getFullYear()} Devize. All rights reserved.</p>
-          <p className="flex items-center gap-2">
-            Built with
-            <span className="brand-dot" aria-hidden="true" />
-            for local service businesses.
-          </p>
         </div>
       </div>
     </footer>

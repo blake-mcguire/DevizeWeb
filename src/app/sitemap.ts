@@ -16,12 +16,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly",
       priority: 1.0,
     },
-    // Legal / A2P compliance pages. Carriers fetch these during 10DLC vetting.
+    // Legal pages, rewritten 2026-10-15 for the local SEO and AEO offer.
+    // Left out on purpose: /sms-consent and /terms/v1-2 (both noindex) and
+    // /thanks (the no-JavaScript form confirmation).
     ...[
-      { path: "/terms", updated: "2026-07-18" },
-      { path: "/privacy", updated: "2026-07-08" },
-      { path: "/sms-terms", updated: "2026-07-08" },
-      { path: "/sms-consent", updated: "2026-07-08" },
+      { path: "/terms", updated: "2026-10-15" },
+      { path: "/privacy", updated: "2026-10-15" },
+      { path: "/sms-terms", updated: "2026-10-15" },
     ].map((page) => ({
       url: `${SITE_URL}${page.path}`,
       lastModified: new Date(page.updated),

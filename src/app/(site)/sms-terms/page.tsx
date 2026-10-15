@@ -7,10 +7,13 @@ import {
   ContactLine,
 } from "@/components/legal-prose";
 
+// Sections 1 and 2 rewritten 2026-10-15 to describe the texts Devize sends
+// about an owner's own audit (the /a/ consent line links this page).
+// Sections 3 to 8 are the standard carrier clauses, unchanged.
 export const metadata: Metadata = {
   title: "SMS Terms & Conditions",
   description:
-    "Terms for the SMS text-message program Devize operates on behalf of the businesses we serve: message types, frequency, costs, STOP/HELP, and opt-out.",
+    "Terms for the text messages Devize sends business owners about their Google Listing and Map Audit: message types, frequency, costs, STOP/HELP, and opt-out.",
   alternates: { canonical: "/sms-terms" },
   robots: { index: true, follow: true },
 };
@@ -20,31 +23,25 @@ export default function SmsTermsPage() {
     <LegalPage
       eyebrow="Legal"
       title="SMS Terms & Conditions"
-      updated="July 8, 2026"
+      updated="October 15, 2026"
     >
       <H2>1. Program Description</H2>
       <P>
-        Blake Louis McGuire (&ldquo;Devize&rdquo;) sends SMS text messages on
-        behalf of the businesses we serve. Messages are informational and
-        service-related, including appointment scheduling and reminders,
-        service-plan status, estimate follow-ups, and confirmations, sent to
-        existing customers of those businesses who have provided their mobile
-        number.
+        Devize (Blake Louis McGuire) texts business owners and managers who ask
+        for their Google Listing and Map Audit on a Devize audit page. Messages
+        are about your audit: that it is ready, how to get it, and a follow-up
+        about Devize&apos;s local SEO and AEO service.
       </P>
 
       <H2>2. Consent</H2>
       <P>
-        You are enrolled only after providing your mobile number to a
-        participating business and agreeing to receive calls and texts about
-        your services. Consent to receive messages is not a condition of any
-        purchase.
+        You are enrolled only when you enter your mobile number on a Devize
+        audit page and agree to the consent line shown there. Consent is not a
+        condition of any purchase.
       </P>
 
       <H2>3. Message Frequency</H2>
-      <P>
-        Message frequency varies based on your service activity and
-        interactions.
-      </P>
+      <P>Message frequency varies.</P>
 
       <H2>4. Costs</H2>
       <P>

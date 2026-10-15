@@ -8,12 +8,23 @@ import {
   ContactLine,
 } from "@/components/legal-prose";
 
+/**
+ * Rewritten 2026-10-15. It used to show a "[Business Name]" opt-in for texts
+ * sent on behalf of client businesses, a flow that does not exist. It now
+ * shows the consent line the /a/ audit form displays (copy.consent in
+ * src/app/a/[token]/copy.ts), word for word. Keep the two in step.
+ *
+ * Kept live but noindex and out of the sitemap and footer, in case a Twilio
+ * 10DLC campaign cites this URL as opt-in proof. Check the Twilio console: if
+ * a campaign cites it, update the campaign description to match; if nothing
+ * does, delete this route.
+ */
 export const metadata: Metadata = {
   title: "SMS Consent Language",
   description:
-    "The exact consent disclosure customers see at the point of service before Devize sends service-related text messages on behalf of the businesses we serve.",
+    "The consent line a business owner sees on a Devize audit page before Devize calls or texts about their audit.",
   alternates: { canonical: "/sms-consent" },
-  robots: { index: true, follow: true },
+  robots: { index: false, follow: true },
 };
 
 export default function SmsConsentPage() {
@@ -21,31 +32,26 @@ export default function SmsConsentPage() {
     <LegalPage
       eyebrow="Legal"
       title="SMS Consent Language"
-      updated="July 8, 2026"
+      updated="October 15, 2026"
     >
       <H2>SMS Consent Disclosure</H2>
       <P>
-        Devize sends service-related text messages on behalf of the businesses
-        we serve. End users provide consent directly to those businesses at the
-        point of service: when scheduling service, requesting an estimate, or
-        signing a service agreement. The following disclosure appears on
-        customer-facing service agreements, intake forms, and quote requests at
-        the point where a customer provides their phone number:
+        Devize texts business owners and managers only after they ask for their
+        Google Listing and Map Audit on a Devize audit page. The form there asks
+        for a name and a mobile number, and shows this line under the button,
+        followed by links to our SMS Terms, Privacy Policy and Service Terms:
       </P>
 
       <Quote>
-        &ldquo;By providing your phone number, you agree that [Business Name] and
-        its service providers may contact you by phone call and text message
-        regarding your services, appointments, and estimates, including messages
-        sent using automated technology. Consent is not a condition of purchase.
-        Message frequency varies. Message and data rates may apply. Reply STOP to
-        opt out at any time, or HELP for help.&rdquo;
+        &ldquo;By sending this, you agree that Blake McGuire from Devize may call
+        or text you about your audit. Message and data rates may apply; reply
+        STOP to opt out of texts.&rdquo;
       </Quote>
 
       <P>
-        This consent is specific to each participating business, is not
-        transferable or assignable, and applies only to service-related
-        communications. Mobile opt-in information is never shared with third
+        On some audit pages the line also names the person at Devize who sent
+        the audit, in the form &ldquo;[First name] or Blake McGuire from
+        Devize.&rdquo; Mobile opt-in information is never shared with third
         parties for marketing purposes. See our{" "}
         <ProseLink href="/privacy">Privacy Policy</ProseLink> and{" "}
         <ProseLink href="/sms-terms">SMS Terms &amp; Conditions</ProseLink>.

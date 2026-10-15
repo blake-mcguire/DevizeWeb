@@ -42,15 +42,15 @@ export default function Hero() {
 
           <h1 className="reveal mt-6 font-[family-name:var(--font-display)] text-4xl md:text-6xl leading-[1.05] tracking-tight text-white font-medium">
             Your prospects are searching for your services,{" "}
-            <br className="hidden md:block" />
+            <br className="hidden lg:block" />
             <span className="text-[var(--color-brand-end)]">but are they finding you?</span>
           </h1>
 
           <p className="reveal mt-6 max-w-xl text-lg text-white/70 leading-relaxed">
             When someone near you searches for what you do, Google shows a
             short list on its map, and AI assistants like ChatGPT name just a
-            few. Devize does the local SEO and AEO work to get your business on
-            those lists.
+            few. Devize does the local SEO and AEO work that helps your business
+            make those lists.
           </p>
 
           <div className="reveal mt-8 flex flex-col sm:flex-row gap-3">

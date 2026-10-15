@@ -16,6 +16,15 @@
   --gradient-brand: linear-gradient(135deg, #330099 0%, #7A3FE5 100%);
 }
 
+/* The marketing pages (the (site) route group and the root 404) use a darker
+   muted grey. #5F6978 is 4.54:1 on the cream background and 5.56:1 on white,
+   enough for WCAG AA at the 12-14px sizes it is used for; the :root value
+   (#8A94A3) is 2.51:1 and 3.07:1. Scoped by a wrapper class so the /a/ audit
+   pages, which are on their own track, keep the :root value. */
+.site-chrome {
+  --color-ink-muted: #5F6978;
+}
+
 @theme inline {
   --color-ink: var(--color-ink);
   --color-ink-soft: var(--color-ink-soft);

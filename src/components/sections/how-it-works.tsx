@@ -203,7 +203,8 @@ export default function HowItWorks() {
 
             <p className="mt-8 text-[0.95rem] text-[var(--color-ink-soft)] leading-relaxed max-w-lg">
               It&apos;s free and there&apos;s nothing to sign. We only use what
-              anyone can see on Google, so there&apos;s nothing to log into.
+              anyone can see on Google and on your website, so there&apos;s
+              nothing to log into.
             </p>
             <div className="mt-6">
               <Button href="/#contact">Get my free map audit</Button>

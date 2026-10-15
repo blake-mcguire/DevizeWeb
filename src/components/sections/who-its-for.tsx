@@ -4,8 +4,6 @@ const trades = [
   "Plumbers",
   "Roofers",
   "Electricians",
-  "Med spas",
-  "Chiropractors",
   "And businesses like them",
 ];
 
@@ -49,8 +47,8 @@ export default function WhoItsFor() {
               ))}
             </ul>
             <p className="mt-6 text-[0.95rem] text-white/65 leading-relaxed">
-              For a practice, the search is &quot;dentist near me&quot; or
-              &quot;emergency dentist&quot;, and the people searching are new
+              For a practice, the search is &ldquo;dentist&rdquo; or
+              &ldquo;dentist near me&rdquo;, and the people searching are new
               patients.
             </p>
           </div>

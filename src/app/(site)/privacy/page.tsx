@@ -3,50 +3,87 @@ import {
   LegalPage,
   H2,
   P,
+  ProseLink,
   Callout,
   ContactLine,
 } from "@/components/legal-prose";
 
+// Rewritten 2026-10-15 for the local SEO and AEO offer: it covers what the
+// site and the /a/ audit pages actually collect. Draft wording: have counsel
+// review it. Keep it in step with /api/lead, /api/audit-request,
+// /api/audit-view and the GTM snippet in the root layout.
 export const metadata: Metadata = {
   title: "Privacy Policy",
   description:
-    "How Devize collects, uses, and protects personal information, including information used for text messaging (SMS).",
+    "How Devize collects, uses and shares personal information on devize.ai and on Devize audit pages, including mobile numbers used for texts about your audit.",
   alternates: { canonical: "/privacy" },
   robots: { index: true, follow: true },
 };
 
 export default function PrivacyPage() {
   return (
-    <LegalPage eyebrow="Legal" title="Privacy Policy" updated="July 8, 2026">
+    <LegalPage eyebrow="Legal" title="Privacy Policy" updated="October 15, 2026">
       <P>
         Blake Louis McGuire, doing business as Devize (&ldquo;we,&rdquo;
         &ldquo;us,&rdquo; &ldquo;our&rdquo;), operates devize.ai and provides
-        customer communication services on behalf of the businesses we serve.
-        This policy explains how we collect, use, and protect personal
-        information, including information used for text messaging (SMS).
+        local SEO and AEO services to local businesses. This policy explains
+        what personal information we collect on this website and on Devize
+        audit pages, how we use it, and who we share it with.
       </P>
 
       <H2>Information We Collect</H2>
       <P>
-        We may collect: name, mobile phone number, email address, service
-        history, and appointment details. Phone numbers used for SMS are
-        collected either directly from you or from the business you are a
-        customer of, on whose behalf we send service-related messages.
+        <strong>When you ask for an audit on this website:</strong>{" "}your name,
+        business name, email, type of business, town, and the search you want
+        to show up for, if you add it. We also keep the time of the request and
+        your browser&apos;s user agent.
+      </P>
+      <P>
+        <strong>On a Devize audit page:</strong>{" "}your name, your mobile number,
+        and a record of the consent you gave (the consent line shown next to
+        the button, and when you sent the form). We also record when an audit
+        page is opened.
+      </P>
+      <P>
+        <strong>Public information about businesses:</strong>{" "}to build audits,
+        we collect information businesses publish, such as Google search
+        results, Google Business Profile details, reviews, photos and website
+        content. To send a business its audit, we may also collect business
+        contact details, such as an owner&apos;s or manager&apos;s name, work
+        email and phone number, from business websites, public directories and
+        business data providers.
+      </P>
+      <P>
+        <strong>Analytics:</strong>{" "}this website&apos;s marketing pages use
+        Google Tag Manager, which can load Google analytics tools that use
+        cookies to measure how visitors use the site, such as pages viewed and
+        the type of browser and device. Google Tag Manager does not run on
+        audit pages. Like most websites, our hosting provider also keeps
+        standard server logs, such as IP addresses and the pages requested.
       </P>
 
       <H2>How We Use Information</H2>
       <P>
-        We use personal information to send service notifications, appointment
-        reminders, estimate updates, and related communications; to respond to
-        inquiries; and to operate and improve our services.
+        We use personal information to prepare and send your audit, to contact
+        you about it and about Devize&apos;s service, and to run, secure and
+        improve this website. We do not sell personal information.
       </P>
 
-      <H2>SMS / Text Messaging</H2>
+      <H2>Who We Share It With</H2>
       <P>
-        When you provide your mobile number to a business we serve, you may
-        receive SMS messages related to your service, appointments, and
-        estimates. Message frequency varies. Message and data rates may apply.
-        Reply STOP to opt out at any time and HELP for help.
+        We share personal information only with service providers that help us
+        run Devize: hosting and storage (Vercel), analytics (Google), our email
+        provider, and our phone and text provider when we call or text you. We
+        may also disclose information when the law requires it.
+      </P>
+
+      <H2>Calls and Text Messages</H2>
+      <P>
+        If you give your mobile number on a Devize audit page and agree to the
+        consent line shown there, Devize may call or text you about your audit.
+        Message frequency varies. Message and data rates may apply. Reply STOP
+        to opt out at any time and HELP for help. See our{" "}
+        <ProseLink href="/sms-terms">SMS Terms</ProseLink>.
       </P>
 
       <Callout>
@@ -56,8 +93,16 @@ export default function PrivacyPage() {
         strictly to support our services (for example, our SMS delivery
         platform), and never for their own marketing. SMS opt-in consent and
         phone numbers are never shared with third parties for any purpose other
-        than delivering the messages you have agreed to receive.
+        than delivering the messages about your audit that you have agreed to
+        receive.
       </Callout>
+
+      <H2>Do Not Track</H2>
+      <P>
+        Some browsers send a &ldquo;Do Not Track&rdquo; signal. There is no
+        common standard for how to respond to it, so this website does not
+        respond to Do Not Track signals.
+      </P>
 
       <H2>Data Retention &amp; Security</H2>
       <P>
@@ -68,8 +113,14 @@ export default function PrivacyPage() {
 
       <H2>Your Choices</H2>
       <P>
-        You may opt out of SMS at any time by replying STOP. You may request
-        access to or deletion of your information by contacting us.
+        You may opt out of texts at any time by replying STOP. You may ask to
+        see, correct or delete your information by contacting us.
+      </P>
+
+      <H2>Changes to This Policy</H2>
+      <P>
+        If we change this policy, we will post the new version on this page
+        with a new date.
       </P>
 
       <H2>Contact Us</H2>
