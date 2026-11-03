@@ -21,7 +21,6 @@ import { BlobNotFoundError, get, head, list as blobList, put } from "@vercel/blo
  *   submissions/<iso>-<token>.json  written here, read by the pipeline
  *   views/<iso>-<token>.json        written here, read by the pipeline (a view
  *                                   is also what asks for the PDF to be built)
- *   leads/<iso>-<rand>.json         written here (the homepage demo form)
  *
  * <iso> is isoCompact(): UTC, basic ISO 8601, to the second (20261014T153012Z).
  *
