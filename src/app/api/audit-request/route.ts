@@ -11,13 +11,13 @@ import {
   usMobileE164,
   validToken,
 } from "@/lib/audit-validate";
-import { isoCompact, putJSON } from "@/lib/blob-store";
+import { eventPath, putJSON } from "@/lib/blob-store";
 import { allow, clientIp } from "@/lib/rate-limit";
 
 /**
  * POST /api/audit-request  {token, name, tel}
  *
- * Validates, writes submissions/<iso>-<token>.json for the pipeline (which
+ * Validates, writes submissions/<iso>-<rand>-<token>.json for the pipeline (which
  * builds the PDF if the page's first view has not already, alerts Blake,
  * stops the sequence and may email a copy), sets the cookie that lets this
  * browser download the file, and says whether the file is ready:
@@ -99,7 +99,7 @@ export async function POST(req: NextRequest) {
   if (!mobile) return fail("mobile", 400);
 
   const now = new Date();
-  const pathname = `submissions/${isoCompact(now)}-${token}.json`;
+  const pathname = eventPath("submissions", token, now);
   try {
     await putJSON(
       pathname,
@@ -111,8 +111,6 @@ export async function POST(req: NextRequest) {
         submitted_at: now.toISOString(),
         user_agent: (req.headers.get("user-agent") ?? "").slice(0, 400),
       },
-      // Two sends in the same second are the same person double-tapping.
-      { allowOverwrite: true },
     );
   } catch (err) {
     console.error("[audit-request] write failed", err instanceof Error ? err.message : err);

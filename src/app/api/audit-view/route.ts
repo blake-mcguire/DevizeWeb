@@ -1,13 +1,13 @@
 import type { NextRequest } from "next/server";
 import { loadAuditPage } from "@/lib/audit-page";
 import { MACHINE_UA, validToken } from "@/lib/audit-validate";
-import { isoCompact, putJSON } from "@/lib/blob-store";
+import { eventPath, putJSON } from "@/lib/blob-store";
 import { allow, clientIp } from "@/lib/rate-limit";
 
 /**
  * POST /api/audit-view  {token}
  *
- * The page's once-per-session beacon. Writes views/<iso>-<token>.json for
+ * The page's once-per-session beacon. Writes views/<iso>-<rand>-<token>.json for
  * the pipeline. Always answers 204, whatever happened, so it says nothing
  * about which tokens exist. Skips machine user agents (mail scanners,
  * previews, headless browsers) and unknown or expired tokens.
@@ -32,11 +32,7 @@ export async function POST(req: NextRequest) {
 
   const now = new Date();
   try {
-    await putJSON(
-      `views/${isoCompact(now)}-${token}.json`,
-      { v: 1, token, viewed_at: now.toISOString() },
-      { allowOverwrite: true },
-    );
+    await putJSON(eventPath("views", token, now), { v: 1, token, viewed_at: now.toISOString() });
   } catch (err) {
     console.error("[audit-view] write failed", err instanceof Error ? err.message : err);
   }

@@ -1,5 +1,6 @@
 import "server-only";
 
+import { randomBytes } from "node:crypto";
 import { BlobNotFoundError, get, head, list as blobList, put } from "@vercel/blob";
 
 /**
@@ -18,9 +19,10 @@ import { BlobNotFoundError, get, head, list as blobList, put } from "@vercel/blo
  *                                   is then rewritten with pdf_url (2026-10-14,
  *                                   round 2)
  *   audits/<token>/audit.pdf        round 1 only (pages that still name it)
- *   submissions/<iso>-<token>.json  written here, read by the pipeline
- *   views/<iso>-<token>.json        written here, read by the pipeline (a view
- *                                   is also what asks for the PDF to be built)
+ *   submissions/<iso>-<rand>-<token>.json  written here, read by the pipeline
+ *   views/<iso>-<rand>-<token>.json        written here, read by the pipeline
+ *                                   (a view is also what asks for the PDF to
+ *                                   be built); see eventPath()
  *   leads/<iso>-<rand>.json         written here (the site's audit request form)
  *
  * <iso> is isoCompact(): UTC, basic ISO 8601, to the second (20261014T153012Z).
@@ -69,6 +71,18 @@ export async function mockFs(): Promise<MockFs | null> {
 /** UTC timestamp in basic ISO 8601, to the second: 20261014T153012Z. */
 export function isoCompact(d: Date = new Date()): string {
   return d.toISOString().replace(/\.\d{3}Z$/, "Z").replace(/[-:]/g, "");
+}
+
+/**
+ * A submission's or a view's pathname: <prefix>/<iso>-<32 hex>-<token>.json.
+ * The store is public and whoever holds a link knows its token, so the 128
+ * random bits keep a submission (a name and a mobile) from being found by
+ * counting through timestamps. Every call is a new file. The pipeline keys
+ * on the token in the body and checks only that the name ends with
+ * -<token>.json.
+ */
+export function eventPath(prefix: "submissions" | "views", token: string, d: Date): string {
+  return `${prefix}/${isoCompact(d)}-${randomBytes(16).toString("hex")}-${token}.json`;
 }
 
 function storeId(): string | null {
