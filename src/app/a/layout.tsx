@@ -35,13 +35,13 @@ export default function AuditLayout({ children }: { children: React.ReactNode })
   return (
     <>
       <header className="relative z-10">
-        <div className="mx-auto max-w-5xl px-5 sm:px-6 pt-5 pb-1">
+        <div className="mx-auto max-w-2xl px-5 sm:px-6 pt-5 pb-1">
           <Logo className="h-7 w-auto" />
         </div>
       </header>
       <main className="relative flex-1 z-0">{children}</main>
       <footer className="relative z-10 border-t border-[var(--color-border)]">
-        <div className="mx-auto max-w-5xl px-5 sm:px-6 py-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs text-[var(--color-ink-muted)]">
+        <div className="mx-auto max-w-2xl px-5 sm:px-6 py-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs text-[var(--color-ink-muted)]">
           <p>{copy.footerAddress}</p>
           <nav className="flex gap-4">
             {LEGAL.map((l) => (

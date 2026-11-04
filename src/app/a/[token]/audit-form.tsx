@@ -7,7 +7,8 @@ import { copy, type ErrorCode } from "./copy";
 /**
  * The page's one form and what follows it.
  *
- *   form       Name + Mobile, one button ("Get the plan now").
+ *   form       a heading that names the business (from the token), then
+ *              Name + Mobile, one button ("Get the plan now").
  *   finishing  sent, but the PDF is not built yet: "Finishing your plan, a few
  *              seconds…", polling /api/audit-status every 2 s for up to 2 min.
  *              The download starts by itself only when THIS visit's own
@@ -22,7 +23,10 @@ import { copy, type ErrorCode } from "./copy";
  * then /api/audit-status's `plan` (the pipeline rewrites it with what it
  * actually built), so the done line never promises a plan the file lacks.
  *
- * The two fields are plain, visible, labelled inputs in a real <form>, named
+ * The business and its email sit in a small panel above the fields, not in
+ * inputs: they show the visitor the audit is theirs without looking like two
+ * more boxes to fill, and are never sent (the server knows both from the
+ * token). The two fields are plain, visible, labelled inputs in a real <form>, named
  * and typed so a phone or browser offers the saved contact in one tap
  * (autocomplete name / tel, type tel). Without JavaScript the form still
  * posts; the page then shows the finishing state (and reloads itself) or the
@@ -97,7 +101,14 @@ function initialStage(initial: Initial): Stage {
   return { kind: "done", started: false, fileUrl: initial.fileUrl, planUrl: initial.planUrl };
 }
 
-export default function AuditForm({ token, personaFirst, hasPlan, filePlan, initial, initialError }: Props) {
+export default function AuditForm({
+  token,
+  personaFirst,
+  hasPlan,
+  filePlan,
+  initial,
+  initialError,
+}: Props) {
   const [stage, setStage] = useState<Stage>(() => initialStage(initial));
   // Whether the file carries the plan, as the server last said (see the top of this file).
   const [plan, setPlan] = useState(filePlan);
@@ -186,7 +197,7 @@ export default function AuditForm({ token, personaFirst, hasPlan, filePlan, init
         }
         return;
       }
-      setError(copy.errors[data.error && data.error in copy.errors ? data.error : "server"]);
+      setError(copy.errors[data.error && Object.hasOwn(copy.errors, data.error) ? data.error : "server"]);
     } catch {
       setError(copy.errors.server);
     } finally {
@@ -262,11 +273,14 @@ export default function AuditForm({ token, personaFirst, hasPlan, filePlan, init
     // method/action make a no-JavaScript submit a POST (never a GET with the
     // number in the URL); the route answers that with a redirect back here.
     <form method="post" action="/api/audit-request" onSubmit={onSubmit}>
-      <h2 className={heading}>{copy.formHeading(hasPlan)}</h2>
+      <h2 className={`${heading} text-balance`}>
+        {copy.formHeading}
+      </h2>
       <p className="mt-2 text-[0.95rem] leading-relaxed text-[var(--color-ink-soft)]">{copy.formIntro(hasPlan)}</p>
 
       <input type="hidden" name="token" value={token} />
-      <div className="mt-5 space-y-4">
+      {/* Blake, 2026-11-03: the "From your email link" panel is gone; the business name is in the heading above. */}
+      <div className="mt-5 grid gap-4 sm:grid-cols-2">
         <div>
           <label htmlFor="audit-name" className={label}>
             {copy.nameLabel}
@@ -310,7 +324,7 @@ export default function AuditForm({ token, personaFirst, hasPlan, filePlan, init
         {busy ? copy.submitting : copy.submit(hasPlan)}
       </button>
 
-      <p className="mt-4 text-xs leading-relaxed text-[var(--color-ink-muted)]">
+      <p className="mt-4 text-xs leading-relaxed text-[var(--color-ink-soft)]">
         {copy.consent(who)}{" "}
         <a href="/sms-terms" target="_blank" rel="noopener" className="underline underline-offset-2 hover:text-[var(--color-ink)]">
           {copy.legalLinks.smsTerms}
@@ -327,3 +341,4 @@ export default function AuditForm({ token, personaFirst, hasPlan, filePlan, init
     </form>
   );
 }
+

@@ -8,10 +8,18 @@
  * Flip this to "approved" when these words are signed off, so the review list
  * shows it.
  *
+ * Layout (Blake, 2026-11-03): one simple page. His question at the top,
+ * naming the search and the business, the answer from their own searches
+ * under it, then the form, which asks for a name and a mobile only (the video
+ * slot is off for now, Blake's later word the same day). The map, the table
+ * and the "what it covers" list are gone from the page (they are in the PDF
+ * and in git history).
+ *
  * Voice (Devize, 2026-10-12/14): plain, a favour not a scoreboard, map only
  * (no claims about their phones, forms, booking, speed or hours), no
- * greeting, short sentences, no question marks, a person doing the work
- * ("I ran"), dentists get practice/patients, HVAC gets shop/homeowner.
+ * greeting, short sentences, dentists get practice/patients, HVAC gets
+ * shop/homeowner. Two exceptions, both Blake's: the headline is his question,
+ * and the page says "we" (one voice; the email's sender may not be Blake).
  * Every number comes from page.json; none is written here.
  *
  * The plan is optional (2026-10-14 integration): page.json's `plan` is false
@@ -34,12 +42,7 @@ type Find = {
   keyword: string;
   place_noun: "practice" | "shop";
   top3: number;
-  mid: number;
-  absent: number;
-  business: string;
 };
-
-const PLURAL = { practice: "practices", shop: "shops" } as const;
 
 /** "Conner or Blake", or just "Blake" when the persona is Blake. */
 function callers({ persona_first }: Who): string {
@@ -49,63 +52,41 @@ function callers({ persona_first }: Who): string {
 
 export const copy = {
   /** Browser tab. The layout's template appends " · Devize". */
-  pageTitle: "Your map",
+  pageTitle: "Your audit",
 
   // ---- Top of the page -------------------------------------------------------
-  headline: (f: Find) =>
-    `I ran ${f.pins} Google searches for ${f.keyword} around your ${f.place_noun}. ` +
-    (f.top3 > 0
-      ? `You came up in the top three at ${f.top3} of them.`
-      : `You never came up in the top three.`),
-  byline: (p: { persona_name: string; scanned_on: string }) =>
-    p.scanned_on ? `${p.persona_name}, Devize. Searched on ${p.scanned_on}.` : `${p.persona_name}, Devize.`,
-  jumpToForm: (plan: boolean) => (plan ? "Get the full audit and the plan" : "Get the full audit"),
+  // Blake's question (2026-11-03): "Your clients are searching for (Category) near me, but are they seeing
+  // (Company Name)?" The category is the phrase we scanned (page.json keyword). The search phrase and the business name
+  // are "italicized and the only purple text" (Blake, same day). Four parts, around those two: before the phrase,
+  // between the two, after the name.
+  headline: (keyword: string) =>
+    ["Your clients are searching for", `${keyword} near me`, ", but are they seeing", "?"] as const,
+  // The answer, from this business's own searches. Two parts: the page sets the result in bold.
+  searched: (f: Find) => `We searched Google for "${f.keyword}" from ${f.pins} spots around your ${f.place_noun}.`,
+  result: (f: Find) =>
+    f.top3 === 0
+      ? `You did not come up in the top three at any of them.`
+      : f.top3 >= f.pins
+        ? `You came up in the top three at all ${f.pins}.`
+        : `You came up in the top three at ${f.top3} of them.`,
+  jumpToForm: (plan: boolean) => (plan ? "Skip to your audit and plan" : "Skip to your audit"),
 
-  // ---- The map ---------------------------------------------------------------
-  mapAlt: (f: Find) =>
-    `A map of ${f.pins} Google searches for ${f.keyword} around ${f.business}. ` +
-    `You came up in the top three at ${f.top3} of them.`,
-  bands: {
-    top3: "In the top three",
-    mid: "Fourth to twentieth",
-    absent: "Nowhere in the first twenty",
-  },
-  legend: (f: Find) =>
-    `Every pin is one search. Green means you were in the top three. ` +
-    `Yellow means you came up, but under them. Grey means you were nowhere in the first twenty Google showed. ` +
-    `The purple pin is your ${f.place_noun}.`,
-  mapMissing: "The map did not load. The counts above are the same searches.",
-
-  // ---- The table -------------------------------------------------------------
-  tableHeading: "Who came up instead of you",
-  tableColumns: (place_noun: "practice" | "shop") => ({
-    name: place_noun === "practice" ? "Practice" : "Shop",
-    stars: "Stars",
-    reviews: "Reviews",
-    top3: "In the top three",
-  }),
-  youPrefix: "You: ",
-  top3Cell: (n: number | null, pins: number) => (n === null ? "not seen" : `${n} of ${pins}`),
-
-  // ---- What they get -----------------------------------------------------------
-  coverHeading: (plan: boolean) => (plan ? "What the full audit and the plan cover" : "What the full audit covers"),
-  coverBullets: (place_noun: "practice" | "shop", plan: boolean) => [
-    `Your Google listing, point by point, next to the ${PLURAL[place_noun]} above you.`,
-    `How far your listing reaches from your own address, and where it stops.`,
-    plan
-      ? `A one-page plan: the changes I would make first, in order.`
-      : `The fixes I would make first, in order.`,
-  ],
+  // ---- The video ---------------------------------------------------------------
+  vslPlay: "Play the video",
+  // Local and preview builds only, while src/lib/vsl.ts has no video.
+  vslMissing: "The video goes here.",
+  vslMissingHow: "Set src in src/lib/vsl.ts. Production leaves this space out until then.",
 
   // ---- The form ----------------------------------------------------------------
-  formHeading: (plan: boolean) => (plan ? "Get the full audit and the plan" : "Get the full audit"),
-  // Says what happens: one PDF, a download, nothing "opens on this page".
+  // Blake's words (2026-11-03, round 2).
+  formHeading: "Get the full SEO and AEO strategy roadmap so you can start improving your organic growth today.",
+  // Says what is in it and what happens: one PDF, a download, nothing "opens on this page".
   formIntro: (plan: boolean) =>
     plan
-      ? "Leave your name and mobile. The audit and the plan download as one PDF."
-      : "Leave your name and mobile. The audit downloads as a PDF.",
-  nameLabel: "Name",
-  mobileLabel: "Mobile",
+      ? "Where you come up on Google, who comes up instead, and the steps to fix it, in order. It downloads as one PDF."
+      : "Where you come up on Google and who comes up instead. It downloads as a PDF.",
+  nameLabel: "Your name",
+  mobileLabel: "Mobile number",
   // Blake's wording (2026-10-14), one button.
   submit: (plan: boolean) => (plan ? "Get the plan now" : "Get the audit now"),
   submitting: "Sending",
