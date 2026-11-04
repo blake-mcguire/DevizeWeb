@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { AuditForm } from "@/components/audit-form";
+import { AuditRequest } from "@/components/audit-request";
 import { FounderChip } from "@/components/founder";
 import { CountList, CrossList, Eyebrow, H2, H3, PageHero, Section } from "@/components/page-parts";
 import { Button } from "@/components/ui/button";
@@ -148,7 +148,7 @@ export default function FreeAuditPage() {
             Your business, your town and where to send it.
           </p>
         </div>
-        <AuditForm slotId="audit-page-form" source="contact" className="mt-8" footer={<FounderChip />} />
+        <AuditRequest slotId="audit-page-form" source="contact" className="mt-8" footer={<FounderChip />} />
       </section>
     </>
   );

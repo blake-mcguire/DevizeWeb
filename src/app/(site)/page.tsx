@@ -32,12 +32,12 @@ const organizationSchema = {
   logo: `${SITE_URL}/devize-logo.svg`,
   description: `${LABEL_FOR}: Devize says what's worth doing to get found and chosen online, does the agreed work each month, and shows what got done. ${MISSION}`,
   email: EMAIL,
+  // TODO(Blake): no street or zip until you confirm the address should be public
+  // (see the note in site-footer.tsx).
   address: {
     "@type": "PostalAddress",
-    streetAddress: "307 Irenic Mist Court",
     addressLocality: "Willis",
     addressRegion: "TX",
-    postalCode: "77318",
     addressCountry: "US",
   },
   contactPoint: {

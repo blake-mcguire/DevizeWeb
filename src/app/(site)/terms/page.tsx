@@ -10,13 +10,13 @@ import {
 /**
  * TODO(Blake, counsel): 2026-11-04, the rebuild changed only what the positioning
  * made wrong: the service's name (1, 3), the list of work (3.2), a short add-on
- * clause (3.8) and the no-guarantee list (4.1). All of it is flagged, not decided.
+ * clause (3.7) and the no-guarantee list (4.1). All of it is flagged, not decided.
  * Counsel still needs to write a real Google Ads clause. It should cover ad spend
  * and billing, who owns the account, who pays if a mistake overspends, access
- * levels, and no guarantee of leads, costs or positions. 3.7 (website rebuild) is
- * left in because it only applies "if your Order includes it", though the rebuild
- * is off the site: keep or remove it. Also decide whether /terms/v1-2 stays public.
- * The price lives on devize.ai/#price and in the Order, not here.
+ * levels, and no guarantee of leads, costs or positions. The website rebuild
+ * clause came out on 2026-11-04, because the rebuild is not built or offered, so
+ * the add-on clause moved from 3.8 to 3.7. Also decide whether /terms/v1-2 stays
+ * public. The price lives on devize.ai/#price and in the Order, not here.
  *
  * Service Terms v2.0 (2026-10-15): a short version for the free audit and the
  * monthly local SEO and AEO service. It replaces v1.2 (the email reactivation
@@ -35,7 +35,7 @@ import {
  * list published on the price card; 3.2 words the directory work the way the
  * site does (checked and corrected, the owner claims what only the owner can
  * change); 3.4 makes the review sign-off a one-time sign-off on the wording,
- * which is what lets the site promise replies within 2 business days; 3.5
+ * which is what lets the site promise replies within a week; 3.5
  * covers a start on the 29th to 31st. Production builds stay blocked until
  * termsConfirmed is true in src/lib/launch-gate.json.
  */
@@ -52,7 +52,9 @@ export default function TermsPage() {
     <LegalPage
       eyebrow="Legal"
       title="Service Terms"
-      updated="November 4, 2026"
+      // TODO(Blake): put the real launch date here. These terms are not in force
+      // or confirmed yet, so no calendar date is shown (termsConfirmed).
+      updated="on the launch date (draft, not yet in force)"
       version="Version 2.0"
     >
       <H2 id="s1">1. Who we are</H2>
@@ -88,11 +90,7 @@ export default function TermsPage() {
         3.6 <strong>Ownership and handover.</strong>{" "}{/* DRAFT (2026-10-15): Blake and counsel to confirm */}Once paid for, the pages, posts, photos you supply, text and other content Devize creates for your business are yours. Devize publishes them only to places you own or control (your Google Business Profile, your website, or hosting and code accounts in your name) and never in an account you would have to keep paying Devize for. When the service ends, Devize hands over every page and file it made for you before removing its access.
       </P>
       <P>
-        3.7 <strong>Optional website rebuild.</strong>{" "}{/* DRAFT (2026-10-15): Blake and counsel to confirm, including when the fee is paid and the refund rule */}If your Order includes it, Devize rebuilds your website for the one-time fee in the Order. The site is built on your domain, in hosting and code accounts in your name, with no hosting fee charged by Devize. The site made for your business is yours once paid for; the underlying template components are licensed to you, without a time limit, for your own business. If the monthly service ends, the site keeps running in your account and Devize hands over its files.
-      </P>
-
-      <P>
-        3.8 <strong>Optional Google Ads add-on.</strong>{" "}{/* DRAFT (2026-11-04): a placeholder for counsel's clause. See the TODO at the top of this file. */}If your Order includes it, your Order sets out the monthly work, its limits and the fee. Ad spend is separate, and you pay it to Google directly. The Google Ads account stays yours.
+        3.7 <strong>Optional Google Ads add-on.</strong>{" "}{/* DRAFT (2026-11-04): a placeholder for counsel's clause. See the TODO at the top of this file. */}If your Order includes it, your Order sets out the monthly work, its limits and the fee. Ad spend is separate, and you pay it to Google directly. The Google Ads account stays yours.
       </P>
 
       <H2 id="s4">4. No guarantee of results</H2>

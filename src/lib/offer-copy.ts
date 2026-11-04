@@ -5,9 +5,10 @@
  * ============================================================================
  * DRAFT: FOR BLAKE TO CONFIRM BEFORE THIS BRANCH SHIPS.
  * Decided by Blake on 2026-11-04, so NOT draft: $500 a month flat for SEO and
- * review management, and Google Ads as an optional add-on at $150 a month with
- * stated monthly deliverables. Ad spend is separate and the client pays it to
- * Google. Decided earlier and still standing: month to month, cancel any time
+ * review management, for everyone, and Google Ads as an optional add-on at $150
+ * a month with stated monthly deliverables. Ad spend is separate and the client
+ * pays it to Google. The audience is B2C service businesses. Decided earlier and
+ * still standing: month to month, cancel any time
  * and keep everything we built, the free audit, name and photo near the call
  * to action.
  *
@@ -80,10 +81,10 @@ export const PRICE = {
   term: "Month to month. Cancel any time.",
   audit: "The audit is free.",
   /**
-   * TODO(Blake): is $500 per listing? An earlier note said "for this listing"
-   * and multi-location is undecided. I have written one location as the
-   * default, because the page must say something. A note also tied $500 to one
-   * proposal, so confirm it is the public price.
+   * Blake, 2026-11-04: $500 flat, for everyone, so this is the public price.
+   * TODO(Blake): does "for everyone" cover a business with several locations?
+   * An earlier note said "for this listing" and multi-location was undecided, so
+   * this line still says one location. Change it or confirm it.
    */
   scope: "Covers one location. More than one? Ask us.",
   /** One line by the call to action. */
@@ -94,7 +95,8 @@ export const PRICE = {
 } as const;
 
 // TODO(Blake): the $997 website rebuild is decided as a price but is not built,
-// so the brief keeps it off the site. Add it back here once one dry run is done.
+// so the brief keeps it off the site. Add it back here once one dry run is done,
+// with a terms clause (the old one came out of /terms on 2026-11-04).
 
 // ---------------------------------------------------------------------------
 // What $500 buys each month
@@ -121,15 +123,16 @@ export const MONTHLY_WORK: WorkItem[] = [
     count: "1",
     title: "review request routine, kept running",
     // TODO(Blake): no review tool is chosen, and who pays for one is unanswered.
-    // "Without your staff having to remember" depends on that tool existing.
-    // Health practices need a privacy contract and their lawyer's answer first.
+    // So requests go out by hand until a tool passes our checks, and nothing on
+    // this site may say they go out on their own until then. Health practices
+    // need a privacy contract and their lawyer's answer first.
     detail:
-      "Every customer gets asked after the visit, without your staff having to remember. No star screen, no paying for reviews, no asking only happy customers. Health practices need a privacy contract in place first.",
+      "Every customer gets asked after the visit. At the start that's by hand, by someone in your office. A tool takes over only once it passes our checks. No star screen, no paying for reviews, no asking only happy customers. Health practices need a privacy contract in place first.",
     purpose: "May help on the map",
   },
   {
     count: "Every",
-    title: "new review answered within 2 business days",
+    title: "new review answered within a week",
     // The clock can only be ours if the sign-off is once, on the wording, and
     // not on each reply (FAQ and terms 3.4 say the same).
     detail:
@@ -147,7 +150,7 @@ export const MONTHLY_WORK: WorkItem[] = [
     count: "1",
     title: "facts check",
     detail:
-      "Your name, phone, address and hours on your listing, your site and the main directories. Corrected where we can, with you claiming any that only the owner can change. AI answers read these same facts, so we keep them plain. We don't track AI answers yet.",
+      "Your name, phone, address and hours on your listing, your site and the main directories. Corrected where we can, with you claiming any that only the owner can change. AI answers may draw on these same facts, so we keep them plain. We don't track AI answers yet.",
     purpose: "Helps people choose you",
   },
   {
@@ -240,7 +243,7 @@ export const ADS_MONTHLY: { count: string; title: string; detail: string }[] = [
     count: "1",
     title: "test open at a time",
     detail:
-      "A written question and a date to read it. At this level of spend, the honest answer is often \"no clear answer\", and the report will say so.",
+      "One thing we try, such as running ads only in office hours. A written question and a date to read it. At this level of spend, the honest answer is often \"no clear answer\", and the report will say so.",
   },
   {
     count: "4",
@@ -288,7 +291,7 @@ export const ADS_FIRST_30: { when: string; title: string; detail: string }[] = [
 export const ADS_LEFT_OUT: string[] = [
   "Ad spend, or holding your billing",
   "More than 1 campaign, 1 area or 2 services",
-  "Performance Max, Display, YouTube, Meta or remarketing of any kind",
+  "Other ad types: Performance Max, Display, YouTube, Meta, or ads that follow past visitors",
   "Local Services Ads",
   "New landing pages or site builds",
   "Installing call tracking or call recording tools",
@@ -367,9 +370,9 @@ export const MISSION_GROUPS: { title: string; lead: string; items: { label: stri
   },
   {
     title: "Without adding headcount",
-    lead: "Nobody new on your payroll, and less for your staff to remember.",
+    lead: "Nobody new on your payroll.",
     items: [
-      { label: "Review requests that go out on their own", href: "/services/seo-and-reviews" },
+      { label: "One review routine, the same for every customer", href: "/services/seo-and-reviews" },
       { label: "The work done for you, by Devize", href: "/how-we-work" },
     ],
   },
@@ -403,7 +406,7 @@ export const SERVICES: {
     title: "Google Ads Management",
     price: "Add-on, $150 a month, plus ad spend paid to Google",
     summary:
-      "5 new lines of ad copy, 2 search reviews, 1 test, 4 check-ins and 1 report a month, in your own account. We haven't run a client's ads before, and we say so up front.",
+      "After the first 30 days, 5 new lines of ad copy, 2 search reviews, 1 test, 4 check-ins and 1 report a month, in your own account. We haven't run a client's ads before, and we say so up front.",
     group: "Optional add-on",
   },
 ];
@@ -414,10 +417,11 @@ export const SERVICES: {
 
 export const PARTNER_MEANS: { title: string; detail: string }[] = [
   {
-    title: "One person to reach",
-    // TODO(Blake): who is the one person? Blake is named on the site, and cold
-    // mail goes out as Blake, Conner and Jaden. Say what the roles are, and
-    // whether Conner and Jaden get a line. No "team" claim until then.
+    title: "A person to reach",
+    // TODO(Blake): who do people reach? Blake is named on the site, and cold mail
+    // goes out as Blake, Conner and Jaden. Say what the roles are, and whether
+    // Conner and Jaden get a line. Keep this "A person", not "One person", and
+    // make no "team" claim until then.
     detail: "A name and an email, in plain words. Not a portal and not a queue.",
   },
   {
@@ -493,7 +497,7 @@ export const WONT_PROMISE: { title: string; detail: string }[] = [
   {
     title: "No AI answer naming you",
     detail:
-      "Nobody outside these companies sees exactly how they choose. We work on what they read, and we don't track it yet.",
+      "Nobody outside these companies sees exactly how they choose. We keep your facts plain in the places they may read, and we don't track AI answers yet.",
   },
   {
     title: "No fake reviews",

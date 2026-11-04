@@ -262,7 +262,7 @@ export const INDUSTRIES: Industry[] = [
       },
       {
         title: "An office Google will accept",
-        body: "Google says virtual offices aren't eligible unless they're staffed during business hours. A shared suite with nobody in it can put a listing at risk.",
+        body: "Google says a rented mailing address you don't work from, a virtual office, isn't eligible. A co-working office needs clear signage, customers during business hours and your own staff there. A shared suite with nobody in it can put a listing at risk.",
         refs: [S.guidelines],
       },
       {
@@ -494,8 +494,8 @@ export const INDUSTRIES: Industry[] = [
     ],
     reviews: [
       {
-        title: "Ask the same day, every time",
-        body: "People remember who showed up. Ask right after the job, and ask everyone. Google bars asking only for good reviews, and the FTC bans fake reviews and buying good ones.",
+        title: "Ask the same day, after you've left",
+        body: "A text or email a few hours after the job, to everyone, and no asking while you're still in the house. Google bars asking only for good reviews, and the FTC bans fake reviews and buying good ones.",
         refs: [S.contribution, S.ftc],
       },
       {

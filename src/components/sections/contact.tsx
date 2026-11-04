@@ -1,4 +1,4 @@
-import { AuditForm } from "@/components/audit-form";
+import { AuditRequest, LEAD_FORM_LIVE } from "@/components/audit-request";
 import { FounderChip } from "@/components/founder";
 import { COVERAGE, EMAIL, PRICE } from "@/lib/offer-copy";
 
@@ -37,23 +37,25 @@ export default function Contact() {
               <span className="brand-dot mt-[0.55em] shrink-0" aria-hidden="true" />
               {PRICE.ctaLine}
             </li>
-            <li className="flex gap-3">
-              <span className="brand-dot mt-[0.55em] shrink-0" aria-hidden="true" />
-              <span>
-                Rather write? Email{" "}
-                <a
-                  href={`mailto:${EMAIL}`}
-                  className="text-[var(--color-ink)] underline underline-offset-4 decoration-[var(--color-ink)]/30 hover:decoration-[var(--color-ink)]"
-                >
-                  {EMAIL}
-                </a>
-              </span>
-            </li>
+            {LEAD_FORM_LIVE && (
+              <li className="flex gap-3">
+                <span className="brand-dot mt-[0.55em] shrink-0" aria-hidden="true" />
+                <span>
+                  Rather write? Email{" "}
+                  <a
+                    href={`mailto:${EMAIL}`}
+                    className="text-[var(--color-ink)] underline underline-offset-4 decoration-[var(--color-ink)]/30 hover:decoration-[var(--color-ink)]"
+                  >
+                    {EMAIL}
+                  </a>
+                </span>
+              </li>
+            )}
           </ul>
         </div>
 
         {/* slotId "audit": the anchor older links and the header button use. */}
-        <AuditForm
+        <AuditRequest
           slotId="audit"
           source="contact"
           className="min-w-0"

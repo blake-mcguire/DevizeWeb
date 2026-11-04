@@ -45,9 +45,12 @@ export default function SiteFooter() {
             chosen online, do the agreed work each month, and show you what got
             done. Independent. Not connected to Google.
           </p>
-          {/* TODO(Blake): this street address may be your home. Confirm you want it on every page. */}
+          {/* TODO(Blake): the street address may be your home, so every page shows only
+              the town for now, and the home page JSON-LD drops the street and zip. Say
+              if you want them shown. The privacy page's contact line and the /a/ footer
+              still carry the full address. */}
           <address className="mt-5 not-italic text-sm text-[var(--color-ink-soft)] leading-relaxed">
-            Devize, 307 Irenic Mist Court, Willis, TX 77318
+            Devize, Willis, TX
             <br />
             <a
               href={`mailto:${EMAIL}`}

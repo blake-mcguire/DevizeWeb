@@ -95,6 +95,7 @@ export default function SeoAndReviewsPage() {
                 "Give us a login to your site, or tell us who runs it.",
                 "Accurate facts about your business, and photos of your work where you can.",
                 "One sign-off at the start, on how we reply to reviews in your name.",
+                "Someone in your office to send the review requests by hand at the start. We help set it up.",
                 "Your own numbers, if you'll share them: calls, bookings and Google's report. No outside scan can see those.",
               ]}
             />

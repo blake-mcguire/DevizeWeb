@@ -3,10 +3,12 @@
  * (contact.tsx), its no-JavaScript path (/api/lead's 303 to /thanks) and the
  * /thanks page, so all three say the same thing.
  *
- * TODO(Blake): before launch, make a form request reach a person. Today the
- * request is stored and nothing alerts anyone, so this line would not yet be
- * true. leadFormReachesPerson in src/lib/launch-gate.json blocks production
- * until it is.
+ * TODO(Blake): before launch, make a form request reach a person: an alert to a
+ * named person on every stored request, run end to end once. Today the request
+ * is stored and nothing alerts anyone, so this line would not yet be true. Until
+ * leadFormReachesPerson is true in src/lib/launch-gate.json, production stays
+ * blocked and the pages show an email link instead of the form
+ * (src/components/audit-request.tsx).
  */
 
 export const LEAD_THANKS =

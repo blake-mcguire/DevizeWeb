@@ -15,6 +15,10 @@ import {
  * accepted"). /terms now carries v2.0. This page is unlinked, out of the
  * sitemap and noindex. Delete this route if no Sprint was ever sold under
  * v1.2.
+ *
+ * TODO(Blake): does this route stay? Noindex and unlinked is not private, and the
+ * page shows a Founding Partner section. If no Sprint was sold, delete this file
+ * and the note about it in src/app/sitemap.ts.
  */
 export const metadata: Metadata = {
   title: "Service Terms, Version 1.2",

@@ -130,6 +130,7 @@ export default function PrivacyPage() {
         label="Contact"
         parts={[
           "Blake Louis McGuire",
+          // TODO(Blake, counsel): keep the street address here? The footer now shows only the town.
           "307 Irenic Mist Court, Willis, TX 77318",
           "admin@devize.ai",
           "(832) 384-5632",

@@ -38,7 +38,7 @@ export default function Price({ band = false }: { band?: boolean }) {
                   <span className="text-lg text-white/80">a month</span>
                 </p>
                 <ul className="mt-6 space-y-3 text-[1.05rem] leading-snug">
-                  {["Flat. No percent of anything.", PRICE.term, PRICE.keepShort, PRICE.scope, `${PRICE.audit} See where you stand before you pay for anything.`].map((line) => (
+                  {["Flat. Not a percent of your ad spend or sales.", PRICE.term, PRICE.keepShort, PRICE.scope, `${PRICE.audit} See where you stand before you pay for anything.`].map((line) => (
                     <li key={line} className="flex gap-3">
                       <svg aria-hidden="true" width="18" height="18" viewBox="0 0 16 16" fill="none" className="mt-[0.15em] shrink-0 text-[#A98BF5]">
                         <path d="M3 8.5l3 3L13 4.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
@@ -93,7 +93,10 @@ export default function Price({ band = false }: { band?: boolean }) {
               </Link>
             </p>
           </div>
-          <CountList className="min-w-0" items={[...ADS_MONTHLY]} />
+          <div className="min-w-0">
+            <p className="text-sm font-medium text-[var(--color-ink)]">After the first 30 days:</p>
+            <CountList className="mt-4" items={[...ADS_MONTHLY]} />
+          </div>
         </div>
       </div>
     </section>

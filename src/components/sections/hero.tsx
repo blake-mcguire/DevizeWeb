@@ -12,6 +12,8 @@ export default function Hero() {
             {LABEL_FOR}
           </p>
 
+          {/* TODO(Blake): the home page headline. You have been asked; this one stays
+              until you answer. */}
           {/* TODO(Blake): the old tagline "Your prospects are searching for your
               services, but are they finding you?" is gone from the marketing pages,
               per the brief. truth.md says it could stay as a line under the label

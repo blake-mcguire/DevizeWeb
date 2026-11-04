@@ -38,7 +38,7 @@ export const faqs = [
   {
     q: "What about ChatGPT and Google's AI answers?",
     // TODO(Blake): does "AEO" stay named? Your new words say "SEO and Review management" only, so it appears once here and nowhere else.
-    a: "When someone asks ChatGPT, Google's AI or another assistant for a local business, it answers with a few names instead of a list of links. You'll sometimes hear the work on this called AEO. It sits on the same foundations as SEO: the same facts everywhere and plain answers to common questions. Google says there's nothing extra to do to appear in its AI answers beyond the basics of good SEO. Nobody outside these companies sees exactly how they choose, so we work on what they read. We don't track AI answers yet, and we can't promise one will name you.",
+    a: "When someone asks ChatGPT, Google's AI or another assistant for a local business, it answers with a few names instead of a list of links. You'll sometimes hear the work on this called AEO. It sits on the same foundations as SEO: the same facts everywhere and plain answers to common questions. Google says there's nothing extra to do to appear in its AI answers beyond the basics of good SEO. Nobody outside these companies sees exactly how they choose. We keep your facts plain in the places they may read. We don't track AI answers yet, and we can't promise one will name you.",
   },
   {
     q: "Can you guarantee I'll be in the top three?",
@@ -50,7 +50,7 @@ export const faqs = [
   },
   {
     q: "Do you do the work, or do I?",
-    a: "We do it. There's no software to learn. Once you've added us as a manager on your Google listing, there's nothing for you to log into. Each month you get a re-run of the map, by hand for now, and a one-page note. We'll ask you for photos of your work, the few answers only you know, and your own numbers if you'll share them. You sign off once, at the start, on how we reply to reviews in your name.",
+    a: "We do it. There's no software to learn. Once you've added us as a manager on your Google listing, there's nothing for you to log into. Each month you get a re-run of the map, by hand for now, and a one-page note. We'll ask you for photos of your work, the few answers only you know, and your own numbers if you'll share them. You sign off once, at the start, on how we reply to reviews in your name. At the start, someone in your office sends the review requests by hand.",
   },
   {
     q: "Do I need a new website?",
@@ -70,7 +70,7 @@ export const faqs = [
   },
   {
     q: "Do you write or buy reviews?",
-    a: "No. Fake reviews, paid reviews and asking only happy customers all break Google's rules, and the FTC bans fake reviews. We set up a routine so every customer gets asked and every review gets a reply. If you run a health practice, a privacy contract comes first.",
+    a: "No. Fake reviews, paid reviews and asking only happy customers all break Google's rules, and the FTC bans fake reviews. We help set up a routine so every customer gets asked, by hand until a tool passes our checks, and we answer every review. If you run a health practice, a privacy contract comes first.",
   },
   {
     q: "Will you run my Google Ads?",

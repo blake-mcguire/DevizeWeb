@@ -20,7 +20,7 @@ import {
 export const metadata: Metadata = {
   title: "Google Ads Management",
   description:
-    "An optional add-on at $150 a month, on top of the $500 monthly work: 5 new lines of ad copy, 2 search reviews, 1 test, 4 check-ins and 1 report a month. Ad spend is separate and paid to Google.",
+    "An optional add-on at $150 a month, on top of the $500 monthly work. After the first 30 days: 5 new lines of ad copy, 2 search reviews, 1 test, 4 check-ins and 1 report a month. Ad spend is separate and paid to Google.",
   alternates: { canonical: "/services/google-ads" },
 };
 
@@ -55,7 +55,7 @@ export default function GoogleAdsPage() {
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)] lg:gap-14 items-start">
           <div className="min-w-0">
             <Eyebrow>What you get</Eyebrow>
-            <H2 className="mt-4">Every month, counted.</H2>
+            <H2 className="mt-4">Every month after the first 30 days, counted.</H2>
             <CountList className="mt-8" items={[...ADS_MONTHLY]} />
           </div>
           <div className="min-w-0 space-y-5">
@@ -73,7 +73,7 @@ export default function GoogleAdsPage() {
                 items={[
                   "You own the account and hold Admin, with your own Google sign-in.",
                   "You pay Google directly. We never hold your billing.",
-                  "We get a user invitation: read-only first, then Standard. Never Admin, and never a shared password.",
+                  "We get a user invitation: read-only first, then Standard, which is Google's name for access that can edit ads but can't add users. Never Admin, and never a shared password.",
                   "You can remove us at any time.",
                   GOOGLE_ADS.keep,
                 ]}
@@ -109,8 +109,9 @@ export default function GoogleAdsPage() {
             Google can spend up to twice your average daily budget on one day, and
             up to 30.4 times it in a month. So a $40 daily budget can spend about
             $80 on one day, and no more than about $1,216 in a month. Your ceiling
-            is written down at the start, and only you change it. This is what the
-            money can do, not a forecast of what it buys.
+            is written down at the start, and we don&apos;t change it without your
+            written yes. This is what the money can do, not a forecast of what it
+            buys.
           </p>
         </div>
       </Section>
