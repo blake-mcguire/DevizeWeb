@@ -19,13 +19,14 @@ export default function Hero() {
           </h1>
 
           <p className="reveal mt-6 max-w-3xl text-lg md:text-xl text-white/85 leading-relaxed">
-            Devize is a {LABEL}{" "}for service businesses that sell to people. We
-            manage your SEO and your ad spend to bring in the clicks. {BOOKING_OS},
-            in pilot today, takes in every lead and helps you book it and keep it.
+            Devize is a {LABEL}{" "}for service businesses that sell to people, like
+            plumbers, HVAC shops, dentists, vets, law firms and walk-in clinics. We
+            manage your SEO and your ad spend to bring in the clicks. {BOOKING_OS}, in
+            pilot, is meant to take in each lead and help you book it and keep it.
           </p>
 
           <div className="reveal mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <Button href="/#contact" size="lg" className="w-full sm:w-auto">
+            <Button href="/#audit" size="lg" className="w-full sm:w-auto">
               Get my free map audit
             </Button>
             <Button href="/what-we-do" variant="glass" size="lg" className="w-full sm:w-auto">
@@ -33,9 +34,11 @@ export default function Hero() {
             </Button>
           </div>
 
+          {/* TODO(Blake): this price sits on the first screen, so it's only true to print
+              once paymentPathReady is true in src/lib/launch-gate.json. */}
           <p className="reveal mt-5 text-sm text-white/75 leading-relaxed">
-            {PRICE.audit}{" "}No logins, nothing to sign. We promise the work, never a
-            rank, a date or a lead count.
+            SEO and review work is {PRICE.display}{" "}a month, flat. {PRICE.audit}{" "}No logins,
+            nothing to sign. We promise the work, never a rank, a date or a lead count.
           </p>
         </div>
       </div>

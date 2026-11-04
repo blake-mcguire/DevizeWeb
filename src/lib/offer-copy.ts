@@ -76,13 +76,14 @@ export const KEEP_PROMISE =
 export const AUDIT_NAME = "Free Google Listing and Map Audit";
 
 /**
- * Where the rival comparison runs. Real scans exist for Houston and Dallas
+ * Where the comparison with rivals runs. Real scans exist for Houston and Dallas
  * (dental and HVAC) and San Antonio (dental). Keep in step with the scraper's
- * market.py and metros.json.
+ * market.py and metros.json. The full wording prints at the form (contact.tsx) and
+ * on Services only, so it doesn't repeat page after page.
  */
 export const COVERAGE = {
   today:
-    "The audit's rival comparison runs today for dental and HVAC, in the areas we've scanned: Houston and Dallas for both, San Antonio for dental.",
+    "The audit's comparison with rivals runs today for dental and HVAC, in the areas we've scanned: Houston and Dallas for both, San Antonio for dental.",
   others:
     "For any other trade or area, we'll tell you up front that your comparison waits until we have the data.",
 } as const;
@@ -151,8 +152,9 @@ export const NOT_GOOGLE =
 // The first 30 days (order of work, never a promised result)
 // ---------------------------------------------------------------------------
 
-// TODO(Blake): publishing this makes it a commitment. Only keep it if you will
-// really do it, in this order, for every client.
+// TODO(Blake): not printed anywhere right now. It came off What We Do with this pass,
+// because publishing it makes it a commitment. If you will really do it, in this
+// order, for every client, say so and it goes back.
 export const FIRST_30_DAYS: { title: string; detail: string }[] = [
   {
     title: "The audit",
@@ -180,45 +182,11 @@ export const FIRST_30_DAYS: { title: string; detail: string }[] = [
 ];
 
 // ---------------------------------------------------------------------------
-// What we won't promise, and what we won't do. Printed on /what-we-do only.
-// ---------------------------------------------------------------------------
-
-export const WONT_PROMISE: { title: string; detail: string }[] = [
-  {
-    title: "No rank",
-    detail:
-      "Nobody controls Google's map, and Google says you can't pay for a better local ranking. Be careful with anyone who promises a spot.",
-  },
-  {
-    title: "No date",
-    detail:
-      "We can tell you the order of the work. We can't tell you when, or if, a place on the map will change.",
-  },
-  {
-    title: "No lead count",
-    detail:
-      `No number of calls, leads, booked jobs or customers, from the map, from ads or from ${BOOKING_OS}. No cost per lead and no ad position either.`,
-  },
-  {
-    title: "No AI answer naming you",
-    detail:
-      "Nobody outside these companies sees exactly how they choose. We keep your facts plain in the places they may read, and we don't track AI answers yet.",
-  },
-  {
-    title: "No fake reviews",
-    detail:
-      "No fake or paid reviews, and no asking only your happy customers. Google bars them, and the FTC bans fake reviews.",
-  },
-  {
-    title: "No long contract",
-    detail: "Month to month. Cancel any time, and it ends with the month you've paid for.",
-  },
-];
-
-// ---------------------------------------------------------------------------
 // Numbers from Devize's own searches. These are about the method, never about a
-// result for anyone. TODO(Blake): publish these? The research defaults to yes,
-// with date and basis, and an older note kept them internal.
+// result for anyone. Not printed anywhere right now: they came off What We Do with
+// this pass, and the three lists below are ready for the page they go on.
+// TODO(Blake): publish these? The research defaults to yes, with date and basis, and
+// an older note kept them internal. If yes, they go on /sample-audit.
 // ---------------------------------------------------------------------------
 
 export const SEARCH_COUNT = {
@@ -285,8 +253,8 @@ export const FOUNDER = {
   // because it is your own block, and the rest of the site says "we". Never "team"
   // or "I run every audit": the pipeline builds audits and a person presses Send.
   bio: [
-    "I run Devize. A service business can pay for every click and still lose the customer at the phone, and most owners never see it happen.",
-    "I'll show you where that's happening, tell you what I'd fix and what I'd skip, and say what nobody can promise.",
+    "I run Devize. A service business can pay for every click and still lose the customer at the phone.",
+    "I'll show you what can be seen from the outside, tell you what I'd fix and what I'd skip, and say what nobody can promise.",
   ],
   // The brief's line, in full: "Devize is new, so there are no client stories
   // here. Judge us by the sample, the price and the terms." The last three go on

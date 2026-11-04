@@ -134,13 +134,18 @@ export default function HvacPage() {
             </p>
           </div>
         </div>
+        {/* TODO(Blake): see the listing-fixes question above TIER_1 in src/lib/tiers.ts.
+            This line is the "no" answer, and it goes if listing fixes join Tier 1. */}
+        <p className="mt-8 max-w-3xl font-medium text-[var(--color-ink)] leading-relaxed">
+          These are yours to change. The audit flags what it can see, and we correct
+          wrong facts in the first month of Tier 1.
+        </p>
       </Section>
 
       <Section band>
         <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)] lg:gap-14">
           <div className="min-w-0">
-            <Eyebrow>Which tier fits</Eyebrow>
-            <H2 className="mt-4 md:text-4xl">Start with Tier 1. The pilots are aimed at 6:40.</H2>
+            <H2 className="md:text-4xl">Start with Tier 1. The pilots are aimed at 6:40.</H2>
             <p className="mt-6 text-lg text-[var(--color-ink-soft)] leading-relaxed">
               Tier 1, at {PRICE.display}{" "}a month, gets your site, posts and replies in
               order for the homeowner with time. It won&apos;t answer a phone after
@@ -149,8 +154,8 @@ export default function HvacPage() {
               because no patient records or bar rules stand in the way.
             </p>
             <p className="mt-4 text-lg text-[var(--color-ink-soft)] leading-relaxed">
-              Google Ads is the one Tier 2 line you can buy now, at {GOOGLE_ADS.display}{" "}a
-              month plus ad spend paid to Google. The first test we&apos;d suggest is ads
+              Google Ads is the one Tier 2 line you can buy now: {GOOGLE_ADS.display}{" "}a
+              month more, plus what you pay Google. The first test we&apos;d suggest is ads
               only in the hours someone answers, because a click that rolls to voicemail
               is money for nothing.
             </p>
@@ -171,14 +176,14 @@ export default function HvacPage() {
             </p>
             <p className="mt-5 font-medium text-[var(--color-ink)]">A caller who smells gas</p>
             <p className="mt-1 text-[0.95rem] text-[var(--color-ink-soft)] leading-relaxed">
-              A voice agent gets one short line for this, then lets them go.
+              A voice agent would get one short line for this, then let them go.
               CenterPoint&apos;s advice is to leave on foot, avoid using a phone and
               call once you&apos;re safe.{cite(S.gas)}{" "}An agent that keeps someone
               talking does the opposite.
             </p>
             <p className="mt-5 font-medium text-[var(--color-ink)]">Your free audit</p>
             <p className="mt-1 text-[0.95rem] text-[var(--color-ink-soft)] leading-relaxed">
-              The rival comparison runs for HVAC in Houston and Dallas, on listings
+              The comparison with rivals runs for HVAC in Houston and Dallas, on listings
               whose main Google category is HVAC contractor, AC repair service or AC
               contractor. Anywhere else, it waits until we have the data.
             </p>

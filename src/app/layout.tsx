@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
 import "./globals.css";
+import { BOOKING_OS } from "@/lib/offer-copy";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -21,11 +22,11 @@ export const metadata: Metadata = {
     template: "%s · Devize",
   },
   description:
-    "Devize is a digital strategy partner for service businesses that sell to people. We manage your SEO and ad spend to bring in the clicks, and help turn them into clients. Start with a free map audit.",
+    `Devize is a digital strategy partner for service businesses that sell to people. We manage your SEO and ad spend. ${BOOKING_OS}, the system meant to help turn those clicks into clients, is in pilot. Start with a free map audit.`,
   openGraph: {
     title: "Convert clicks into clients without adding headcount.",
     description:
-      "We manage your SEO and ad spend to bring in the clicks, and help turn them into clients. Start with a free map audit.",
+      `We manage your SEO and Google Ads. ${BOOKING_OS}, the system meant to help turn those clicks into clients, is in pilot. Start with a free map audit.`,
     url: "https://www.devize.ai",
     siteName: "Devize",
     type: "website",
@@ -35,7 +36,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Convert clicks into clients without adding headcount.",
     description:
-      "We manage your SEO and ad spend to bring in the clicks, and help turn them into clients. Start with a free map audit.",
+      `We manage your SEO and Google Ads. ${BOOKING_OS}, the system meant to help turn those clicks into clients, is in pilot. Start with a free map audit.`,
   },
   robots: {
     index: true,

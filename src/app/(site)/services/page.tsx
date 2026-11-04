@@ -21,15 +21,13 @@ import {
   TIERS,
   TIER_1_LEFT_OUT,
   TIER_1_YOUR_PART,
-  TIER_ITEMS,
   TRADE_ACCESS,
   type Tier,
 } from "@/lib/tiers";
 
 export const metadata: Metadata = {
   title: "Services",
-  description:
-    "A free map audit, then three tiers side by side. Tier 1 is $500 a month, flat, and available now. Google Ads is a $150 a month add-on, with ad spend paid to Google. The rest is in pilot.",
+  description: `A free map audit, then three tiers side by side. Tier 1 is ${PRICE.display} a month, flat, and available now. Google Ads is a ${GOOGLE_ADS.display} a month add-on, with ad spend paid to Google. The rest is in pilot.`,
   alternates: { canonical: "/services" },
 };
 
@@ -43,14 +41,20 @@ const LINK = "font-medium text-[var(--color-brand)] underline underline-offset-4
 
 // DRAFT: for Blake to confirm. These are only the questions no page answers
 // elsewhere. It feeds both the list below and the FAQPage JSON-LD.
-const QUESTIONS: { q: string; a: string }[] = [
+const QUESTIONS: { q: string; a: string; more?: React.ReactNode }[] = [
   {
     q: "Can I buy Tier 2 or Tier 3 today?",
     a: `Google Ads management, yes, as the ${GOOGLE_ADS.display} a month add-on. The rest is in pilot: no client is on it and the price isn't set. Email ${EMAIL} and we'll tell you where it stands for your trade.`,
   },
   {
     q: "What happens if I cancel?",
-    a: `${PRICE.term} Tell us by email, and the service ends with the month you've paid for. ${KEEP_PROMISE} We hand over every page and file before we remove our access.`,
+    a: `${PRICE.term} Tell us by email, and the service ends with the month you've paid for. We hand over every page and file before we remove our access.`,
+    // On the page only. The structured data keeps the plain answer above.
+    more: (
+      <>
+        {" "}What stays yours is under <a href="#if-you-leave" className={LINK}>If you leave</a>.
+      </>
+    ),
   },
   {
     q: "Do you write or buy reviews?",
@@ -185,8 +189,16 @@ function TierCard({ tier }: { tier: Tier }) {
             )}
             <div className="min-w-0">
               <p className={cn("text-[0.95rem] leading-snug", dark ? "text-white" : "text-[var(--color-ink)]")}>{item.title}</p>
-              {item.note && <p className="mt-1 text-sm leading-snug text-[#1F7A45]">{item.note}</p>}
-              {!dark && item.status === "pilot" && <p className="mt-0.5 text-xs font-medium text-[var(--color-brand)]">In pilot, ask us</p>}
+              {item.note && <p className="mt-1 text-sm leading-snug text-[var(--color-ink)]">{item.note}</p>}
+              {!dark && item.status === "pilot" && (
+                <>
+                  <p className="mt-0.5 text-xs font-medium text-[var(--color-brand)]">In pilot, ask us</p>
+                  <details className="mt-1">
+                    <summary className="cursor-pointer py-1 text-xs font-medium text-[var(--color-ink-soft)] underline underline-offset-4 decoration-[var(--color-ink)]/25">What it would do</summary>
+                    <p className="mt-1 text-sm leading-relaxed text-[var(--color-ink-soft)]">{item.detail}</p>
+                  </details>
+                </>
+              )}
             </div>
           </li>
         ))}
@@ -209,14 +221,15 @@ function TierCard({ tier }: { tier: Tier }) {
 
 export default function ServicesPage() {
   const tier1 = TIERS[0];
-  const pilots = TIER_ITEMS.filter((i) => i.status === "pilot");
 
   return (
     <>
+      {/* TODO(Blake): "for sale today" is only true once paymentPathReady is true in
+          src/lib/launch-gate.json. No order form or way to pay exists yet. */}
       <PageHero
         eyebrow="Services"
         title="Three tiers. Each one adds to the last."
-        lead="The free audit comes first, and it costs nothing. Tier 1 is for sale today at one flat price. Most of Tiers 2 and 3 is still in pilot, and we mark it line by line."
+        lead={`The free audit comes first, and it costs nothing. Tier 1 is ${PRICE.display} a month, flat, for sale today. Google Ads is ${GOOGLE_ADS.display} a month more, plus what you pay Google. Most of Tiers 2 and 3 is still in pilot, and we mark it line by line.`}
       >
         <div className="flex flex-col gap-3 sm:flex-row">
           <Button href="#free-audit" native size="lg" className="w-full sm:w-auto">Start with the free audit</Button>
@@ -239,7 +252,7 @@ export default function ServicesPage() {
             </p>
           </div>
           <div className="min-w-0 flex flex-col gap-3">
-            <Button href="/#contact" size="lg" className="w-full">Get my free map audit</Button>
+            <Button href="/#audit" size="lg" className="w-full">Get my free map audit</Button>
             <Button href="/sample-audit" size="lg" variant="secondary" className="w-full">See a sample audit</Button>
           </div>
         </div>
@@ -294,13 +307,17 @@ export default function ServicesPage() {
             <TierCard key={tier.id} tier={tier} />
           ))}
         </ol>
-        <p className="mt-6 max-w-3xl text-[var(--color-ink-soft)] leading-relaxed">{PILOT_NOTE}</p>
+        <p className="mt-6 max-w-3xl text-[var(--color-ink-soft)] leading-relaxed">
+          {PILOT_NOTE} Most of the pilots send messages or take calls from real people,
+          so the rules come first.
+        </p>
       </Section>
 
       <Section id="tier-1">
         <div className="max-w-2xl">
           <Eyebrow>Tier 1, line by line</Eyebrow>
           <H2 className="mt-4">What {PRICE.display} a month buys.</H2>
+          <p className="mt-5 text-lg text-[var(--color-ink-soft)] leading-relaxed">{tier1.purpose}</p>
         </div>
         <div className="mt-10 grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)] lg:gap-14 items-start">
           <div className="min-w-0">
@@ -312,7 +329,7 @@ export default function ServicesPage() {
                 </li>
               ))}
             </ul>
-            <div className="mt-8 rounded-2xl border border-[var(--color-ink)]/15 bg-[var(--color-surface-raised)] p-6">
+            <div id="if-you-leave" className="mt-8 scroll-mt-24 rounded-2xl border border-[var(--color-ink)]/15 bg-[var(--color-surface-raised)] p-6">
               <H3 className="md:text-xl">If you leave</H3>
               <p className="mt-3 text-[var(--color-ink)] leading-relaxed">{KEEP_PROMISE}</p>
               <p className="mt-3 text-[0.95rem] text-[var(--color-ink-soft)] leading-relaxed">
@@ -358,61 +375,42 @@ export default function ServicesPage() {
               <H3 className="md:text-xl">Every month after the first 30 days</H3>
               <CountList className="mt-5" items={ADS_MONTHLY} />
             </div>
-            <div className="grid gap-5 md:grid-cols-2">
-              <div className="rounded-2xl border border-[var(--color-border)] bg-white p-6">
-                <H3 className="md:text-xl">The limits</H3>
-                <DotList className="mt-4" items={[...GOOGLE_ADS.limits]} />
-              </div>
-              <div className="rounded-2xl border border-[var(--color-border)] bg-white p-6">
-                <H3 className="md:text-xl">Who owns what</H3>
-                <DotList className="mt-4" items={ADS_OWNERSHIP} />
-              </div>
-            </div>
           </div>
         </div>
 
-        <ol className="mt-5 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {ADS_FIRST_30.map((step) => (
-            <li key={step.when} className="rounded-2xl border border-[var(--color-border)] bg-white p-5">
-              <p className="text-xs uppercase tracking-[0.14em] text-[var(--color-brand)] font-medium">{step.when}</p>
-              <p className="mt-2 font-medium text-[var(--color-ink)] leading-snug">{step.title}</p>
-              <p className="mt-2 text-sm text-[var(--color-ink-soft)] leading-relaxed">{step.detail}</p>
-            </li>
-          ))}
-        </ol>
-
-        <div className="mt-5 grid gap-5 md:grid-cols-2 items-start">
-          <details className="rounded-2xl border border-[var(--color-border)] bg-white p-5 md:p-6">
-            <summary className="cursor-pointer font-medium text-[var(--color-ink)]">What isn&apos;t promised</summary>
-            <CrossList className="mt-4" items={ADS_NOT_PROMISED} />
-          </details>
-          <details className="rounded-2xl border border-[var(--color-border)] bg-white p-5 md:p-6">
-            <summary className="cursor-pointer font-medium text-[var(--color-ink)]">What&apos;s left out</summary>
-            <CrossList className="mt-4" items={ADS_LEFT_OUT} />
-          </details>
-        </div>
-      </Section>
-
-      <Section id="pilots">
-        <div className="max-w-2xl">
-          <Eyebrow>Tiers 2 and 3</Eyebrow>
-          <H2 className="mt-4">What each pilot does, and what it has to meet first.</H2>
-          <p className="mt-5 text-lg text-[var(--color-ink-soft)] leading-relaxed">
-            None of these is on a client today. Most of them send messages or take
-            calls from real people, so the rules come first.
-          </p>
-        </div>
-        <ul className="mt-10 grid gap-x-10 gap-y-7 md:grid-cols-2">
-          {pilots.map((item) => (
-            <li key={item.id} className="border-t border-[var(--color-border)] pt-5">
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-                <H3 className="md:text-xl leading-snug">{item.title}</H3>
-                <StatusPill status="pilot" />
-              </div>
-              <p className="mt-2 text-[var(--color-ink-soft)] leading-relaxed">{item.detail}</p>
-            </li>
-          ))}
-        </ul>
+        <details className="mt-5 rounded-2xl border border-[var(--color-border)] bg-white p-5 md:p-7">
+          <summary className="cursor-pointer font-medium text-[var(--color-ink)]">The add-on&apos;s full terms</summary>
+          <div className="mt-6 grid gap-8 md:grid-cols-2">
+            <div>
+              <H3 className="md:text-xl">The limits</H3>
+              <DotList className="mt-4" items={[...GOOGLE_ADS.limits]} />
+            </div>
+            <div>
+              <H3 className="md:text-xl">Who owns what</H3>
+              <DotList className="mt-4" items={ADS_OWNERSHIP} />
+            </div>
+          </div>
+          <H3 className="mt-8 md:text-xl">The first 30 days</H3>
+          <ol className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            {ADS_FIRST_30.map((step) => (
+              <li key={step.when} className="rounded-2xl border border-[var(--color-border)] p-5">
+                <p className="text-xs uppercase tracking-[0.14em] text-[var(--color-brand)] font-medium">{step.when}</p>
+                <p className="mt-2 font-medium text-[var(--color-ink)] leading-snug">{step.title}</p>
+                <p className="mt-2 text-sm text-[var(--color-ink-soft)] leading-relaxed">{step.detail}</p>
+              </li>
+            ))}
+          </ol>
+          <div className="mt-8 grid gap-8 md:grid-cols-2">
+            <div>
+              <H3 className="md:text-xl">What isn&apos;t promised</H3>
+              <CrossList className="mt-4" items={ADS_NOT_PROMISED} />
+            </div>
+            <div>
+              <H3 className="md:text-xl">What&apos;s left out</H3>
+              <CrossList className="mt-4" items={ADS_LEFT_OUT} />
+            </div>
+          </div>
+        </details>
       </Section>
 
       <Section id="open-to" band>
@@ -477,12 +475,15 @@ export default function ServicesPage() {
                   </svg>
                 </span>
               </summary>
-              <p className="mt-4 text-[var(--color-ink-soft)] leading-relaxed">{item.a}</p>
+              <p className="mt-4 text-[var(--color-ink-soft)] leading-relaxed">
+                {item.a}
+                {item.more}
+              </p>
             </details>
           ))}
         </div>
         <div className="mt-10">
-          <Sources items={SOURCES} />
+          <Sources items={SOURCES} legalNote />
         </div>
       </Section>
 

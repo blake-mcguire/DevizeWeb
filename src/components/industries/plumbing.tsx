@@ -115,8 +115,7 @@ export default function PlumbingPage() {
       <Section>
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:gap-14 items-start">
           <div className="min-w-0">
-            <Eyebrow>Which tier fits</Eyebrow>
-            <H2 className="mt-4 md:text-4xl">It depends where you lose the job.</H2>
+            <H2 className="md:text-4xl">It depends where you lose the job.</H2>
             <p className="mt-6 text-lg text-[var(--color-ink-soft)] leading-relaxed">
               If nobody finds you, or they find you and don&apos;t trust the page, that&apos;s
               Tier 1 at {PRICE.display}{" "}a month: on-site fixes, posts a person has checked,
@@ -128,9 +127,9 @@ export default function PlumbingPage() {
               pilot. Plumbing and HVAC go first, since neither carries patient records or bar rules.
             </p>
             <p className="mt-4 text-[var(--color-ink-soft)] leading-relaxed">
-              Google Ads is available now at {GOOGLE_ADS.display}{" "}a month plus ad spend paid to
-              Google. If you only want it for emergencies, ask yourself who answers. Paying for a midnight click that rings out is
-              the worst deal in the trade.
+              Google Ads is {GOOGLE_ADS.display}{" "}a month more, plus what you pay Google. If you
+              only want it for emergencies, ask yourself who answers. Paying for a midnight click
+              that rings out is the worst deal in the trade.
             </p>
             <p className="mt-4 text-[var(--color-ink-soft)] leading-relaxed">
               A text telling a past customer their water heater is getting on in years is
@@ -142,8 +141,8 @@ export default function PlumbingPage() {
               <H3 className="md:text-xl">Your reviews</H3>
               <p className="mt-3 text-[0.95rem] text-[var(--color-ink-soft)] leading-relaxed">
                 A bad review about price gets a general answer and an invitation to call. Never
-                the invoice, and never the customer&apos;s address. If you ask for reviews yourself,
-                ask everyone: Google bars asking only for good ones, and the FTC bans buying them.{cite(S.contribution, S.ftc)}
+                the invoice, and never the customer&apos;s address. Ask everyone or no one, and never
+                pay for a review.{cite(S.contribution, S.ftc)}
               </p>
             </div>
             <div className="rounded-2xl border border-[var(--color-ink)]/15 bg-[var(--color-surface-raised)] p-6 md:p-7">
@@ -155,9 +154,8 @@ export default function PlumbingPage() {
                 secured a Responsible Master Plumber, as an employee or the owner.{cite(S.tx3679)}
               </p>
               <p className="mt-3 text-[0.95rem] text-[var(--color-ink-soft)] leading-relaxed">
-                Gas water heaters mean the odd call about a gas smell. A voice agent gets one short
-                line for it, then lets them go. CenterPoint&apos;s advice is to leave on foot, avoid
-                using a phone and call once you&apos;re safe.{cite(S.gas)}
+                Gas water heaters mean the odd call about a gas smell. A voice agent would tell them
+                to leave and call from outside, then let them go.{cite(S.gas)}
               </p>
             </div>
           </div>
@@ -167,7 +165,8 @@ export default function PlumbingPage() {
       <TradeClose
         sources={SOURCES}
         title="Call your own number at midnight."
-        body="If you don't like what you hear, email us. The audit is free and reads public pages only. We haven't scanned plumbers yet, so the rival comparison waits until we have the data."
+        cta="Ask what we can show you"
+        body="If you don't like what you hear, email us. It's free, and we only read public pages. We haven't scanned plumbers yet, so we can't yet show you how you stack up against the shops around you."
       />
     </>
   );

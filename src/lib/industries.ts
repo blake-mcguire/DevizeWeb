@@ -89,7 +89,7 @@ export const INDUSTRIES: Industry[] = [
     name: "Dental Clinics",
     title: "Dental Clinics",
     metaDescription:
-      "Why a review reply is where dental practices get fined, what a new-patient call is worth, and why voice, text and CRM wait for dental clinics at Devize.",
+      "Why a review reply is where dental practices get fined, what a new-patient call is worth, and why voice, text and a lead system wait for dental clinics at Devize.",
     hook: "A toothache at 7am. A new family on Saturday.",
     search: "emergency dentist near me",
     compared: true,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type FocusEvent, type KeyboardEvent } from "react";
 import Link from "next/link";
 
 export type IndustryCard = {
@@ -84,6 +84,21 @@ export function IndustryCarousel({ cards }: { cards: IndustryCard[] }) {
     el.scrollTo({ left: slide.offsetLeft - pad, behavior: prefersReducedMotion() ? "auto" : "smooth" });
   }, []);
 
+  // Tabbing to a link in a card that's cut off brings the card into view. A card
+  // already in full view stays put, so tabbing on a wide screen doesn't shuffle them.
+  // Keyboard focus only: a mouse press also focuses the link, and moving the card
+  // between press and release would lose the click.
+  function onFocus(event: FocusEvent<HTMLUListElement>) {
+    const el = track.current;
+    const target = event.target as HTMLElement;
+    const card = target.closest("li");
+    if (!el || !card || !target.matches(":focus-visible")) return;
+    const view = el.getBoundingClientRect();
+    const box = card.getBoundingClientRect();
+    if (box.left >= view.left - 1 && box.right <= view.right + 1) return;
+    goTo(Array.from(el.children).indexOf(card));
+  }
+
   function onKeyDown(event: KeyboardEvent<HTMLUListElement>) {
     if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
     const moves: Record<string, number> = {
@@ -108,6 +123,7 @@ export function IndustryCarousel({ cards }: { cards: IndustryCard[] }) {
         ref={track}
         tabIndex={0}
         aria-label="Industry pages. Swipe, or use the left and right arrow keys."
+        onFocus={onFocus}
         onKeyDown={onKeyDown}
         className="relative -mx-6 flex snap-x snap-mandatory scroll-pl-6 gap-4 overflow-x-auto overscroll-x-contain px-6 pb-3 pt-1 [scrollbar-width:none] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand)] lg:mx-0 lg:scroll-pl-0 lg:gap-5 lg:px-0 [&::-webkit-scrollbar]:hidden"
       >

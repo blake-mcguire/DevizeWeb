@@ -126,13 +126,11 @@ export default function VeterinaryPage() {
             </ul>
           </div>
           <div className="min-w-0 rounded-3xl border border-[var(--color-border)] bg-white p-6 md:p-8">
-            <Eyebrow>Which tier fits</Eyebrow>
-            <H3 className="mt-3 md:text-[1.75rem]">Tier 1 fits as it stands.</H3>
+            <H3 className="md:text-[1.75rem]">Tier 1 fits as it stands.</H3>
             <p className="mt-4 text-[var(--color-ink-soft)] leading-relaxed">
               At {PRICE.display}{" "}a month you get your site, your posts, your replies and your
-              map. Google Ads is available at {GOOGLE_ADS.display}{" "}a month plus ad spend paid
-              to Google. Claims stay
-              inside the board&apos;s rule: it bars guarantees of satisfaction or a cure, claims
+              map. You can add Google Ads for {GOOGLE_ADS.display}{" "}a month, plus what you pay
+              Google. Claims stay inside the board&apos;s rule: it bars guarantees of satisfaction or a cure, claims
               of better quality the public can&apos;t reasonably verify, and calling yourself a
               specialist unless you&apos;re board certified through the AVMA.{cite(S.tx57330)}
             </p>
@@ -155,7 +153,8 @@ export default function VeterinaryPage() {
         <TradeClose
           sources={SOURCES}
           title="Look up your own clinic at 9pm."
-          body="See what a scared owner sees, then ask us for the audit. We haven't scanned vet clinics yet, so the rival comparison waits until we have the data. We'll tell you what we can show you today."
+          cta="Ask what we can show you"
+          body="See what a scared owner sees, then ask us. We haven't scanned vet clinics yet, so we can't line you up against the clinics near you. We'll tell you what we can show you today."
         />
       </div>
     </>

@@ -22,14 +22,17 @@ export function Crumb({ name }: { name: string }) {
 export const TRADE_LINE =
   "Devize is new: no client in this trade yet, and no client's Google Ads campaign run yet. We aren't lawyers, this isn't legal advice, and nothing here promises a rank, a date or a booked job.";
 
-export function TradeClose({ sources, title, body }: { sources: Source[]; title: string; body: string }) {
+// TODO(Blake): say exactly what a plumber, vet, lawyer or clinic receives when they
+// ask. truth.md says the real audit covers dentists and HVAC shops in scanned areas,
+// so those four pages' buttons read "Ask what we can show you" until you do.
+export function TradeClose({ sources, title, body, cta }: { sources: Source[]; title: string; body: string; cta?: string }) {
   return (
     <>
       <section className="mx-auto max-w-6xl px-6 pb-14">
         <p className="mb-6 max-w-3xl text-[var(--color-ink)] leading-relaxed">{TRADE_LINE}</p>
         <Sources items={sources} />
       </section>
-      <CtaBand title={title} body={body} />
+      <CtaBand title={title} body={body} cta={cta} />
     </>
   );
 }

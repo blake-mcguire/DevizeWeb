@@ -146,8 +146,7 @@ export default function LawPage() {
 
       <Section band>
         <div className="max-w-2xl">
-          <Eyebrow>Which tier fits</Eyebrow>
-          <H2 className="mt-4">Tier 1, with your name on the sign-off.</H2>
+          <H2>Tier 1, with your name on the sign-off.</H2>
         </div>
         <div className="mt-8 grid grid-cols-1 gap-10 md:grid-cols-2 md:gap-14 items-start">
           <div className="min-w-0 space-y-4 text-[var(--color-ink-soft)] leading-relaxed">
@@ -156,14 +155,14 @@ export default function LawPage() {
               that someone at the firm reads before they go up. Replies follow your rule.
             </p>
             <p>
-              Google Ads is available at {GOOGLE_ADS.display}{" "}a month plus ad spend paid to
-              Google. Your lawyer reviews the copy and any filing.
+              Google Ads adds {GOOGLE_ADS.display}{" "}a month, plus what you pay Google, and your
+              lawyer reviews the copy and any filing.
             </p>
             <p>
               Texas Rule 7.01 bars false or misleading communications, and its comments warn
               about unjustified expectations of results and comparisons that can&apos;t be
               backed up.{cite(S.tx701)}{" "}Your state&apos;s rules may differ. Your free audit
-              won&apos;t show a rival comparison yet, because we haven&apos;t scanned law firms.
+              won&apos;t compare you with other firms yet, because we haven&apos;t scanned law firms.
             </p>
           </div>
           <div className="min-w-0 rounded-2xl border-2 border-dashed border-[#B3261E]/30 bg-white p-6 md:p-7">
@@ -190,7 +189,8 @@ export default function LawPage() {
         <TradeClose
           sources={SOURCES}
           title="Want to see what we'd look at?"
-          body="Ask for the audit anyway. It's free, it reads only public pages, and it touches nothing of your clients'. We'll tell you up front what it can't show a law firm yet."
+          cta="Ask what we can show you"
+          body="Ask us anyway. It's free, we only read public pages, and it touches nothing of your clients'. We'll tell you up front what we can't show a law firm yet."
         />
       </div>
     </>

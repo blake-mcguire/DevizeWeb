@@ -198,9 +198,11 @@ export function CountList({
 export function CtaBand({
   title = "See your own map first.",
   body = "It's free, there's nothing to sign, and we only use what anyone can see on Google and on your website.",
+  cta = "Get my free map audit",
 }: {
   title?: string;
   body?: string;
+  cta?: string;
 }) {
   return (
     <section className="mx-auto max-w-6xl px-6 pb-20 md:pb-28 pt-4">
@@ -220,8 +222,8 @@ export function CtaBand({
             </p>
             <p className="mt-3 text-white/80 leading-relaxed max-w-2xl">{body}</p>
           </div>
-          <Button href="/#contact" size="lg" className="w-full md:w-auto">
-            Get my free map audit
+          <Button href="/#audit" size="lg" className="w-full md:w-auto">
+            {cta}
           </Button>
         </div>
       </div>
@@ -269,7 +271,16 @@ export function SearchChips({ searches, className }: { searches: string[]; class
 }
 
 /** Numbered sources for any outside fact on a page. */
-export function Sources({ items, read = "4 November 2026" }: { items: Source[]; read?: string }) {
+export function Sources({
+  items,
+  read = "4 November 2026",
+  legalNote = false,
+}: {
+  items: Source[];
+  read?: string;
+  /** For a page with no other line saying this isn't legal advice. The trade pages already have one. */
+  legalNote?: boolean;
+}) {
   if (!items.length) return null;
   return (
     <div className="border-t border-[var(--color-border)] pt-6">
@@ -289,7 +300,7 @@ export function Sources({ items, read = "4 November 2026" }: { items: Source[]; 
         ))}
       </ol>
       <p className="mt-3 text-xs text-[var(--color-ink-muted)] leading-relaxed">
-        Read on {read}. Rules change, so check the current version. Nothing here is legal advice.
+        Read on {read}. Rules change, so check the current version.{legalNote && " Nothing here is legal advice."}
       </p>
     </div>
   );

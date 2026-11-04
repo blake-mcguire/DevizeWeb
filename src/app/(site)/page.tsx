@@ -81,12 +81,12 @@ export default function Home() {
         <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-16">
           <div className="min-w-0">
             <Eyebrow>How it works</Eyebrow>
-            <H2 className="mt-4">One loop, and each turn feeds the next.</H2>
+            <H2 className="mt-4">The aim: clicks come in, customers come back.</H2>
             <p className="mt-6 text-lg text-[var(--color-ink-soft)] leading-relaxed">
               Search and ads bring people to you. {BOOKING_OS}, still in pilot, is
-              there to catch each one, so a click has a better shot at becoming a
+              meant to catch each one, so a click has a better shot at becoming a
               client and a client has a reason to come back. Their reviews and
-              repeat visits bring in the next round of clicks.
+              repeat visits can bring in the next round of clicks.
             </p>
             <p className="mt-6">
               <Link
@@ -138,6 +138,11 @@ export default function Home() {
                 <p className={cn("font-[family-name:var(--font-display)] text-xl font-medium tracking-tight", tier.status === "available" ? "text-white" : "text-[var(--color-ink)]")}>
                   {tier.price}
                 </p>
+                {tier.items.filter((item) => item.note).map((item) => (
+                  <p key={item.id} className="mt-1 text-sm leading-snug text-[var(--color-ink)]">
+                    Google Ads: {item.note}
+                  </p>
+                ))}
                 <div className="mt-2 flex flex-wrap gap-2">
                   {tier.pills.map((pill) => (
                     <StatusPill key={pill.label} status={pill.status} label={pill.label} onDark={tier.status === "available"} />

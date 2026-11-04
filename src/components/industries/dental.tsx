@@ -140,16 +140,21 @@ export default function DentalPage() {
             </p>
           </li>
         </ol>
+        {/* TODO(Blake): see the listing-fixes question above TIER_1 in src/lib/tiers.ts.
+            This line is the "no" answer, and it goes if listing fixes join Tier 1. */}
+        <p className="mt-8 font-medium text-[var(--color-ink)] leading-relaxed">
+          All five are yours to change. The audit flags what it can see from outside,
+          and in the first month of Tier 1 we&apos;d correct wrong facts on your listing.
+        </p>
       </Section>
 
       <Section band>
         <div className="max-w-2xl">
-          <Eyebrow>Which tier fits</Eyebrow>
-          <H2 className="mt-4">What we can sell a dental practice today, and what has to wait.</H2>
+          <H2>What a dental practice could buy, and what has to wait.</H2>
         </div>
         <div className="mt-10 grid gap-5 lg:grid-cols-2 items-start">
           <div className="rounded-3xl border border-[var(--color-border)] bg-white p-6 md:p-8">
-            <H3>Today</H3>
+            <H3>First, once the privacy paperwork is done</H3>
             <p className="mt-4 font-medium text-[var(--color-ink)]">Tier 1, at {PRICE.display} a month, with four conditions</p>
             {/* TODO(Blake): confirm the tool can exclude chosen pages, and get the vendor's
                 written answer on a privacy contract before connecting any dental listing
@@ -163,7 +168,7 @@ export default function DentalPage() {
                 "The privacy paperwork comes first. If it isn't settled, our tools don't touch your listing.",
               ]}
             />
-            <p className="mt-6 font-medium text-[var(--color-ink)]">Google Ads, at {GOOGLE_ADS.display} a month plus ad spend paid to Google, once your lawyer answers a few questions</p>
+            <p className="mt-6 font-medium text-[var(--color-ink)]">Google Ads, {GOOGLE_ADS.display} a month more plus what you pay Google, once your lawyer answers a few questions</p>
             <p className="mt-2 text-[0.95rem] text-[var(--color-ink-soft)] leading-relaxed">
               Texas says a trade-name ad must prominently name the owners and at least
               one dentist practicing there,{cite(S.tx10852)}{" "}and an ad line is 30 characters.
@@ -175,7 +180,7 @@ export default function DentalPage() {
           </div>
           <div className="rounded-3xl border-2 border-dashed border-[#B3261E]/30 bg-white p-6 md:p-8">
             <H3>Waits</H3>
-            <p className="mt-4 font-medium text-[var(--color-ink)]">Voice, text and CRM</p>
+            <p className="mt-4 font-medium text-[var(--color-ink)]">Voice, text and a lead system (CRM)</p>
             <p className="mt-2 text-[0.95rem] text-[var(--color-ink-soft)] leading-relaxed">
               That&apos;s all of {BOOKING_OS}: everything in Tier 2 except Google Ads, and
               all of Tier 3. Each one handles patient information, and whoever handles
@@ -233,7 +238,7 @@ export default function DentalPage() {
       <TradeClose
         sources={SOURCES}
         title="See who gets the 7am search."
-        body="The rival comparison runs for dental in Houston, Dallas and San Antonio, on listings whose main category is Dentist or Dental clinic. It reads only what anyone can see on Google and on your website, so it touches no patient data."
+        body="The comparison with rivals runs for dental in Houston, Dallas and San Antonio, on listings whose main category is Dentist or Dental clinic. It reads only what anyone can see on Google and on your website, so it touches no patient data."
       />
     </>
   );

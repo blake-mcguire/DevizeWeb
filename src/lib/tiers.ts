@@ -1,7 +1,14 @@
 /**
  * The three tiers, in one file: what each holds, the status of every line, and
- * every price. Change a line here and the home page, Services and What We Do all
- * follow. (Blake, 2026-11-04: "The Services we sell should be a 3 tiered option.")
+ * every price. (Blake, 2026-11-04: "The Services we sell should be a 3 tiered option.")
+ *
+ * These read from this file, so a status or price changed here follows: the home
+ * page's tier cards, the tier cards on Services, its description and JSON-LD, the
+ * flywheel's tags and What We Do's stage pills.
+ *
+ * These are sentences, and stay manual when a line goes live: hero.tsx, the
+ * how-it-works paragraph in src/app/(site)/page.tsx, the stage wording on What We
+ * Do, each pilot's "would" wording below, TRADE_ACCESS and the six trade pages.
  *
  * The launch gate stays closed: production builds fail until `offerCopyConfirmed`
  * is true in src/lib/launch-gate.json, and that flag covers this file.
@@ -26,7 +33,9 @@ export const ASK_US = "Ask us";
 
 // TODO(Blake): confirm this says what "in pilot" means to you. truth.md records
 // no delivered voice, texting or reactivation system, so it says no client is on
-// any of it. Change it once one is.
+// any of it. Change it once one is. "Pilot" suggests something is running, so answer
+// line by line: built or not? Anything not built becomes "Planned, ask us", which
+// is a one-line change to STATUS_LABEL or a new status.
 export const PILOT_NOTE =
   "In pilot means no client runs on it today and the price isn't set. Ask us where it stands for your trade.";
 
@@ -34,12 +43,15 @@ export const PILOT_NOTE =
 // Prices that are decided (Blake, 2026-11-04)
 // ---------------------------------------------------------------------------
 
+const TIER_1_DOLLARS = 500;
+const ADS_DOLLARS = 150;
+
 export const PRICE = {
   /** Dollars a month. Also feeds the Service Offer in the Services JSON-LD. */
-  amount: 500,
+  amount: TIER_1_DOLLARS,
   currency: "USD",
-  display: "$500",
-  headline: "$500 a month, flat.",
+  display: `$${TIER_1_DOLLARS}`,
+  headline: `$${TIER_1_DOLLARS} a month, flat.`,
   term: "Month to month. Cancel any time.",
   audit: "The audit is free.",
   // TODO(Blake): does the flat $500 cover a business with several locations? An
@@ -50,15 +62,17 @@ export const PRICE = {
 
 export const GOOGLE_ADS = {
   /** Dollars a month, on top of Tier 1. Also feeds the JSON-LD. */
-  amount: 150,
+  amount: ADS_DOLLARS,
   currency: "USD",
-  display: "$150",
+  display: `$${ADS_DOLLARS}`,
   title: "Google Ads management",
-  headline: "$150 a month, added to Tier 1.",
+  headline: `$${ADS_DOLLARS} a month, added to Tier 1.`,
   spend: "Ad spend is separate. You pay it straight to Google.",
   // Google's third-party policy: a separate fee must be stated clearly, in writing
-  // before the first purchase and on every invoice. No payment path exists yet.
-  fee: "Our $150 fee is separate from what Google charges you. You get it in writing before your first purchase, and it's on every invoice.",
+  // before the first purchase and on every invoice.
+  // TODO(Blake): "it's on every invoice" describes an invoice that doesn't exist yet.
+  // True only once paymentPathReady is true in src/lib/launch-gate.json.
+  fee: `Our $${ADS_DOLLARS} fee is separate from what Google charges you. You get it in writing before your first purchase, and it's on every invoice.`,
   // Google's "Advertiser guide" notice: it must be linked in a clearly visible
   // place on the site, and shared with customers at sale and renewal. It sits
   // under Google Ads on Services and in the footer.
@@ -75,7 +89,7 @@ export const GOOGLE_ADS = {
     "1 search campaign",
     "1 service area",
     "Up to 2 services",
-    "Up to about $1,500 a month in ad money",
+    "Up to about $1,500 a month in ad spend",
     "In your own Google Ads account",
   ],
 } as const;
@@ -100,6 +114,8 @@ export type Tier = {
   name: string;
   /** One sentence for the home page. */
   brief: string;
+  /** Why anyone would pay for it, printed above the line-by-line list on Services. */
+  purpose?: string;
   status: Status;
   /** The status pills under the price. */
   pills: { status: Status; label: string }[];
@@ -120,15 +136,26 @@ export type Tier = {
 // before promising a number. Delivery has never been timed: log the hours.
 // TODO(Blake): run all of this on Devize's own site first, and keep approval mode
 // on in the tool from day one (search-atlas.md, "Settings on day one").
+// TODO(Blake): rename this tier, or put review requests in it for HVAC and plumbing.
+// Its name promises "Review Automation", but asking for reviews is left out and the
+// automation is only drafting replies a person approves. flywheel-v2.md has your
+// later words putting review requests in Tier 1, which would settle it.
+// TODO(Blake): are listing fixes in Tier 1? The trade pages teach them at length
+// (service area, name, hours, categories), and the six lines below don't include
+// them, though Terms 3.2 lists correcting wrong facts. If yes, add a seventh line
+// here, align Terms 3.1 and 3.2, and drop the "yours to change" line on the HVAC and
+// dental pages. If no, keep that line and add it to the other four trade pages.
 const TIER_1: Tier = {
   id: "tier-1",
   number: 1,
   name: "SEO Management and Review Automation",
   brief:
-    "Keeps your site, your posts, your review replies and your map in order, with a monthly note that counts it.",
+    "For the customer who finds you and is deciding whether to call: your site, posts, review replies and map kept in order, with a monthly note that counts it.",
+  purpose:
+    "It's for the customer who finds you and is deciding whether to call: true facts, real pages, reviews answered, and a count of what got done. It won't answer your phone.",
   status: "available",
   pills: [{ status: "available", label: STATUS_LABEL.available }],
-  price: "$500 a month, flat",
+  price: `${PRICE.display} a month, flat`,
   priceNote: `${PRICE.term} ${PRICE.scope}`,
   listLead: "What's in it",
   items: [
@@ -171,7 +198,7 @@ const TIER_1: Tier = {
       // By hand: gbp_grid.py --close can rescan one shop, but no client record,
       // schedule or report is built (truth.md section 2).
       detail:
-        "The same searches from the same spots each month, by hand for now. Places can shift with no edits at all, so we also watch nearby businesses that changed nothing.",
+        "The same searches from the same spots each month, by hand for now. Places can shift with no edits at all, so we also track nearby businesses we don't work on, as a rough check.",
     },
     {
       id: "monthly-note",
@@ -190,7 +217,7 @@ const TIER_2: Tier = {
   number: 2,
   name: "Convert",
   brief:
-    "Adds paid clicks and a shorter path from first contact to booked: speed to lead, missed-call text-back, online booking and reminders.",
+    "Adds paid clicks today. In pilot, a shorter path from first contact to booked: speed to lead (a fast first reply), missed-call text-back, online booking and reminders.",
   status: "pilot",
   pills: [
     { status: "available", label: "Google Ads available now" },
@@ -204,7 +231,7 @@ const TIER_2: Tier = {
       id: "google-ads",
       title: "Google Ads management",
       status: "available",
-      note: "$150 a month add-on, ad spend paid to Google. No client campaign run yet.",
+      note: `${GOOGLE_ADS.display} a month add-on, ad spend paid to Google. No client campaign run yet.`,
       detail:
         "Counted monthly work in your own account, inside tight limits. You can add this to Tier 1 today. The full terms are in the Google Ads section below.",
     },
@@ -215,7 +242,7 @@ const TIER_2: Tier = {
       title: "Speed to lead",
       status: "pilot",
       detail:
-        "A new lead reaches a person right away, and the reply goes out in your words. Automated texts only go to people who ticked a separate, optional box. Everyone else gets a call from a person.",
+        "A new lead would reach a person right away, and the reply would go out in your words. Automated texts would only go to people who ticked a separate, optional box. Everyone else would get a call from a person.",
     },
     {
       id: "missed-call-text-back",
@@ -224,7 +251,7 @@ const TIER_2: Tier = {
       title: "Missed-call text-back",
       status: "pilot",
       detail:
-        "When a call goes unanswered, one text goes back to answer it. It carries no offer, and it stops the moment someone says stop.",
+        "When a call goes unanswered, one text would go back to answer it. It would carry no offer, and it would stop the moment someone says stop.",
     },
     {
       id: "booking-reminders",
@@ -233,7 +260,7 @@ const TIER_2: Tier = {
       title: "Online booking and reminders",
       status: "pilot",
       detail:
-        "A booking link that lands on your calendar, and reminders so people show up. Nothing about someone's health or legal matter goes in a message.",
+        "A booking link that would land on your calendar, and reminders so people show up. Nothing about someone's health or legal matter would go in a message.",
     },
   ],
 };
@@ -245,7 +272,7 @@ const TIER_3: Tier = {
   number: 3,
   name: `${BOOKING_OS} in full`,
   brief:
-    "Adds a custom AI voice agent for overflow and after-hours calls, follow-up on dead estimates, and win-back for past customers.",
+    "Would add a custom AI voice agent for overflow and after-hours calls, follow-up on dead estimates, and win-back for past customers.",
   status: "pilot",
   pills: [{ status: "pilot", label: STATUS_LABEL.pilot }],
   price: ASK_US,
@@ -259,7 +286,7 @@ const TIER_3: Tier = {
       title: "Custom AI voice agent for overflow and after-hours calls",
       status: "pilot",
       detail:
-        "Picks up when the line is busy or you're closed. Its first sentence says it's an AI and which business it's answering for. It never decides how serious something is: it books, takes a message or hands off to your on-call person.",
+        "Would pick up when the line is busy or you're closed. Its first sentence would say it's an AI and which business it's answering for. It would never decide how serious something is: it would book, take a message or hand off to your on-call person.",
     },
     {
       id: "dead-estimates",
@@ -267,7 +294,7 @@ const TIER_3: Tier = {
       title: "Dead-estimate follow-up",
       status: "pilot",
       detail:
-        "An estimate that went quiet gets a follow-up by email or from a person. A text only goes where there's a consent record for that number.",
+        "An estimate that went quiet would get a follow-up by email or from a person. A text would only go where there's a consent record for that number.",
     },
     {
       id: "reactivation",
@@ -276,7 +303,7 @@ const TIER_3: Tier = {
       title: "Reactivation and win-back",
       status: "pilot",
       detail:
-        "Past customers hear from you again. We audit the list first, because we don't treat a number on an old invoice as consent to text, and every old opt-out gets applied before the first send.",
+        "Past customers would hear from you again. We'd audit the list first, because we don't treat a number on an old invoice as consent to text, and every old opt-out would be applied before the first send.",
     },
   ],
 };
@@ -286,16 +313,60 @@ export const TIERS: Tier[] = [TIER_1, TIER_2, TIER_3];
 export const TIER_ITEMS = TIERS.flatMap((t) => t.items);
 
 // ---------------------------------------------------------------------------
-// The flywheel, in order. `solid` means that stage has something you can buy
-// today; the diagram draws the others dashed.
+// The flywheel, in order. Each stage names the tier lines it runs on, and its tag,
+// its pill on What We Do and `solid` are worked out from their status, so a line
+// that goes live here changes the diagram too. `solid` means all of the stage can
+// be bought today; the diagram draws the others dashed.
 // ---------------------------------------------------------------------------
 
-export const FLYWHEEL: { title: string; sub: string; tag: string; solid: boolean }[] = [
-  { title: "Clicks", sub: "SEO and paid ads", tag: "Available now", solid: true },
-  { title: BOOKING_OS, sub: "takes in every lead", tag: "In pilot", solid: false },
-  { title: "Converted", sub: "answered and booked", tag: "In pilot", solid: false },
-  { title: "Retained", sub: "reminders and win-back", tag: "In pilot", solid: false },
-  { title: "Reviews and repeat", sub: "feed the next clicks", tag: "Replies available", solid: true },
+export type FlywheelStage = {
+  title: string;
+  sub: string;
+  /** The short words on the diagram. */
+  tag: string;
+  /** The status pill on What We Do. */
+  pill: { status: Status; label: string };
+  solid: boolean;
+};
+
+function stage(
+  title: string,
+  sub: string,
+  itemIds: string[],
+  /** For a stage with a part in no tier at all, so it can't read as fully on sale. */
+  partly?: { tag: string; pill: string }
+): FlywheelStage {
+  const statuses = itemIds.map((id) => {
+    const item = TIER_ITEMS.find((i) => i.id === id);
+    if (!item) throw new Error(`Flywheel stage "${title}" names a tier line that doesn't exist: ${id}`);
+    return item.status;
+  });
+  if (!partly && statuses.every((s) => s === "available")) {
+    return { title, sub, tag: STATUS_LABEL.available, pill: { status: "available", label: STATUS_LABEL.available }, solid: true };
+  }
+  if (!partly && statuses.every((s) => s === "pilot")) {
+    return { title, sub, tag: "In pilot", pill: { status: "pilot", label: STATUS_LABEL.pilot }, solid: false };
+  }
+  return {
+    title,
+    sub,
+    tag: partly?.tag ?? "Partly available",
+    pill: { status: "pilot", label: partly?.pill ?? "Partly available, ask us" },
+    solid: false,
+  };
+}
+
+export const FLYWHEEL: FlywheelStage[] = [
+  stage("Clicks", "SEO and paid ads", ["on-site-fixes", "blog-posts", "google-ads"]),
+  stage(BOOKING_OS, "meant to take in each lead", ["speed-to-lead"]),
+  stage("Converted", "answered and booked", ["speed-to-lead", "missed-call-text-back", "booking-reminders", "voice-agent"]),
+  stage("Retained", "reminders and win-back", ["booking-reminders", "dead-estimates", "reactivation"]),
+  // Only the replies can be bought. Asking for reviews is in no tier (TIER_1_LEFT_OUT),
+  // so the stage that closes the loop can't be drawn as on sale.
+  stage("Reviews and repeat", "feed the next clicks", ["review-replies"], {
+    tag: "Only replies today",
+    pill: "Review replies available now. Asking for reviews: ask us",
+  }),
 ];
 
 // ---------------------------------------------------------------------------
@@ -337,7 +408,7 @@ export const TRADE_ACCESS: Record<string, TradeAccess> = {
   "dental-clinics": {
     tier1: { state: "conditions", text: "A person approves every reply. Privacy paperwork comes first." },
     ads: { state: "conditions", text: "After your lawyer answers a few questions. No patient lists, ever." },
-    pilots: { state: "waits", text: "Voice, text and CRM wait until we have our own privacy program and signed agreements at every link." },
+    pilots: { state: "waits", text: "Voice, text and a lead system (CRM) wait until we have our own privacy program and signed agreements at every link." },
   },
   "law-firms": {
     tier1: { state: "conditions", text: "Your firm sets the rule on replies and signs off on what we write." },

@@ -45,8 +45,8 @@ export default function SiteFooter() {
           {/* The label stays out of the footer: it would sit on every page, and near
               Google Ads "partner" can read as Google's own program. */}
           <p className="mt-4 text-sm text-[var(--color-ink-soft)] leading-relaxed">
-            Helping service businesses convert clicks into clients without adding
-            headcount. Independent. Not connected to Google.
+            Working to help service businesses convert clicks into clients without
+            adding headcount. Independent. Not connected to Google.
           </p>
           {/* TODO(Blake): the street address may be your home, so every page shows only
               the town for now, and the home page JSON-LD drops the street and zip. Say

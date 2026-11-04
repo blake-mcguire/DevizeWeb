@@ -130,8 +130,7 @@ export default function WalkInPage() {
 
       <Section band>
         <div className="max-w-2xl">
-          <Eyebrow>Which tier fits</Eyebrow>
-          <H2 className="mt-4">Tier 1 is all we&apos;d sell a walk-in clinic today.</H2>
+          <H2>Tier 1 is all we&apos;d sell a walk-in clinic, and only after the privacy paperwork.</H2>
         </div>
         <div className="mt-10 grid gap-5 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] items-start">
           <div className="rounded-3xl border border-[var(--color-border)] bg-white p-6 md:p-8">
@@ -148,18 +147,18 @@ export default function WalkInPage() {
                 "A person approves every reply.",
                 "A clinician reads any health claim in a post.",
                 "Our on-site tools stay off patient logins, check-in and intake pages.",
-                "The privacy paperwork comes first. If it isn't settled, our tools don't touch your listing.",
+                "No contract with our tool vendor, no work on your listing.",
               ]}
             />
             <p className="mt-5 text-[0.95rem] text-[var(--color-ink-soft)] leading-relaxed">
-              Google Ads, at {GOOGLE_ADS.display}{" "}a month plus ad spend paid to Google, can
-              follow once your lawyer has answered.
+              Google Ads can follow once your lawyer has answered. That&apos;s {GOOGLE_ADS.display}{" "}a
+              month more, plus what you pay Google.
             </p>
           </div>
           <div className="rounded-3xl border-2 border-dashed border-[#B3261E]/30 bg-white p-6 md:p-8">
             <H3>Everything that talks to a patient waits</H3>
             <p className="mt-3 text-[var(--color-ink-soft)] leading-relaxed">
-              Voice, text and CRM: all of {BOOKING_OS}{" "}apart from Google Ads. Walk-in clinics
+              Voice, text and a lead system (CRM): everything in {BOOKING_OS}. Walk-in clinics
               come last of all our trades, because a sick caller is the worst case for an AI
               agent.
             </p>
@@ -168,8 +167,8 @@ export default function WalkInPage() {
               items={[
                 <>
                   Whoever handles patient information for a clinic can count as a business
-                  associate.{cite(S.ba)}{" "}We&apos;d need a privacy program of our own and a signed
-                  agreement at every link first.
+                  associate.{cite(S.ba)}{" "}We&apos;d have to build a privacy program and sign an
+                  agreement with each vendor before any of this could start.
                 </>,
                 <>
                   The patient-safety group ECRI named misuse of AI chatbots its top health
@@ -192,7 +191,8 @@ export default function WalkInPage() {
         <TradeClose
           sources={SOURCES}
           title="Check your Sunday hours first."
-          body="Then ask for the audit. It reads public pages only and touches no patient data. We haven't scanned walk-in clinics yet, so the rival comparison waits until we have the data."
+          cta="Ask what we can show you"
+          body="Then ask us. Anything we'd look at is public and touches no patient data. We haven't scanned walk-in clinics yet, so there's no side-by-side with other clinics to send you."
         />
       </div>
     </>

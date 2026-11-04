@@ -31,7 +31,7 @@ export default function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <Button href="/#contact" size="sm">
+          <Button href="/#audit" size="sm">
             Free map audit
           </Button>
           <MobileNav links={navLinks} />
