@@ -6,7 +6,7 @@ const footerNav = [
     heading: "Product",
     links: [
       { href: "/#services", label: "The systems" },
-      { href: "/#how-it-works", label: "How it works" },
+      { href: "/#services", label: "How it works" },
       { href: "/#contact", label: "Book a demo" },
     ],
   },

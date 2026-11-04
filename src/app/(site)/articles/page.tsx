@@ -43,7 +43,7 @@ export default function ArticlesIndex() {
     "@type": "Blog",
     name: "Devize Journal",
     description:
-      "Weekly writeups from inside home services shops running on Devize.",
+      "Weekly writeups for home services shops.",
     url: "https://devize.ai/articles",
     publisher: {
       "@type": "Organization",
@@ -70,7 +70,7 @@ export default function ArticlesIndex() {
         Articles &amp; field notes
       </h1>
       <p className="mt-5 text-lg text-[var(--color-ink-soft)] max-w-xl leading-relaxed">
-        Weekly writeups from inside home services shops running on Devize.
+        Weekly writeups for home services shops.
       </p>
 
       <ul className="mt-16 divide-y divide-[var(--color-border)] border-y border-[var(--color-border)]">

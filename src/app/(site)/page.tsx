@@ -1,11 +1,7 @@
 import type { Metadata } from "next";
 import Hero from "@/components/sections/hero";
-import Logos from "@/components/sections/logos";
 import Problem from "@/components/sections/problem";
 import Services from "@/components/sections/services";
-import Testimonials from "@/components/sections/testimonials";
-import Stats from "@/components/sections/stats";
-import CaseStudies from "@/components/sections/case-studies";
 import Faq, { faqs } from "@/components/sections/faq";
 import Contact from "@/components/sections/contact";
 import { JsonLd } from "@/components/json-ld";
@@ -42,12 +38,8 @@ export default function Home() {
   return (
     <>
       <Hero />
-      <Logos />
       <Problem />
       <Services />
-      <Testimonials />
-      <Stats />
-      <CaseStudies />
       <Faq />
       <Contact />
       <JsonLd data={[websiteSchema, faqSchema]} />
