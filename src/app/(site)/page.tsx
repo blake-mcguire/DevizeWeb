@@ -1,16 +1,16 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import Hero from "@/components/sections/hero";
-import MapStory from "@/components/sections/sample-audit";
-import Mission from "@/components/sections/mission";
-import PartnerMeans from "@/components/sections/partner-means";
-import First30Days from "@/components/sections/first-30-days";
-import Price from "@/components/sections/price";
-import WontPromise from "@/components/sections/wont-promise";
-import Faq, { faqs } from "@/components/sections/faq";
 import Contact from "@/components/sections/contact";
-import { FounderSection } from "@/components/founder";
+import { Flywheel } from "@/components/flywheel";
+import { IndustryCarousel } from "@/components/industry-carousel";
 import { JsonLd } from "@/components/json-ld";
-import { AUDIT_NAME, EMAIL, FOUNDER, GOOGLE_ADS, LABEL_FOR, MISSION, PRICE } from "@/lib/offer-copy";
+import { Eyebrow, H2, Section } from "@/components/page-parts";
+import { StatusPill } from "@/components/tier-parts";
+import { cn } from "@/lib/cn";
+import { INDUSTRIES } from "@/lib/industries";
+import { BOOKING_OS, EMAIL, FOUNDER, LABEL, MISSION } from "@/lib/offer-copy";
+import { TIERS } from "@/lib/tiers";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/" },
@@ -18,7 +18,6 @@ export const metadata: Metadata = {
 
 const SITE_URL = "https://www.devize.ai";
 const ORG_ID = `${SITE_URL}/#organization`;
-const US = { "@type": "Country", name: "United States" };
 
 // The brand's facts live on the home page so the prospect pages under /a/ carry
 // none of the marketing structured data. No review, rating, client count or
@@ -30,7 +29,7 @@ const organizationSchema = {
   name: "Devize",
   url: SITE_URL,
   logo: `${SITE_URL}/devize-logo.svg`,
-  description: `${LABEL_FOR}: Devize says what's worth doing to get found and chosen online, does the agreed work each month, and shows what got done. ${MISSION}`,
+  description: `Devize is a ${LABEL} for service businesses that sell to people. ${MISSION}`,
   email: EMAIL,
   // TODO(Blake): no street or zip until you confirm the address should be public
   // (see the note in site-footer.tsx).
@@ -46,66 +45,10 @@ const organizationSchema = {
     email: EMAIL,
     availableLanguage: "English",
   },
-  areaServed: US,
+  areaServed: { "@type": "Country", name: "United States" },
   founder: { "@type": "Person", name: FOUNDER.name },
   knowsAbout: ["Local search engine optimization", "Google Business Profile", "Online reviews"],
 };
-
-function monthly(amount: number, currency: string, url: string) {
-  return {
-    "@type": "Offer",
-    url,
-    price: String(amount),
-    priceCurrency: currency,
-    priceSpecification: {
-      "@type": "UnitPriceSpecification",
-      price: String(amount),
-      priceCurrency: currency,
-      unitCode: "MON",
-      unitText: "month",
-      referenceQuantity: { "@type": "QuantitativeValue", value: 1, unitCode: "MON" },
-    },
-  };
-}
-
-const serviceSchemas = [
-  {
-    "@context": "https://schema.org",
-    "@type": "Service",
-    name: AUDIT_NAME,
-    serviceType: "Local search audit",
-    description:
-      "We run the searches your customers run from dozens of spots around your business, show where you come up on Google's map and who comes up instead, check 21 things on your Google listing, reviews and website, and list the fixes we'd make first, in order.",
-    provider: { "@id": ORG_ID },
-    areaServed: US,
-    url: `${SITE_URL}/services/free-audit`,
-    offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-  },
-  {
-    "@context": "https://schema.org",
-    "@type": "Service",
-    name: "SEO and Review Management",
-    serviceType: "Local search engine optimization and review management",
-    description:
-      "Monthly work with counts: a review request routine, replies to new reviews, a listing check, a facts check, one better page, a map re-run and a one-page note. Month to month.",
-    provider: { "@id": ORG_ID },
-    areaServed: US,
-    url: `${SITE_URL}/services/seo-and-reviews`,
-    offers: monthly(PRICE.amount, PRICE.currency, `${SITE_URL}/#price`),
-  },
-  {
-    "@context": "https://schema.org",
-    "@type": "Service",
-    name: "Google Ads Management",
-    serviceType: "Search advertising management",
-    description:
-      "An optional add-on with counted monthly work, inside stated limits, in the client's own account. Ad spend is separate and paid to Google. Devize has not run a client's Google Ads before and is not a Google Partner.",
-    provider: { "@id": ORG_ID },
-    areaServed: US,
-    url: `${SITE_URL}/services/google-ads`,
-    offers: monthly(GOOGLE_ADS.amount, GOOGLE_ADS.currency, `${SITE_URL}/services/google-ads`),
-  },
-];
 
 const websiteSchema = {
   "@context": "https://schema.org",
@@ -115,38 +58,116 @@ const websiteSchema = {
   publisher: { "@id": ORG_ID },
 };
 
-const faqSchema = {
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  mainEntity: faqs.map(({ q, a }) => ({
-    "@type": "Question",
-    name: q,
-    acceptedAnswer: {
-      "@type": "Answer",
-      text: a,
-    },
-  })),
-};
+const CARDS = INDUSTRIES.map((i) => ({
+  href: `/industries/${i.slug}`,
+  name: i.name,
+  hook: i.hook,
+  search: i.search,
+}));
 
 /**
- * The order comes from the positioning brief, with the mission block added after
- * the map. The map stays high because people arrive here from the audit emails.
- * There is no proof section, and nothing replaces the old reviews.
+ * Short on purpose (Blake, 2026-11-04: "Very repetive pages"). Hero, the loop, the
+ * tiers, the trades, who's behind it. Everything longer has one home elsewhere:
+ * the explanation on /what-we-do, the tier contents on /services, the trades on
+ * their own pages. No section here repeats another page, and there's no proof
+ * section, because Devize has no clients to prove anything with.
  */
 export default function Home() {
   return (
     <>
       <Hero />
-      <MapStory />
-      <Mission />
-      <PartnerMeans />
-      <First30Days />
-      <Price band />
-      <WontPromise />
-      <FounderSection />
-      <Faq />
-      <Contact />
-      <JsonLd data={[organizationSchema, ...serviceSchemas, websiteSchema, faqSchema]} />
+
+      <Section id="how-it-works">
+        <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-16">
+          <div className="min-w-0">
+            <Eyebrow>How it works</Eyebrow>
+            <H2 className="mt-4">One loop, and each turn feeds the next.</H2>
+            <p className="mt-6 text-lg text-[var(--color-ink-soft)] leading-relaxed">
+              Search and ads bring people to you. {BOOKING_OS}, still in pilot, is
+              there to catch each one, so a click has a better shot at becoming a
+              client and a client has a reason to come back. Their reviews and
+              repeat visits bring in the next round of clicks.
+            </p>
+            <p className="mt-6">
+              <Link
+                href="/what-we-do"
+                className="font-medium text-[var(--color-brand)] underline underline-offset-4 decoration-[var(--color-brand)]/30 hover:decoration-[var(--color-brand)]"
+              >
+                What we do, and what&apos;s running today
+              </Link>
+            </p>
+          </div>
+          <Flywheel className="min-w-0" />
+        </div>
+      </Section>
+
+      <Section id="tiers" band>
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div className="max-w-2xl">
+            <Eyebrow>Services</Eyebrow>
+            <H2 className="mt-4">Three tiers, after one free audit.</H2>
+          </div>
+          <Link
+            href="/services"
+            className="font-medium text-[var(--color-brand)] underline underline-offset-4 decoration-[var(--color-brand)]/30 hover:decoration-[var(--color-brand)]"
+          >
+            Compare them side by side
+          </Link>
+        </div>
+        <ol className="mt-10 grid gap-5 lg:grid-cols-3">
+          {TIERS.map((tier) => (
+            <li
+              key={tier.id}
+              className={cn(
+                "flex flex-col rounded-2xl p-6 md:p-7",
+                tier.status === "available"
+                  ? "bg-[var(--color-ink)] text-white"
+                  : "border-2 border-dashed border-[var(--color-brand)]/30 bg-white"
+              )}
+            >
+              <p className={cn("text-xs uppercase tracking-[0.14em] font-medium", tier.status === "available" ? "text-white/70" : "text-[var(--color-ink-muted)]")}>
+                Tier {tier.number}
+              </p>
+              <h3 className={cn("mt-3 font-[family-name:var(--font-display)] text-2xl font-medium tracking-tight leading-snug", tier.status === "available" ? "text-white" : "text-[var(--color-ink)]")}>
+                {tier.name}
+              </h3>
+              <p className={cn("mt-3 text-[0.95rem] leading-relaxed", tier.status === "available" ? "text-white/80" : "text-[var(--color-ink-soft)]")}>
+                {tier.brief}
+              </p>
+              <div className="mt-auto pt-6">
+                <p className={cn("font-[family-name:var(--font-display)] text-xl font-medium tracking-tight", tier.status === "available" ? "text-white" : "text-[var(--color-ink)]")}>
+                  {tier.price}
+                </p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {tier.pills.map((pill) => (
+                    <StatusPill key={pill.label} status={pill.status} label={pill.label} onDark={tier.status === "available"} />
+                  ))}
+                </div>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </Section>
+
+      <Section id="industries">
+        <div className="max-w-2xl">
+          <Eyebrow>Industries</Eyebrow>
+          <H2 className="mt-4">Every trade loses a call in its own way.</H2>
+          <p className="mt-5 text-lg text-[var(--color-ink-soft)] leading-relaxed">
+            Pick yours. Each page covers how its customers search, what a missed
+            call costs, and what the rules let us sell you.
+          </p>
+        </div>
+        <div className="mt-10">
+          <IndustryCarousel cards={CARDS} />
+        </div>
+      </Section>
+
+      <div className="border-t border-[var(--color-border)] bg-white/60">
+        <Contact />
+      </div>
+
+      <JsonLd data={[organizationSchema, websiteSchema]} />
     </>
   );
 }

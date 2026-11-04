@@ -12,11 +12,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const marketing = [
     { path: "/", priority: 1.0 },
+    { path: "/what-we-do", priority: 0.9 },
     { path: "/services", priority: 0.9 },
-    { path: "/services/free-audit", priority: 0.9 },
-    { path: "/services/seo-and-reviews", priority: 0.9 },
-    { path: "/services/google-ads", priority: 0.7 },
-    { path: "/how-we-work", priority: 0.9 },
     { path: "/sample-audit", priority: 0.8 },
     { path: "/industries", priority: 0.8 },
     ...INDUSTRIES.map((i) => ({ path: `/industries/${i.slug}`, priority: 0.7 })),

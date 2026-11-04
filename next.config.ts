@@ -35,6 +35,14 @@ const nextConfig: NextConfig = {
       // so send those URLs home instead of to a 404.
       { source: "/articles", destination: "/", permanent: true },
       { source: "/articles/:path*", destination: "/", permanent: true },
+      // 2026-11-04: one Services page replaced the separate service pages, and
+      // What We Do replaced How We Work. Specific paths first, then anything else
+      // under /services, including the old live site's service pages.
+      { source: "/how-we-work", destination: "/what-we-do", permanent: true },
+      { source: "/services/free-audit", destination: "/services#free-audit", permanent: true },
+      { source: "/services/seo-and-reviews", destination: "/services#tier-1", permanent: true },
+      { source: "/services/google-ads", destination: "/services#google-ads", permanent: true },
+      { source: "/services/:path+", destination: "/services", permanent: true },
     ];
   },
   async headers() {

@@ -4,9 +4,9 @@ import { MobileNav } from "@/components/mobile-nav";
 import { Button } from "@/components/ui/button";
 
 const navLinks = [
+  { href: "/what-we-do", label: "What We Do" },
   { href: "/services", label: "Services" },
-  { href: "/industries", label: "Industries We Serve" },
-  { href: "/how-we-work", label: "How We Work and Price" },
+  { href: "/industries", label: "Industries" },
   { href: "/sample-audit", label: "Sample Audit" },
 ];
 

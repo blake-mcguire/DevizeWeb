@@ -1,13 +1,9 @@
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Eyebrow, H2 } from "@/components/page-parts";
 import { cn } from "@/lib/cn";
 import { MARKS } from "@/lib/marks";
-import { SAMPLE, SAMPLE_NOTE } from "@/lib/sample-audit";
+import { SAMPLE } from "@/lib/sample-audit";
 
 /**
- * The sample audit's pieces, and the home page's map section. All of it is
- * invented data (src/lib/sample-audit.ts), and every piece carries a SAMPLE tag
+ * The sample audit's pieces. All of it is invented data (src/lib/sample-audit.ts), and every piece carries a SAMPLE tag
  * so that no card can be read, or screenshotted, without it.
  */
 
@@ -162,60 +158,5 @@ export function WhoCameUpTable({ className }: { className?: string }) {
         </tbody>
       </table>
     </div>
-  );
-}
-
-/** Home page, section 2: the map story stays high, because people arrive here from the audit emails. */
-export default function MapStory() {
-  return (
-    <section id="sample" className="scroll-mt-16 bg-white/60 border-b border-[var(--color-border)]">
-      <div className="mx-auto max-w-6xl px-6 py-16 md:py-24">
-        <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] lg:gap-14 items-start">
-          <div className="min-w-0">
-            <Eyebrow>Start here</Eyebrow>
-            <H2 className="mt-4">Who comes up when someone nearby searches for you?</H2>
-            <p className="mt-6 text-lg text-[var(--color-ink-soft)] leading-relaxed">
-              Search &ldquo;dentist&rdquo; or &ldquo;ac repair&rdquo; on a phone and
-              Google shows a map with three businesses under it. Those get looked
-              at first. The list changes from street to street, so you can&apos;t
-              see it from your own office.
-            </p>
-            <p className="mt-4 text-lg text-[var(--color-ink-soft)] leading-relaxed">
-              The free audit runs that search from spots all around you, then
-              shows where you came up and who came up instead.
-            </p>
-            <p className="mt-4 text-lg text-[var(--color-ink)] leading-relaxed">
-              One thing nobody can move is distance. Google weighs how close you
-              are to the person searching, and that does a lot of the deciding.
-              So a good plan starts by saying what can change and what can&apos;t.
-            </p>
-            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-              <Button href="/#contact" className="w-full sm:w-auto">Get my free map audit</Button>
-              <Button href="/sample-audit" variant="secondary" className="w-full sm:w-auto">See the whole sample</Button>
-            </div>
-          </div>
-
-          <figure className="min-w-0 rounded-2xl border border-[var(--color-border)] bg-white p-4 md:p-5 shadow-[0_18px_40px_-24px_rgba(28,42,57,0.35)]">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <p className="text-sm font-medium text-[var(--color-ink)]">
-                &ldquo;{SAMPLE.drawnPhrase}&rdquo;, from {SAMPLE.spotCount} spots
-              </p>
-              <SampleTag />
-            </div>
-            <SampleMap className="mt-3" />
-            <figcaption className="mt-3">
-              <SampleMapLegend />
-              <WhoCameUpTable className="mt-4" />
-              <p className="mt-3 text-sm text-[var(--color-ink-soft)] leading-relaxed">
-                {SAMPLE_NOTE}{" "}
-                <Link href="/sample-audit" className="font-medium text-[var(--color-brand)] underline underline-offset-4 decoration-[var(--color-brand)]/30 hover:decoration-[var(--color-brand)]">
-                  See how a sample audit reads
-                </Link>
-              </p>
-            </figcaption>
-          </figure>
-        </div>
-      </div>
-    </section>
   );
 }

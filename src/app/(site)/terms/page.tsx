@@ -11,12 +11,16 @@ import {
  * TODO(Blake, counsel): 2026-11-04, the rebuild changed only what the positioning
  * made wrong: the service's name (1, 3), the list of work (3.2), a short add-on
  * clause (3.7) and the no-guarantee list (4.1). All of it is flagged, not decided.
+ * Second pass, same day, for the three tiers: 3.1 points at /services, 3.2 lists
+ * Tier 1 as Blake wrote it, 3.5 and 3.6 carry the changed "what stays yours" promise
+ * (TODO(Blake) in offer-copy.ts), 3.7 states the fee disclosure Google's policy
+ * asks for, and 3.8 is new and keeps pilots out unless an Order says otherwise.
  * Counsel still needs to write a real Google Ads clause. It should cover ad spend
  * and billing, who owns the account, who pays if a mistake overspends, access
  * levels, and no guarantee of leads, costs or positions. The website rebuild
  * clause came out on 2026-11-04, because the rebuild is not built or offered, so
  * the add-on clause moved from 3.8 to 3.7. Also decide whether /terms/v1-2 stays
- * public. The price lives on devize.ai/#price and in the Order, not here.
+ * public. The price lives on devize.ai/services and in the Order, not here.
  *
  * Service Terms v2.0 (2026-10-15): a short version for the free audit and the
  * monthly local SEO and AEO service. It replaces v1.2 (the email reactivation
@@ -72,10 +76,10 @@ export default function TermsPage() {
 
       <H2 id="s3">3. The monthly SEO and review management service</H2>
       <P>
-        3.1 <strong>Your proposal or order.</strong>{" "}The monthly service is governed by the written proposal or order you accept (the &ldquo;<strong>Order</strong>&rdquo;), together with these Terms. The Order sets out the work and the flat monthly fee. The work for the standard monthly fee is the list published at devize.ai/#price on the date you accept the Order. If the Order and these Terms conflict, the Order controls, except for section 3.5: the service is month to month whatever the Order says.
+        3.1 <strong>Your proposal or order.</strong>{" "}The monthly service is governed by the written proposal or order you accept (the &ldquo;<strong>Order</strong>&rdquo;), together with these Terms. The Order sets out the work and the flat monthly fee. The work for the standard monthly fee is the Tier 1 list published at devize.ai/services on the date you accept the Order. If the Order and these Terms conflict, the Order controls, except for section 3.5: the service is month to month whatever the Order says.
       </P>
       <P>
-        3.2 <strong>The work.</strong>{" "}{/* DRAFT (2026-11-04): Blake and counsel to confirm. It must match MONTHLY_WORK in src/lib/offer-copy.ts */}Depending on your Order, the work can include: your Google Business Profile (categories, services, description, hours, photos and questions); a routine for asking customers for reviews and replying to them; a better page on your website; your business details checked on your listing, your website and the main directories, and corrected where Devize can (some directories let only the owner make changes, and you make those); clear facts about your business that search engines and AI assistants can read; and a monthly rerun of the same map searches with a short note on the work done.
+        3.2 <strong>The work.</strong>{" "}{/* DRAFT (2026-11-04): Blake and counsel to confirm. It must match Tier 1 in src/lib/tiers.ts */}Depending on your Order, the work can include: on-site search engine fixes; blog posts checked by a person; scheduling posts on your Google Business Profile; drafting replies to reviews, which a person approves before they post; corrections to wrong facts on your Google Business Profile; tracking the same map searches each month; and a monthly note with counts of the work done.
       </P>
       <P>
         3.3 <strong>Access and ownership.</strong>{" "}You add Devize as a manager on your Google Business Profile, and give us access to your website or put us in touch with the person who runs it. You remain the owner of your Google Business Profile, your website and your accounts, and you can remove Devize&apos;s access at any time.
@@ -84,18 +88,21 @@ export default function TermsPage() {
         3.4 <strong>Your part.</strong>{" "}You give us accurate facts about your business, photos of your work where you can, and a one-time sign-off, at the start, on how we reply to reviews in your name.
       </P>
       <P>
-        3.5 <strong>Month to month, and cancelling.</strong>{" "}The monthly service runs month to month, with no minimum term. Each month of service starts on the same day of the month as the first, or on the last day of a shorter month. The flat monthly fee is charged at the start of each month of service, in advance. You or Devize can cancel at any time by email (section 7.3). A cancellation takes effect at the end of the month already paid for: the work continues until then, no further fee is charged after it, and the fee for that month is not refunded in part. When the service ends, you remove Devize as a manager of your Google Business Profile and from your website (or Devize removes itself), and everything Devize made for you, such as pages, posts and changes to your listing, stays yours.
+        3.5 <strong>Month to month, and cancelling.</strong>{" "}The monthly service runs month to month, with no minimum term. Each month of service starts on the same day of the month as the first, or on the last day of a shorter month. The flat monthly fee is charged at the start of each month of service, in advance. You or Devize can cancel at any time by email (section 7.3). A cancellation takes effect at the end of the month already paid for: the work continues until then, no further fee is charged after it, and the fee for that month is not refunded in part. When the service ends, you remove Devize as a manager of your Google Business Profile and from your website (or Devize removes itself). Section 3.6 says what stays yours.
       </P>
       <P>
-        3.6 <strong>Ownership and handover.</strong>{" "}{/* DRAFT (2026-10-15): Blake and counsel to confirm */}Once paid for, the pages, posts, photos you supply, text and other content Devize creates for your business are yours. Devize publishes them only to places you own or control (your Google Business Profile, your website, or hosting and code accounts in your name) and never in an account you would have to keep paying Devize for. When the service ends, Devize hands over every page and file it made for you before removing its access.
+        3.6 <strong>Ownership and handover.</strong>{" "}{/* DRAFT (2026-10-15): Blake and counsel to confirm */}Your Google Business Profile, your reviews, your ad account, your website and every page and post Devize publishes on it stay yours. Once paid for, the pages, posts, text and other content Devize creates for your business are yours, as are any photos you supply. Devize publishes pages and posts only to places you own or control. On-site fixes that run through Devize&apos;s tools can stop when the service stops, unless they have been written into your site. When the service ends, Devize hands over every page and file it made for you before removing its access.
       </P>
       <P>
-        3.7 <strong>Optional Google Ads add-on.</strong>{" "}{/* DRAFT (2026-11-04): a placeholder for counsel's clause. See the TODO at the top of this file. */}If your Order includes it, your Order sets out the monthly work, its limits and the fee. Ad spend is separate, and you pay it to Google directly. The Google Ads account stays yours.
+        3.7 <strong>Optional Google Ads add-on.</strong>{" "}{/* DRAFT (2026-11-04): a placeholder for counsel's clause. See the TODO at the top of this file. */}If your Order includes it, your Order sets out the monthly work, its limits and the fee. Devize&apos;s fee is separate from what Google charges, is stated in writing before your first purchase, and appears on every invoice. Ad spend is separate, and you pay it to Google directly. The Google Ads account stays yours.
+      </P>
+      <P>
+        3.8 <strong>Services in pilot.</strong>{" "}{/* DRAFT (2026-11-04): Blake and counsel to confirm */}Anything this website marks as in pilot is not part of the monthly service, and no price or result is offered for it, unless your Order says so in writing.
       </P>
 
       <H2 id="s4">4. No guarantee of results</H2>
       <P>
-        4.1 Devize does not guarantee any ranking, position on Google&apos;s map, appearance in an AI answer (including Google&apos;s AI features and assistants such as ChatGPT), ad position, cost per click or per lead, number of calls, leads, customers, or revenue. Google and the companies behind AI assistants decide what they show, and Devize does not control them.
+        4.1 Devize does not guarantee any ranking, position on Google&apos;s map, appearance in an AI answer (including Google&apos;s AI features and assistants such as ChatGPT), ad position, cost per click or per lead, number of calls, leads, booked jobs, customers, or revenue. Google and the companies behind AI assistants decide what they show, and Devize does not control them.
       </P>
       <P>
         4.2 EXCEPT AS EXPRESSLY STATED IN YOUR ORDER, THE SERVICES ARE PROVIDED &ldquo;AS IS&rdquo; AND DEVIZE DISCLAIMS ALL OTHER WARRANTIES, EXPRESS OR IMPLIED.

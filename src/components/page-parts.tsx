@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/cn";
-import { LABEL_FOR, LABEL_PLAIN } from "@/lib/offer-copy";
 
 /**
  * Small building blocks for the marketing pages, in the same type and colours
@@ -131,23 +130,6 @@ export function PageHero({
   );
 }
 
-/**
- * The lead label with its plain sentence. The brief: the sentence always sits
- * beside the label, so any page that shows the label uses this and nothing else.
- * Keep it off the Google Ads page, where "partner" can read as Google's program.
- */
-export function PartnerLabel({ className }: { className?: string }) {
-  return (
-    <div className={cn("text-white/85", className)}>
-      <p className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 backdrop-blur px-3 py-1 text-xs font-medium text-white/90">
-        <span className="brand-dot" aria-hidden="true" />
-        {LABEL_FOR}
-      </p>
-      <p className="mt-3 text-[0.95rem] md:text-base leading-relaxed">{LABEL_PLAIN}</p>
-    </div>
-  );
-}
-
 export function DotList({ items, className }: { items: ReactNode[]; className?: string }) {
   return (
     <ul className={cn("space-y-2.5 text-[0.95rem] text-[var(--color-ink-soft)] leading-relaxed", className)}>
@@ -248,6 +230,43 @@ export function CtaBand({
 }
 
 export type Source = { label: string; url: string };
+
+/**
+ * Returns a function that prints a source's number, linked to the list at the
+ * bottom of the page. Pass the same array to <Sources>, in the order the page
+ * first cites them.
+ */
+export function citer(sources: Source[]) {
+  return function Cite(...refs: Source[]) {
+    return refs.map((ref) => {
+      const n = sources.findIndex((s) => s.url === ref.url) + 1;
+      if (n === 0) throw new Error(`Source missing from this page's list: ${ref.label}`);
+      return (
+        <a
+          key={ref.url}
+          href={`#source-${n}`}
+          aria-label={`Source ${n}: ${ref.label}`}
+          className="ml-0.5 text-xs font-medium text-[var(--color-brand)] no-underline hover:underline"
+        >
+          [{n}]
+        </a>
+      );
+    });
+  };
+}
+
+/** Example searches, as chips. Plain-word examples, never volume figures. */
+export function SearchChips({ searches, className }: { searches: string[]; className?: string }) {
+  return (
+    <ul className={cn("flex flex-wrap gap-2", className)}>
+      {searches.map((s) => (
+        <li key={s} className="rounded-full border border-[var(--color-border)] bg-[var(--color-surface-raised)] px-3 py-1 text-sm text-[var(--color-ink)]">
+          {s}
+        </li>
+      ))}
+    </ul>
+  );
+}
 
 /** Numbered sources for any outside fact on a page. */
 export function Sources({ items, read = "4 November 2026" }: { items: Source[]; read?: string }) {

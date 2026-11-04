@@ -1,15 +1,16 @@
 import Link from "next/link";
 import Logo from "@/components/logo";
-import { EMAIL, SERVICES } from "@/lib/offer-copy";
+import { EMAIL } from "@/lib/offer-copy";
 import { INDUSTRIES } from "@/lib/industries";
+import { GOOGLE_ADS } from "@/lib/tiers";
 
 const footerNav = [
   {
-    heading: "Services",
+    heading: "Devize",
     links: [
-      { href: "/services", label: "All services" },
-      ...SERVICES.map((s) => ({ href: s.href, label: s.title })),
-      { href: "/how-we-work", label: "How We Work and Price" },
+      { href: "/what-we-do", label: "What We Do and How It Works" },
+      { href: "/services", label: "Services" },
+      { href: "/services#free-audit", label: "Free map audit" },
       { href: "/sample-audit", label: "Sample Audit" },
     ],
   },
@@ -26,6 +27,9 @@ const footerNav = [
       { href: "/terms", label: "Service Terms" },
       { href: "/privacy", label: "Privacy Policy" },
       { href: "/sms-terms", label: "SMS Terms" },
+      // Google's third-party policy: this notice must be linked somewhere clearly
+      // visible on the site. It also sits under Google Ads on Services.
+      { href: GOOGLE_ADS.guide.url, label: "Google's advertiser guide" },
     ],
   },
 ];
@@ -38,12 +42,11 @@ export default function SiteFooter() {
           <Link href="/" aria-label="Devize home" className="inline-block">
             <Logo className="h-8 w-auto" />
           </Link>
-          {/* The label stays out of the footer: it sits on every page, including
-              the Google Ads one, and always needs its plain sentence beside it. */}
+          {/* The label stays out of the footer: it would sit on every page, and near
+              Google Ads "partner" can read as Google's own program. */}
           <p className="mt-4 text-sm text-[var(--color-ink-soft)] leading-relaxed">
-            We tell service businesses what&apos;s worth doing to get found and
-            chosen online, do the agreed work each month, and show you what got
-            done. Independent. Not connected to Google.
+            Helping service businesses convert clicks into clients without adding
+            headcount. Independent. Not connected to Google.
           </p>
           {/* TODO(Blake): the street address may be your home, so every page shows only
               the town for now, and the home page JSON-LD drops the street and zip. Say

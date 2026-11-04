@@ -4,7 +4,7 @@ import { ImageResponse } from "next/og";
  * The share image for the marketing pages. It lives in (site) so that the root
  * image, which the /a/ prospect pages inherit, stays as it was.
  */
-export const alt = "Devize: Know what's worth doing online. Skip the rest.";
+export const alt = "Devize: Convert clicks into clients without adding headcount.";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -27,10 +27,10 @@ export default async function Image() {
         <div style={{ fontSize: 40, fontWeight: 600, letterSpacing: "-0.02em" }}>devize</div>
         <div style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
           <div style={{ fontSize: 84, fontWeight: 500, lineHeight: 1.05, letterSpacing: "-0.025em", maxWidth: 1000 }}>
-            Know what&apos;s worth doing online. Skip the rest.
+            Convert clicks into clients without adding headcount.
           </div>
           <div style={{ fontSize: 28, color: "rgba(255,255,255,0.72)", fontWeight: 400 }}>
-            $500 a month, flat. Everything stays in your name. Cancel any time.
+            SEO and ad management for service businesses. Start with a free map audit.
           </div>
         </div>
       </div>

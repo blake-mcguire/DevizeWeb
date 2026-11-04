@@ -91,51 +91,51 @@ export function FounderChip({
   );
 }
 
-/** "Who's behind Devize": the founder block, and the plain line that Devize is new. */
-export function FounderSection() {
+/** Who's behind Devize, and the plain line that Devize is new. */
+export function FounderBlock({ className }: { className?: string }) {
   return (
-    <section id="founder" className="scroll-mt-16 mx-auto max-w-6xl px-6 py-16 md:py-24">
-      <div className="grid gap-8 rounded-3xl border border-[var(--color-border)] bg-white p-7 md:grid-cols-[auto_1fr] md:gap-12 md:p-12 items-start">
-        <FounderAvatar size={128} />
-        <div className="max-w-2xl">
+    <div className={className}>
+      <div className="flex items-center gap-5">
+        <FounderAvatar size={88} />
+        <div>
           <p className="text-xs uppercase tracking-[0.18em] text-[var(--color-ink-muted)] font-medium">
-            Who&apos;s behind Devize
+            Who&apos;s behind it
           </p>
-          <h2 className="mt-3 font-[family-name:var(--font-display)] text-3xl md:text-4xl leading-tight tracking-tight text-[var(--color-ink)] font-medium">
+          <h2 className="mt-2 font-[family-name:var(--font-display)] text-3xl md:text-4xl leading-tight tracking-tight text-[var(--color-ink)] font-medium">
             {FOUNDER.name}
           </h2>
           <p className="mt-1 text-[var(--color-ink-soft)]">{FOUNDER.town}</p>
-          <div className="mt-6 space-y-4 text-lg text-[var(--color-ink-soft)] leading-relaxed">
-            {FOUNDER.bio.map((line) => (
-              <p key={line}>{line}</p>
-            ))}
-          </div>
-          <p className="mt-6 rounded-xl border border-[var(--color-ink)]/15 bg-[var(--color-surface-raised)] p-4 text-[var(--color-ink)] leading-relaxed">
-            {FOUNDER.newLine}{" "}
-            <Link href="/sample-audit" className="underline underline-offset-4 decoration-[var(--color-ink)]/30 hover:decoration-[var(--color-ink)]">
-              the sample
-            </Link>
-            {", "}
-            <Link href="/how-we-work#price" className="underline underline-offset-4 decoration-[var(--color-ink)]/30 hover:decoration-[var(--color-ink)]">
-              the price
-            </Link>
-            {" and "}
-            <Link href="/terms" className="underline underline-offset-4 decoration-[var(--color-ink)]/30 hover:decoration-[var(--color-ink)]">
-              the terms
-            </Link>
-            .
-          </p>
-          <p className="mt-6 text-[var(--color-ink)]">
-            Email{" "}
-            <a
-              href={`mailto:${EMAIL}`}
-              className="font-medium underline underline-offset-4 decoration-[var(--color-ink)]/30 hover:decoration-[var(--color-ink)]"
-            >
-              {EMAIL}
-            </a>
-          </p>
         </div>
       </div>
-    </section>
+      <div className="mt-6 space-y-4 text-lg text-[var(--color-ink-soft)] leading-relaxed">
+        {FOUNDER.bio.map((line) => (
+          <p key={line}>{line}</p>
+        ))}
+      </div>
+      <p className="mt-6 rounded-xl border border-[var(--color-ink)]/15 bg-[var(--color-surface-raised)] p-4 text-[var(--color-ink)] leading-relaxed">
+        {FOUNDER.newLine}{" "}
+        <Link href="/sample-audit" className="underline underline-offset-4 decoration-[var(--color-ink)]/30 hover:decoration-[var(--color-ink)]">
+          the sample
+        </Link>
+        {", "}
+        <Link href="/services" className="underline underline-offset-4 decoration-[var(--color-ink)]/30 hover:decoration-[var(--color-ink)]">
+          the price
+        </Link>
+        {" and "}
+        <Link href="/terms" className="underline underline-offset-4 decoration-[var(--color-ink)]/30 hover:decoration-[var(--color-ink)]">
+          the terms
+        </Link>
+        .
+      </p>
+      <p className="mt-6 text-[var(--color-ink)]">
+        Email{" "}
+        <a
+          href={`mailto:${EMAIL}`}
+          className="font-medium underline underline-offset-4 decoration-[var(--color-ink)]/30 hover:decoration-[var(--color-ink)]"
+        >
+          {EMAIL}
+        </a>
+      </p>
+    </div>
   );
 }

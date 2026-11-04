@@ -17,15 +17,15 @@ const spaceGrotesk = Space_Grotesk({
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.devize.ai"),
   title: {
-    default: "Digital Strategy Partner for Service Businesses · Devize",
+    default: "Convert Clicks Into Clients Without Adding Headcount · Devize",
     template: "%s · Devize",
   },
   description:
-    "Devize tells service businesses what's worth doing to get found and chosen online, does the agreed work each month, and shows what got done. $500 a month, flat. Start with a free map audit.",
+    "Devize is a digital strategy partner for service businesses that sell to people. We manage your SEO and ad spend to bring in the clicks, and help turn them into clients. Start with a free map audit.",
   openGraph: {
-    title: "Know what's worth doing online. Skip the rest.",
+    title: "Convert clicks into clients without adding headcount.",
     description:
-      "Someone you can reach tells you what to fix first and what to skip, does the work, and sends a short monthly note with counts. Start with a free map audit.",
+      "We manage your SEO and ad spend to bring in the clicks, and help turn them into clients. Start with a free map audit.",
     url: "https://www.devize.ai",
     siteName: "Devize",
     type: "website",
@@ -33,9 +33,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Know what's worth doing online. Skip the rest.",
+    title: "Convert clicks into clients without adding headcount.",
     description:
-      "Someone you can reach tells you what to fix first and what to skip, does the work, and sends a short monthly note with counts. Start with a free map audit.",
+      "We manage your SEO and ad spend to bring in the clicks, and help turn them into clients. Start with a free map audit.",
   },
   robots: {
     index: true,

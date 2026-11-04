@@ -213,7 +213,7 @@ export default function SampleAuditPage() {
         </div>
         <p className="mt-6 text-sm text-[var(--color-ink-soft)] leading-relaxed max-w-3xl">
           Want the method behind it?{" "}
-          <Link href="/services/free-audit" className="font-medium text-[var(--color-brand)] underline underline-offset-4 decoration-[var(--color-brand)]/30 hover:decoration-[var(--color-brand)]">
+          <Link href="/services#free-audit" className="font-medium text-[var(--color-brand)] underline underline-offset-4 decoration-[var(--color-brand)]/30 hover:decoration-[var(--color-brand)]">
             See what the free audit covers
           </Link>
         </p>
