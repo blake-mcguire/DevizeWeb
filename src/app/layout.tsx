@@ -17,16 +17,15 @@ const spaceGrotesk = Space_Grotesk({
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.devize.ai"),
   title: {
-    default: "Local SEO and AEO for Local Service Businesses · Devize",
+    default: "Digital Strategy Partner for Service Businesses · Devize",
     template: "%s · Devize",
   },
   description:
-    "Devize does local SEO and AEO for dentists, HVAC companies and other local service businesses. See where you show up with a free map audit.",
+    "Devize tells service businesses what's worth doing to get found and chosen online, does the agreed work each month, and shows what got done. $500 a month, flat. Start with a free map audit.",
   openGraph: {
-    title:
-      "Your prospects are searching for your services, but are they finding you?",
+    title: "Know what's worth doing online. Skip the rest.",
     description:
-      "Local SEO and AEO for dentists, HVAC companies and other local service businesses. Start with a free Google map audit.",
+      "Someone you can reach tells you what to fix first and what to skip, does the work, and sends a short monthly note with counts. Start with a free map audit.",
     url: "https://www.devize.ai",
     siteName: "Devize",
     type: "website",
@@ -34,10 +33,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title:
-      "Your prospects are searching for your services, but are they finding you?",
+    title: "Know what's worth doing online. Skip the rest.",
     description:
-      "Local SEO and AEO for dentists, HVAC companies and other local service businesses. Start with a free Google map audit.",
+      "Someone you can reach tells you what to fix first and what to skip, does the work, and sends a short monthly note with counts. Start with a free map audit.",
   },
   robots: {
     index: true,

@@ -1,25 +1,20 @@
 import Link from "next/link";
 import Logo from "@/components/logo";
+import { MobileNav } from "@/components/mobile-nav";
 import { Button } from "@/components/ui/button";
 
 const navLinks = [
-  { href: "/#how-it-works", label: "How it works" },
-  { href: "/#sample", label: "Sample audit" },
-  { href: "/#services", label: "Local SEO" },
-  { href: "/#aeo", label: "AEO" },
-  { href: "/#price", label: "Price" },
-  { href: "/#faq", label: "FAQ" },
+  { href: "/services", label: "Services" },
+  { href: "/industries", label: "Industries We Serve" },
+  { href: "/how-we-work", label: "How We Work and Price" },
+  { href: "/sample-audit", label: "Sample Audit" },
 ];
 
 export default function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 backdrop-blur-md bg-[var(--color-surface-soft)]/80 border-b border-[var(--color-border)]">
       <div className="mx-auto max-w-6xl px-6 h-16 flex items-center justify-between gap-6">
-        <Link
-          href="/"
-          aria-label="Devize home"
-          className="flex items-center -ml-1"
-        >
+        <Link href="/" aria-label="Devize home" className="flex items-center -ml-1">
           <Logo className="h-9 w-auto" />
         </Link>
 
@@ -36,11 +31,10 @@ export default function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
-          {/* A plain <a> to the hero form's slot: on a phone it opens the
-              form in place (hashchange and :target, see audit-form.tsx). */}
-          <Button href="/#audit" size="sm" native>
+          <Button href="/#contact" size="sm">
             Free map audit
           </Button>
+          <MobileNav links={navLinks} />
         </div>
       </div>
     </header>

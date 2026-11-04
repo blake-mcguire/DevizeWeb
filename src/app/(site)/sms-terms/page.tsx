@@ -18,6 +18,9 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 };
 
+// TODO(Blake, counsel): section 1 still says "local SEO and AEO service". Left as
+// is on purpose in the 2026-11-04 rebuild, because this wording may need to match
+// the texting program's carrier registration. Check that before changing it.
 export default function SmsTermsPage() {
   return (
     <LegalPage

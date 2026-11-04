@@ -8,6 +8,16 @@ import {
 } from "@/components/legal-prose";
 
 /**
+ * TODO(Blake, counsel): 2026-11-04, the rebuild changed only what the positioning
+ * made wrong: the service's name (1, 3), the list of work (3.2), a short add-on
+ * clause (3.8) and the no-guarantee list (4.1). All of it is flagged, not decided.
+ * Counsel still needs to write a real Google Ads clause. It should cover ad spend
+ * and billing, who owns the account, who pays if a mistake overspends, access
+ * levels, and no guarantee of leads, costs or positions. 3.7 (website rebuild) is
+ * left in because it only applies "if your Order includes it", though the rebuild
+ * is off the site: keep or remove it. Also decide whether /terms/v1-2 stays public.
+ * The price lives on devize.ai/#price and in the Order, not here.
+ *
  * Service Terms v2.0 (2026-10-15): a short version for the free audit and the
  * monthly local SEO and AEO service. It replaces v1.2 (the email reactivation
  * "Revenue Recovery Sprint", a held-back service), which is kept word for word
@@ -32,7 +42,7 @@ import {
 export const metadata: Metadata = {
   title: "Service Terms",
   description:
-    "Service Terms for Devize's free Google Listing and Map Audit and monthly local SEO and AEO service.",
+    "Service Terms for Devize's free Google Listing and Map Audit, monthly SEO and review management, and the optional Google Ads add-on.",
   alternates: { canonical: "/terms" },
   robots: { index: true, follow: true },
 };
@@ -42,12 +52,12 @@ export default function TermsPage() {
     <LegalPage
       eyebrow="Legal"
       title="Service Terms"
-      updated="October 15, 2026"
+      updated="November 4, 2026"
       version="Version 2.0"
     >
       <H2 id="s1">1. Who we are</H2>
       <P>
-        &ldquo;<strong>Devize</strong>&rdquo; (&ldquo;we,&rdquo; &ldquo;us&rdquo;) is the trade name of Blake Louis McGuire, a sole proprietor based in Willis, Texas. These Service Terms (the &ldquo;<strong>Terms</strong>&rdquo;) cover the free Google Listing and Map Audit and the monthly local SEO and AEO service Devize provides to businesses (&ldquo;<strong>Client</strong>,&rdquo; &ldquo;you&rdquo;).
+        &ldquo;<strong>Devize</strong>&rdquo; (&ldquo;we,&rdquo; &ldquo;us&rdquo;) is the trade name of Blake Louis McGuire, a sole proprietor based in Willis, Texas. These Service Terms (the &ldquo;<strong>Terms</strong>&rdquo;) cover the free Google Listing and Map Audit, the monthly SEO and review management service, and the optional Google Ads add-on Devize provides to businesses (&ldquo;<strong>Client</strong>,&rdquo; &ldquo;you&rdquo;).
       </P>
 
       <H2 id="s2">2. The free Google Listing and Map Audit</H2>
@@ -58,12 +68,12 @@ export default function TermsPage() {
         2.2 The audit is built from public information: Google search results, your Google Business Profile, and your website. It shows what we found when we ran the searches. Google results change often and differ by device, place and time, so a later search can show something different.
       </P>
 
-      <H2 id="s3">3. The monthly local SEO and AEO service</H2>
+      <H2 id="s3">3. The monthly SEO and review management service</H2>
       <P>
         3.1 <strong>Your proposal or order.</strong>{" "}The monthly service is governed by the written proposal or order you accept (the &ldquo;<strong>Order</strong>&rdquo;), together with these Terms. The Order sets out the work and the flat monthly fee. The work for the standard monthly fee is the list published at devize.ai/#price on the date you accept the Order. If the Order and these Terms conflict, the Order controls, except for section 3.5: the service is month to month whatever the Order says.
       </P>
       <P>
-        3.2 <strong>The work.</strong>{" "}Depending on your Order, the work can include: your Google Business Profile (categories, services, description, hours, photos, posts and questions); a routine for asking customers for reviews and replying to them; service and town pages on your website; your business details checked on the main directories and corrected where Devize can (some directories let only the owner make changes, and you make those); clear facts about your business that search engines and AI assistants can read; and a monthly rerun of the same map searches as your progress report.
+        3.2 <strong>The work.</strong>{" "}{/* DRAFT (2026-11-04): Blake and counsel to confirm. It must match MONTHLY_WORK in src/lib/offer-copy.ts */}Depending on your Order, the work can include: your Google Business Profile (categories, services, description, hours, photos and questions); a routine for asking customers for reviews and replying to them; a better page on your website; your business details checked on your listing, your website and the main directories, and corrected where Devize can (some directories let only the owner make changes, and you make those); clear facts about your business that search engines and AI assistants can read; and a monthly rerun of the same map searches with a short note on the work done.
       </P>
       <P>
         3.3 <strong>Access and ownership.</strong>{" "}You add Devize as a manager on your Google Business Profile, and give us access to your website or put us in touch with the person who runs it. You remain the owner of your Google Business Profile, your website and your accounts, and you can remove Devize&apos;s access at any time.
@@ -81,9 +91,13 @@ export default function TermsPage() {
         3.7 <strong>Optional website rebuild.</strong>{" "}{/* DRAFT (2026-10-15): Blake and counsel to confirm, including when the fee is paid and the refund rule */}If your Order includes it, Devize rebuilds your website for the one-time fee in the Order. The site is built on your domain, in hosting and code accounts in your name, with no hosting fee charged by Devize. The site made for your business is yours once paid for; the underlying template components are licensed to you, without a time limit, for your own business. If the monthly service ends, the site keeps running in your account and Devize hands over its files.
       </P>
 
+      <P>
+        3.8 <strong>Optional Google Ads add-on.</strong>{" "}{/* DRAFT (2026-11-04): a placeholder for counsel's clause. See the TODO at the top of this file. */}If your Order includes it, your Order sets out the monthly work, its limits and the fee. Ad spend is separate, and you pay it to Google directly. The Google Ads account stays yours.
+      </P>
+
       <H2 id="s4">4. No guarantee of results</H2>
       <P>
-        4.1 Devize does not guarantee any ranking, position on Google&apos;s map, appearance in an AI answer (including Google&apos;s AI features and assistants such as ChatGPT), number of calls, customers, or revenue. Google and the companies behind AI assistants decide what they show, and Devize does not control them.
+        4.1 Devize does not guarantee any ranking, position on Google&apos;s map, appearance in an AI answer (including Google&apos;s AI features and assistants such as ChatGPT), ad position, cost per click or per lead, number of calls, leads, customers, or revenue. Google and the companies behind AI assistants decide what they show, and Devize does not control them.
       </P>
       <P>
         4.2 EXCEPT AS EXPRESSLY STATED IN YOUR ORDER, THE SERVICES ARE PROVIDED &ldquo;AS IS&rdquo; AND DEVIZE DISCLAIMS ALL OTHER WARRANTIES, EXPRESS OR IMPLIED.

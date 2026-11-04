@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { INDUSTRIES } from "@/lib/industries";
 
 const SITE_URL = "https://www.devize.ai";
 
@@ -9,19 +10,30 @@ const SITE_URL = "https://www.devize.ai";
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
 
+  const marketing = [
+    { path: "/", priority: 1.0 },
+    { path: "/services", priority: 0.9 },
+    { path: "/services/free-audit", priority: 0.9 },
+    { path: "/services/seo-and-reviews", priority: 0.9 },
+    { path: "/services/google-ads", priority: 0.7 },
+    { path: "/how-we-work", priority: 0.9 },
+    { path: "/sample-audit", priority: 0.8 },
+    { path: "/industries", priority: 0.8 },
+    ...INDUSTRIES.map((i) => ({ path: `/industries/${i.slug}`, priority: 0.7 })),
+  ];
+
   return [
-    {
-      url: `${SITE_URL}/`,
+    ...marketing.map((page) => ({
+      url: `${SITE_URL}${page.path === "/" ? "/" : page.path}`,
       lastModified: now,
-      changeFrequency: "weekly",
-      priority: 1.0,
-    },
-    // Legal pages, rewritten 2026-10-15 for the local SEO and AEO offer.
+      changeFrequency: "monthly" as const,
+      priority: page.priority,
+    })),
     // Left out on purpose: /sms-consent and /terms/v1-2 (both noindex) and
     // /thanks (the no-JavaScript form confirmation).
     ...[
-      { path: "/terms", updated: "2026-10-15" },
-      { path: "/privacy", updated: "2026-10-15" },
+      { path: "/terms", updated: "2026-11-04" },
+      { path: "/privacy", updated: "2026-11-04" },
       { path: "/sms-terms", updated: "2026-10-15" },
     ].map((page) => ({
       url: `${SITE_URL}${page.path}`,

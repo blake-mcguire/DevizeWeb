@@ -1,19 +1,17 @@
 import { AuditForm } from "@/components/audit-form";
 import { FounderChip } from "@/components/founder";
-import { EMAIL, PRICE } from "@/lib/offer-copy";
+import { COVERAGE, EMAIL, PRICE } from "@/lib/offer-copy";
 
 export default function Contact() {
   return (
-    <section id="contact" className="scroll-mt-16 mx-auto max-w-6xl px-6 py-24 md:py-32">
-      <div className="grid gap-12 md:grid-cols-2 md:gap-16 items-start">
-        <div>
+    <section id="contact" className="scroll-mt-16 mx-auto max-w-6xl px-6 py-16 md:py-24">
+      <div className="grid grid-cols-1 gap-10 md:grid-cols-2 md:gap-16 items-start">
+        <div className="min-w-0">
           <p className="text-xs uppercase tracking-[0.18em] text-[var(--color-ink-muted)] font-medium">
             Free map audit
           </p>
           <h2 className="mt-4 font-[family-name:var(--font-display)] text-4xl md:text-5xl leading-[1.05] tracking-tight text-[var(--color-ink)] font-medium">
-            See the map
-            <br />
-            your customers see.
+            See your own map first.
           </h2>
           <p className="mt-6 text-lg text-[var(--color-ink-soft)] leading-relaxed max-w-md">
             Tell us your business, your town and where to send it. We&apos;ll
@@ -30,6 +28,10 @@ export default function Contact() {
               <span className="brand-dot mt-[0.55em] shrink-0" aria-hidden="true" />
               No logins. We only use what anyone can see on Google and on your
               website.
+            </li>
+            <li className="flex gap-3">
+              <span className="brand-dot mt-[0.55em] shrink-0" aria-hidden="true" />
+              <span>{COVERAGE.today} {COVERAGE.others}</span>
             </li>
             <li className="flex gap-3">
               <span className="brand-dot mt-[0.55em] shrink-0" aria-hidden="true" />
@@ -50,9 +52,11 @@ export default function Contact() {
           </ul>
         </div>
 
+        {/* slotId "audit": the anchor older links and the header button use. */}
         <AuditForm
-          slotId="contact-form"
+          slotId="audit"
           source="contact"
+          className="min-w-0"
           footer={<FounderChip />}
         />
       </div>

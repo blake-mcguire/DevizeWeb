@@ -1,17 +1,23 @@
 import Link from "next/link";
 import Logo from "@/components/logo";
+import { EMAIL, SERVICES } from "@/lib/offer-copy";
+import { INDUSTRIES } from "@/lib/industries";
 
 const footerNav = [
   {
-    heading: "The service",
+    heading: "Services",
     links: [
-      { href: "/#how-it-works", label: "How it works" },
-      { href: "/#sample", label: "Sample audit" },
-      { href: "/#services", label: "Local SEO" },
-      { href: "/#aeo", label: "AEO" },
-      { href: "/#price", label: "Price" },
-      { href: "/#faq", label: "FAQ" },
-      { href: "/#contact", label: "Free map audit" },
+      { href: "/services", label: "All services" },
+      ...SERVICES.map((s) => ({ href: s.href, label: s.title })),
+      { href: "/how-we-work", label: "How We Work and Price" },
+      { href: "/sample-audit", label: "Sample Audit" },
+    ],
+  },
+  {
+    heading: "Industries",
+    links: [
+      { href: "/industries", label: "All industries" },
+      ...INDUSTRIES.map((i) => ({ href: `/industries/${i.slug}`, label: i.name })),
     ],
   },
   {
@@ -27,24 +33,27 @@ const footerNav = [
 export default function SiteFooter() {
   return (
     <footer className="relative z-10 border-t border-[var(--color-border)] bg-[var(--color-surface)]">
-      <div className="mx-auto max-w-6xl px-6 py-16 grid grid-cols-1 gap-10 md:grid-cols-[1.5fr_repeat(2,1fr)]">
-        <div className="max-w-sm">
+      <div className="mx-auto max-w-6xl px-6 py-16 grid grid-cols-1 gap-10 sm:grid-cols-2 md:grid-cols-[1.5fr_repeat(3,1fr)]">
+        <div className="max-w-sm sm:col-span-2 md:col-span-1">
           <Link href="/" aria-label="Devize home" className="inline-block">
             <Logo className="h-8 w-auto" />
           </Link>
+          {/* The label stays out of the footer: it sits on every page, including
+              the Google Ads one, and always needs its plain sentence beside it. */}
           <p className="mt-4 text-sm text-[var(--color-ink-soft)] leading-relaxed">
-            Local SEO and AEO for owner-run local service businesses. We help
-            the people searching near you find you, on Google&apos;s map and in
-            AI answers.
+            We tell service businesses what&apos;s worth doing to get found and
+            chosen online, do the agreed work each month, and show you what got
+            done. Independent. Not connected to Google.
           </p>
+          {/* TODO(Blake): this street address may be your home. Confirm you want it on every page. */}
           <address className="mt-5 not-italic text-sm text-[var(--color-ink-soft)] leading-relaxed">
             Devize, 307 Irenic Mist Court, Willis, TX 77318
             <br />
             <a
-              href="mailto:admin@devize.ai"
+              href={`mailto:${EMAIL}`}
               className="hover:text-[var(--color-ink)] underline underline-offset-4 decoration-[var(--color-ink)]/20 hover:decoration-[var(--color-ink)] transition-colors"
             >
-              admin@devize.ai
+              {EMAIL}
             </a>
           </address>
         </div>

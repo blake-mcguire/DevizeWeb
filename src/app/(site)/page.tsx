@@ -1,16 +1,16 @@
 import type { Metadata } from "next";
 import Hero from "@/components/sections/hero";
-import Problem from "@/components/sections/problem";
-import HowItWorks from "@/components/sections/how-it-works";
-import SampleAudit from "@/components/sections/sample-audit";
-import Services from "@/components/sections/services";
+import MapStory from "@/components/sections/sample-audit";
+import Mission from "@/components/sections/mission";
+import PartnerMeans from "@/components/sections/partner-means";
+import First30Days from "@/components/sections/first-30-days";
 import Price from "@/components/sections/price";
-import WhoItsFor from "@/components/sections/who-its-for";
+import WontPromise from "@/components/sections/wont-promise";
 import Faq, { faqs } from "@/components/sections/faq";
 import Contact from "@/components/sections/contact";
 import { FounderSection } from "@/components/founder";
 import { JsonLd } from "@/components/json-ld";
-import { PRICE, REBUILD } from "@/lib/offer-copy";
+import { AUDIT_NAME, EMAIL, FOUNDER, GOOGLE_ADS, LABEL_FOR, MISSION, PRICE } from "@/lib/offer-copy";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/" },
@@ -20,9 +20,9 @@ const SITE_URL = "https://www.devize.ai";
 const ORG_ID = `${SITE_URL}/#organization`;
 const US = { "@type": "Country", name: "United States" };
 
-// The brand's facts live on the home page (moved from the root layout on
-// 2026-10-15) so the prospect pages under /a/ carry none of the marketing
-// structured data.
+// The brand's facts live on the home page so the prospect pages under /a/ carry
+// none of the marketing structured data. No review, rating, client count or
+// award field: Devize has none.
 const organizationSchema = {
   "@context": "https://schema.org",
   "@type": "Organization",
@@ -30,9 +30,8 @@ const organizationSchema = {
   name: "Devize",
   url: SITE_URL,
   logo: `${SITE_URL}/devize-logo.svg`,
-  description:
-    "Devize does local SEO and AEO (answer engine optimization) for owner-run local service businesses such as dentists and HVAC companies: Google Business Profile work, reviews, service and town pages, consistent listings, and clear facts AI assistants can read.",
-  email: "admin@devize.ai",
+  description: `${LABEL_FOR}: Devize says what's worth doing to get found and chosen online, does the agreed work each month, and shows what got done. ${MISSION}`,
+  email: EMAIL,
   address: {
     "@type": "PostalAddress",
     streetAddress: "307 Irenic Mist Court",
@@ -44,68 +43,67 @@ const organizationSchema = {
   contactPoint: {
     "@type": "ContactPoint",
     contactType: "sales",
-    email: "admin@devize.ai",
+    email: EMAIL,
     availableLanguage: "English",
   },
   areaServed: US,
-  founder: { "@type": "Person", name: "Blake McGuire" },
-  knowsAbout: [
-    "Local search engine optimization",
-    "Answer engine optimization",
-    "Google Business Profile",
-    "Online reviews",
-    "Structured data",
-  ],
+  founder: { "@type": "Person", name: FOUNDER.name },
+  knowsAbout: ["Local search engine optimization", "Google Business Profile", "Online reviews"],
 };
+
+function monthly(amount: number, currency: string, url: string) {
+  return {
+    "@type": "Offer",
+    url,
+    price: String(amount),
+    priceCurrency: currency,
+    priceSpecification: {
+      "@type": "UnitPriceSpecification",
+      price: String(amount),
+      priceCurrency: currency,
+      unitCode: "MON",
+      unitText: "month",
+      referenceQuantity: { "@type": "QuantitativeValue", value: 1, unitCode: "MON" },
+    },
+  };
+}
 
 const serviceSchemas = [
   {
     "@context": "https://schema.org",
     "@type": "Service",
-    name: "Google Listing and Map Audit",
+    name: AUDIT_NAME,
     serviceType: "Local search audit",
     description:
       "We run the searches your customers run from dozens of spots around your business, show where you come up on Google's map and who comes up instead, check 21 things on your Google listing, reviews and website, and list the fixes we'd make first, in order.",
     provider: { "@id": ORG_ID },
     areaServed: US,
+    url: `${SITE_URL}/services/free-audit`,
     offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
   },
   {
     "@context": "https://schema.org",
     "@type": "Service",
-    name: "Local SEO and AEO",
-    serviceType: "Local search engine optimization",
+    name: "SEO and Review Management",
+    serviceType: "Local search engine optimization and review management",
     description:
-      "Monthly work on your Google Business Profile, reviews, service and town pages, listings across directories, and facts AI assistants can read, with the same map searches rerun each month. Month to month.",
+      "Monthly work with counts: a review request routine, replies to new reviews, a listing check, a facts check, one better page, a map re-run and a one-page note. Month to month.",
     provider: { "@id": ORG_ID },
     areaServed: US,
-    // $750 a month, flat (Blake, 2026-10-15). The visible price card says the
-    // same; both read PRICE in src/lib/offer-copy.ts.
-    offers: {
-      "@type": "Offer",
-      url: `${SITE_URL}/#price`,
-      price: String(PRICE.amount),
-      priceCurrency: PRICE.currency,
-      priceSpecification: {
-        "@type": "UnitPriceSpecification",
-        price: String(PRICE.amount),
-        priceCurrency: PRICE.currency,
-        unitCode: "MON",
-        unitText: "month",
-        referenceQuantity: { "@type": "QuantitativeValue", value: 1, unitCode: "MON" },
-      },
-    },
+    url: `${SITE_URL}/services/seo-and-reviews`,
+    offers: monthly(PRICE.amount, PRICE.currency, `${SITE_URL}/#price`),
   },
   {
     "@context": "https://schema.org",
     "@type": "Service",
-    name: "Website rebuild",
-    serviceType: "Website design for local service businesses",
+    name: "Google Ads Management",
+    serviceType: "Search advertising management",
     description:
-      "A fast new website on the client's own domain, built in accounts in the client's name, with a page for each service and town served. One-time fee; no hosting fee; the site stays the client's if they cancel.",
+      "An optional add-on with counted monthly work, inside stated limits, in the client's own account. Ad spend is separate and paid to Google. Devize has not run a client's Google Ads before and is not a Google Partner.",
     provider: { "@id": ORG_ID },
     areaServed: US,
-    offers: { "@type": "Offer", url: `${SITE_URL}/#rebuild`, price: String(REBUILD.amount), priceCurrency: REBUILD.currency },
+    url: `${SITE_URL}/services/google-ads`,
+    offers: monthly(GOOGLE_ADS.amount, GOOGLE_ADS.currency, `${SITE_URL}/services/google-ads`),
   },
 ];
 
@@ -130,22 +128,25 @@ const faqSchema = {
   })),
 };
 
+/**
+ * The order comes from the positioning brief, with the mission block added after
+ * the map. The map stays high because people arrive here from the audit emails.
+ * There is no proof section, and nothing replaces the old reviews.
+ */
 export default function Home() {
   return (
     <>
       <Hero />
-      <Problem />
-      <HowItWorks />
-      <SampleAudit />
-      <Services />
-      <Price />
-      <WhoItsFor />
-      <Faq />
+      <MapStory />
+      <Mission />
+      <PartnerMeans />
+      <First30Days />
+      <Price band />
+      <WontPromise />
       <FounderSection />
+      <Faq />
       <Contact />
-      <JsonLd
-        data={[organizationSchema, ...serviceSchemas, websiteSchema, faqSchema]}
-      />
+      <JsonLd data={[organizationSchema, ...serviceSchemas, websiteSchema, faqSchema]} />
     </>
   );
 }
