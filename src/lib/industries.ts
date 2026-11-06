@@ -5,12 +5,17 @@
  * no page reads as another page with the name swapped.
  *
  * Rules for those pages:
- * - Devize has no client in any of these trades. One shared line says so.
+ * - Voluntary admissions stay off these pages (Blake, 2026-11-05), and we still
+ *   claim no client, result, experience or certification we lack (proof rule,
+ *   src/lib/menu.ts). The shared fine print is in the footer.
  * - No claim of experience, specialist knowledge, results or legal advice.
  * - Every outside fact carries a numbered source from `S`, read on 2026-11-04.
  *   Anything without a number is our own reasoning, written so it reads that way.
  * - No invented numbers. Searches are plain-word examples, not volume figures.
- * - What can't be sold yet comes from TRADE_ACCESS in src/lib/tiers.ts.
+ * - Our own ranking numbers appear only on the HVAC and dental pages, each trade's own,
+ *   with date and basis. The other four trades have no scans, so they get rules and
+ *   what we will do. A dental finding never goes on an HVAC page as if it held there.
+ * - Each page says what comes first for its trade, in its own words.
  *
  * Rule numbers and dollar figures are Texas or federal, because Texas is where
  * Devize scans today. A layperson read them, from public copies. A lawyer should
@@ -38,7 +43,7 @@ export const S = {
   tx3679: { label: "Texas: 22 Tex. Admin. Code 367.9, advertising plumbing", url: "https://www.law.cornell.edu/regulations/texas/22-Tex-Admin-Code-SS-367-9" },
   elite: { label: "National Law Review: Dental practice pays $10,000 over Yelp replies", url: "https://natlawreview.com/article/dental-practice-pays-10000-hipaa-settlements-disclosing-personal-health-information" },
   igbinadolor: { label: "HHS, March 2022: Four HIPAA enforcement actions, including a $50,000 penalty on a dental practice", url: "https://www.hhs.gov/about/news/2022/03/28/four-hipaa-enforcement-actions-hold-healthcare-providers-accountable-with-compliance.html" },
-  newVision: { label: "HHS: New Vision Dental settlement, $23,000", url: "https://www.hhs.gov/hipaa/for-professionals/compliance-enforcement/agreements/new-vision/index.html" },
+  newVision: { label: "HHS: Dental practice settlement, $23,000", url: "https://www.hhs.gov/hipaa/for-professionals/compliance-enforcement/agreements/new-vision/index.html" },
   manasa: { label: "Nixon Peabody: HIPAA-regulated entities and online reviews", url: "https://nixonpeabody.com/insights/articles/2023/07/13/hipaa-regulated-entities-must-use-caution-responding-to-online-reviews" },
   ba: { label: "45 CFR 160.103: definition of business associate", url: "https://www.law.cornell.edu/cfr/text/45/160.103" },
   reminders: { label: "HHS: Are appointment reminders allowed under HIPAA without authorization?", url: "https://www.hhs.gov/hipaa/for-professionals/faq/286/are-appointment-reminders-allowed-under-hipaa-without-authorization/index.html" },
@@ -56,6 +61,12 @@ export const S = {
   tx705: { label: "Texas Professional Ethics Committee: Opinion 705 on generative AI", url: "https://legalethicstexas.com/resources/opinions/opinion-705/" },
   tx801: { label: "Texas Occupations Code 801.353: veterinarian and client confidentiality", url: "https://texas.public.law/statutes/tex._occ._code_section_801.353" },
   tx57330: { label: "Texas: 22 Tex. Admin. Code 573.30, veterinary advertising", url: "https://www.law.cornell.edu/regulations/texas/22-Tex-Admin-Code-SS-573-30" },
+  // Read 2026-11-04 and 2026-11-05 for the ad plans.
+  seoGuide: { label: "Google Search Central: Do you need an SEO?", url: "https://developers.google.com/search/docs/fundamentals/do-i-need-seo" },
+  lsaMove: { label: "Google Ads: Local Services Ads moving into Performance Max", url: "https://support.google.com/google-ads/answer/17213585" },
+  aiMax: { label: "Google Ads: AI Max for Search campaigns", url: "https://support.google.com/google-ads/answer/15909989" },
+  budget: { label: "Google Ads: How daily budgets work", url: "https://support.google.com/google-ads/answer/6385083" },
+  trademark: { label: "Google Ads policy: Trademarks", url: "https://support.google.com/adspolicy/answer/6118" },
 } satisfies Record<string, Source>;
 
 export type Industry = {
@@ -67,9 +78,11 @@ export type Industry = {
   metaDescription: string;
   /** The carousel card's line: this trade's own bad moment. */
   hook: string;
+  /** The card's short line, which fades out. Cut down from the trade page's own opening. */
+  line: string;
   /** One search someone types in that moment. */
   search: string;
-  /** Does the audit's rival comparison run for this trade today? */
+  /** Does the audit's competitor comparison run for this trade today? */
   compared: boolean;
 };
 
@@ -79,8 +92,10 @@ export const INDUSTRIES: Industry[] = [
     name: "HVAC",
     title: "HVAC Companies",
     metaDescription:
-      "Where an HVAC job goes when the AC quits after hours, what your listing and reviews need, which Devize tier fits, and the Texas license number rule.",
+      "Where an HVAC job goes when the AC quits after hours, what our HVAC scans show, what your listing and reviews need, and the Texas license number rule.",
     hook: "The AC quit after you went home.",
+    line:
+      "Nobody looks for AC repair on a nice day. They look when the house is hot, and they keep calling until someone picks up.",
     search: "ac not cooling",
     compared: true,
   },
@@ -89,8 +104,10 @@ export const INDUSTRIES: Industry[] = [
     name: "Dental Clinics",
     title: "Dental Clinics",
     metaDescription:
-      "Why a review reply is where dental practices get fined, what a new-patient call is worth, and why voice, text and a lead system wait for dental clinics at Devize.",
-    hook: "A toothache at 7am. A new family on Saturday.",
+      "How a review reply gets a dental practice fined, what a new-patient call is worth, what our dental scans show, and the privacy work that comes first.",
+    hook: "One patient has a toothache at 7am, and a new family is looking on Saturday.",
+    line:
+      "The first needs to be seen today. The second checks that you take their insurance and reads your reviews before calling.",
     search: "emergency dentist near me",
     compared: true,
   },
@@ -99,8 +116,10 @@ export const INDUSTRIES: Industry[] = [
     name: "Law Firms",
     title: "Law Firms",
     metaDescription:
-      "What Devize needs from a law firm before touching anything: who signs off, your rule on review replies, and a flat fee. Voice and text wait for your lawyer.",
+      "What Devize needs from a law firm before we touch anything: who signs off, your rule on review replies, and how we charge. Voice and text start with your sign-off.",
     hook: "Some of your callers will never tell anyone they called.",
+    line:
+      "People find a lawyer quietly, whether it's a DUI at 2am, a custody order or a will they've put off for years, and bar rules limit what your ads and review replies can say.",
     search: "dui lawyer near me",
     compared: false,
   },
@@ -109,8 +128,10 @@ export const INDUSTRIES: Industry[] = [
     name: "Walk-In Clinics",
     title: "Walk-In Clinics",
     metaDescription:
-      "The four questions a walk-in clinic's listing answers before anyone reads a review, what a missed search costs, and why voice and text come last here.",
-    hook: "Open? Nearby? Takes my plan? Decision made.",
+      "The four questions a walk-in clinic's listing answers before anyone reads a review, what a missed search costs, and the privacy work that comes before any tool talks to a patient.",
+    hook: "They check if you're open, close by and take their plan.",
+    line:
+      "Someone with a sore throat on a Sunday checks those facts on a phone and goes, so your listing answers before anyone reads a review.",
     search: "walk in clinic open now",
     compared: false,
   },
@@ -121,6 +142,8 @@ export const INDUSTRIES: Industry[] = [
     metaDescription:
       "What to say after hours when the dog ate something at 9pm, what a first visit can lead to, and how to answer a review written in grief.",
     hook: "The dog ate something at 9pm.",
+    line:
+      "The owner is scared and on a phone. If you don't see emergencies, the kindest thing your listing can do is say where to go instead.",
     search: "emergency vet near me",
     compared: false,
   },
@@ -131,6 +154,8 @@ export const INDUSTRIES: Industry[] = [
     metaDescription:
       "Four plumbing jobs, four searches and what a missed call costs on each, why Google allows one profile for your area, and the Texas license number rule.",
     hook: "Water is on the floor.",
+    line:
+      "A burst pipe goes to whoever answers, and a water heater quote goes to whoever looks trustworthy after a few minutes of reading.",
     search: "emergency plumber",
     compared: false,
   },

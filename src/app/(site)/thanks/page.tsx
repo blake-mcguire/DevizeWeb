@@ -9,7 +9,7 @@ import { LEAD_ERRORS, LEAD_THANKS, isLeadErrorCode } from "@/lib/lead-copy";
  * place and never comes here. Not for search, and not in the sitemap.
  */
 export const metadata: Metadata = {
-  title: "Audit request",
+  title: "Thanks",
   robots: { index: false, follow: true },
 };
 
@@ -24,7 +24,7 @@ export default async function ThanksPage({
   return (
     <div className="mx-auto max-w-2xl px-6 py-32 text-center">
       <p className="text-xs uppercase tracking-[0.18em] text-[var(--color-ink-muted)] font-medium">
-        Free map audit
+        Get in touch
       </p>
       <h1 className="mt-4 font-[family-name:var(--font-display)] text-3xl md:text-4xl tracking-tight text-[var(--color-ink)] font-medium leading-tight">
         {error ?? LEAD_THANKS}

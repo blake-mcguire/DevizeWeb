@@ -11,10 +11,10 @@ type Status = "idle" | "submitting" | "success" | "error";
 const FALLBACK_ERROR =
   "Something went wrong. Please try again, or email admin@devize.ai.";
 
-const OPEN_LABEL = "Get my free map audit";
+const OPEN_LABEL = "Get in touch";
 
 /**
- * The audit request form: three fields (business name, town, email), with
+ * The contact form: three fields (business name, town, email), with
  * your name and the search you want to show up for as optional extras behind
  * a toggle. No phone field. Used twice on the home page: in the hero
  * (source "hero") and in the contact section (source "contact").
@@ -233,7 +233,7 @@ export function AuditForm({
               spaces the form's children, and this is the last one). */}
           <div>
             {hero ? (
-              <PrivacyLine className="text-[0.8125rem]" short />
+              <PrivacyLine className="text-[0.8125rem]" />
             ) : (
               <div className="flex flex-col gap-3 pt-1 sm:flex-row sm:items-center sm:justify-between sm:gap-5">
                 <PrivacyLine className="order-2 text-sm sm:text-right" />
@@ -289,15 +289,10 @@ function OptionalExtras({ id, className }: { id: (name: string) => string; class
   );
 }
 
-/**
- * `short` (the hero): without "Free, nothing to sign.", which the line under
- * the hero card already says, so it fits one line beside a laptop's fold.
- */
-function PrivacyLine({ className, short = false }: { className?: string; short?: boolean }) {
+function PrivacyLine({ className }: { className?: string }) {
   return (
     <p className={cn("text-[var(--color-ink-soft)] leading-relaxed", className)}>
-      {short ? "" : "Free, nothing to sign. "}We use your details only to send
-      your audit and talk to you about it.{" "}
+      We use your details only to send your audit and talk to you about it.{" "}
       <Link href="/privacy" className="underline underline-offset-2 hover:text-[var(--color-ink)]">
         Privacy Policy
       </Link>
@@ -315,7 +310,7 @@ function SubmitButton({ status, className }: { status: Status; className?: strin
       disabled={status === "submitting" || status === "success"}
       className={className}
     >
-      {status === "submitting" ? "Sending…" : status === "success" ? "Sent" : "Send me my audit"}
+      {status === "submitting" ? "Sending…" : status === "success" ? "Sent" : "Send"}
     </Button>
   );
 }

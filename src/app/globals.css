@@ -16,17 +16,6 @@
   --gradient-brand: linear-gradient(135deg, #330099 0%, #7A3FE5 100%);
 }
 
-/* The marketing pages (the (site) route group and the root 404) use a darker
-   muted grey. #56606E is about 5.2:1 on the cream background, about 5.0:1
-   where body::before's grain darkens the cream (to about #E8E4DA), and 6.3:1
-   on white: WCAG AA at the 12-14px sizes it is used for. (#5F6978, pass 1,
-   measured 4.34:1 under the grain.) The :root value (#8A94A3) is 2.51:1 and
-   3.07:1. Scoped by a wrapper class so the /a/ audit pages, which are on
-   their own track, keep the :root value. */
-.site-chrome {
-  --color-ink-muted: #56606E;
-}
-
 /* The hero's audit form on a phone starts closed behind one button
    (audit-form.tsx). Without JavaScript that button is a plain link to the
    form's slot, and these two rules open the form in place when the slot is
@@ -128,5 +117,216 @@ body::before {
       opacity: 1;
       transform: translateY(0);
     }
+  }
+}
+
+/* ==========================================================================
+   The public site's look (Blake, 2026-11-05: white sections, deep navy-purple
+   blocks, solid brand-purple panels, one heavy tight sans).
+
+   Everything below is scoped to .site-chrome, the wrapper that only the (site)
+   route group and the root 404 render. The prospect audit pages under /a/ don't
+   carry that class, so they keep every :root token above, the cream ground, the
+   grain and Space Grotesk, exactly as they were.
+   ========================================================================== */
+
+html:has(.site-chrome) {
+  scroll-padding-top: 6.5rem;
+}
+body:has(.site-chrome) {
+  background: #fff;
+  color: #150b3a;
+}
+body:has(.site-chrome)::before {
+  display: none;
+}
+
+.site-chrome {
+  --color-ink: #150b3a;
+  --color-ink-soft: #443b62;
+  --color-ink-muted: #5c5480;
+  --color-surface: #fff;
+  --color-surface-soft: #fff;
+  --color-surface-raised: #f5f2fd;
+  --color-border: rgba(21, 11, 58, 0.14);
+  --color-brand: #5a1fbf;
+  --color-panel: #5a1fbf;
+  --color-navy: #120739;
+  --color-lilac: #cdb9fa;
+  --font-display: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --slant: clamp(1.75rem, 5vw, 5rem);
+}
+
+/* No lone word left hanging on a heading's last line. */
+.site-chrome h1,
+.site-chrome h2,
+.site-chrome h3 {
+  text-wrap: balance;
+}
+
+/* One family. Everything that used to be the display face is now Inter 800, tight. */
+.site-chrome [class*="--font-display"] {
+  font-weight: 800;
+  letter-spacing: -0.035em;
+}
+
+/* Body at about 18px. Small print keeps its own size. */
+.site-chrome main {
+  font-size: 1.125rem;
+  line-height: 1.6;
+}
+.site-chrome main .text-lg {
+  font-size: 1.1875rem;
+}
+.site-chrome main .text-\[0\.95rem\] {
+  font-size: 1.0625rem;
+}
+
+/* Anything on navy or on the solid purple panel. The tokens flip, so a heading or a
+   source link inside needs no colours of its own. A white card inside flips back. */
+.site-chrome .on-navy {
+  --color-ink: #fff;
+  --color-ink-soft: rgba(255, 255, 255, 0.86);
+  --color-ink-muted: rgba(255, 255, 255, 0.72);
+  --color-border: rgba(255, 255, 255, 0.22);
+  --color-surface-raised: rgba(255, 255, 255, 0.08);
+  --color-brand: var(--color-lilac);
+  --gradient-brand: linear-gradient(135deg, #fff 0%, #cdb9fa 100%);
+  color: #fff;
+}
+.site-chrome .on-navy .bg-white,
+.site-chrome .on-navy .on-light {
+  --color-ink: #150b3a;
+  --color-ink-soft: #443b62;
+  --color-ink-muted: #5c5480;
+  --color-border: rgba(21, 11, 58, 0.14);
+  --color-surface-raised: #f5f2fd;
+  --color-brand: #5a1fbf;
+  --gradient-brand: linear-gradient(135deg, #330099 0%, #7a3fe5 100%);
+  color: #150b3a;
+}
+
+/* Slanted edges. The white page shows through the cut. */
+.site-chrome .slant {
+  clip-path: polygon(0 var(--slant), 100% 0, 100% calc(100% - var(--slant)), 0 100%);
+  padding-block: var(--slant);
+}
+.site-chrome .slant-top {
+  clip-path: polygon(0 var(--slant), 100% 0, 100% 100%, 0 100%);
+  padding-top: var(--slant);
+}
+.site-chrome .slant-bottom {
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--slant)), 0 100%);
+  padding-bottom: var(--slant);
+}
+
+/* The closing call to action: dark, with purple light falling across it. */
+.site-chrome .cta-diagonal {
+  background:
+    linear-gradient(128deg, transparent 0 16%, rgba(122, 63, 229, 0.34) 16.2% 29%, transparent 44%),
+    linear-gradient(128deg, transparent 0 52%, rgba(90, 31, 191, 0.5) 52.2% 70%, transparent 86%),
+    linear-gradient(128deg, #06021a 0%, #120739 46%, #2a0e7a 100%);
+}
+
+/* Proof > Promises: the scrolling band of counts. Without motion it is a wrapped list and
+   the duplicate is gone, so the fallback is the default and the scroll is opt-in. Cells are
+   a whole fraction of the band (2, 3 or 4 across), so the held first frame cuts no number
+   at either edge. -1px hides the first cell's rule on the page edge. */
+.site-chrome .proof-band {
+  container-type: inline-size;
+  outline: none;
+}
+.site-chrome .proof-band:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: -2px;
+}
+.site-chrome .proof-window {
+  overflow: hidden;
+}
+.site-chrome .proof-track {
+  margin-left: -1px;
+}
+.site-chrome .proof-group {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  row-gap: 2rem;
+}
+.site-chrome .proof-copy {
+  display: none;
+}
+.site-chrome .proof-cell {
+  width: 50%;
+  border-left: 1px solid var(--color-border);
+}
+@media (min-width: 48rem) {
+  .site-chrome .proof-cell {
+    width: 33.3333%;
+  }
+}
+@media (min-width: 64rem) {
+  .site-chrome .proof-cell {
+    width: 25%;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .site-chrome .proof-window {
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 1.5rem, #000 calc(100% - 1.5rem), transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 1.5rem, #000 calc(100% - 1.5rem), transparent);
+  }
+  .site-chrome .proof-track {
+    display: flex;
+    width: max-content;
+    animation: proof-scroll 72s linear 1.5s infinite;
+  }
+  .site-chrome .proof-group {
+    flex-wrap: nowrap;
+    flex-shrink: 0;
+  }
+  .site-chrome .proof-copy {
+    display: flex;
+  }
+  .site-chrome .proof-cell {
+    flex-shrink: 0;
+    width: 50cqw;
+  }
+  .site-chrome .proof-band:hover .proof-track,
+  .site-chrome .proof-band:focus .proof-track {
+    animation-play-state: paused;
+  }
+  @keyframes proof-scroll {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+}
+@media (prefers-reduced-motion: no-preference) and (min-width: 48rem) {
+  .site-chrome .proof-cell {
+    width: 33.3333cqw;
+  }
+}
+@media (prefers-reduced-motion: no-preference) and (min-width: 64rem) {
+  .site-chrome .proof-cell {
+    width: 25cqw;
+  }
+}
+
+/* The short line on a carousel card fades out instead of ending on a cut. */
+.site-chrome .fade-out {
+  -webkit-mask-image: linear-gradient(#000 70%, transparent 100%);
+  mask-image: linear-gradient(#000 70%, transparent 100%);
+}
+/* One card wide on a phone: the whole line fits, so nothing fades. */
+@media (max-width: 639.98px) {
+  .site-chrome .fade-out {
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .site-chrome .fade-out {
+    -webkit-mask-image: none;
+    mask-image: none;
   }
 }

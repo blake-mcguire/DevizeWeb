@@ -56,7 +56,7 @@ export function SampleMap({ className }: { className?: string }) {
       viewBox={`0 0 ${W} ${H}`}
       role="img"
       aria-label={label}
-      className={cn("block w-full h-auto rounded-xl bg-[#F3F0E8]", className)}
+      className={cn("block w-full h-auto rounded-xl bg-[#F5F2FD]", className)}
     >
       {/* Rings at 1, 3 and 5 miles. Named in the corner: on the ring they sit under the dots. */}
       {[1, 3, 5].map((mi) => (
@@ -126,7 +126,7 @@ export function WhoCameUpTable({ className }: { className?: string }) {
     <div className={cn("overflow-x-auto", className)}>
       <table className="w-full text-[0.8125rem] sm:text-sm">
         <caption className="sr-only">
-          Sample only. Three invented practices that held the top three most often, against the invented sample practice.
+          These three invented practices held the top three most often, shown next to the invented sample practice.
         </caption>
         <thead>
           <tr className="text-left text-xs uppercase tracking-[0.1em] text-[var(--color-ink-soft)]">

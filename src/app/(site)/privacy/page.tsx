@@ -10,7 +10,8 @@ import {
 
 // Rewritten 2026-10-15: it covers what the site and the /a/ audit pages actually
 // collect. 2026-11-04: only the service description changed. Draft wording: have
-// counsel review it, including whether the Google Ads add-on changes anything. Keep it in step with /api/lead, /api/audit-request,
+// counsel review it, including whether the ad plans change anything. 2026-11-05: "Google
+// Ads management" became "ads management", because the menu has three ad plans now. Keep it in step with /api/lead, /api/audit-request,
 // /api/audit-view and the GTM snippet in the root layout.
 export const metadata: Metadata = {
   title: "Privacy Policy",
@@ -22,11 +23,11 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage() {
   return (
-    <LegalPage eyebrow="Legal" title="Privacy Policy" updated="November 4, 2026">
+    <LegalPage eyebrow="Legal" title="Privacy Policy" updated="November 5, 2026">
       <P>
         Blake Louis McGuire, doing business as Devize (&ldquo;we,&rdquo;
         &ldquo;us,&rdquo; &ldquo;our&rdquo;), operates devize.ai and provides
-        SEO, review management and Google Ads management to service businesses.
+        SEO, review management and ads management to service businesses.
         This policy explains
         what personal information we collect on this website and on Devize
         audit pages, how we use it, and who we share it with.

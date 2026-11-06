@@ -1,103 +1,97 @@
 import { cn } from "@/lib/cn";
-import { FLYWHEEL } from "@/lib/tiers";
+import { HOW_WE_DO_IT } from "@/lib/offer-copy";
 
 /**
- * The flywheel: five stages clockwise around a ring. The stages are real HTML in
- * an ordered list, so they read in order without the picture and stay legible on
- * a phone; the ring behind them is decoration. A solid stage can all be bought
- * today. A dashed one can't yet, which the words say too. Below 360px wide the
- * boxes would cover the ring and each other, so the same list stacks instead, with
- * the numbers showing and the ring hidden.
+ * The flywheel: Blake's three stages clockwise around a ring, each one's point fitting
+ * into the next one's notch, because each feeds the next. Drawn for Devize. The words
+ * are in the SVG and the image's label, and every page that shows the ring also prints
+ * the three stages as real text beside it.
  */
 
-const W = 400;
-const H = 395;
-const CX = 200;
-const CY = 205;
-const R = 150;
-const ANGLES = [-90, -18, 54, 126, 198];
+const CX = 260;
+const CY = 260;
+const OUTER = 236;
+const INNER = 148;
+const MID = (OUTER + INNER) / 2;
+const TIP = 11;
+const GAP = 2.5;
+/** Half the height of the capitals, so the labels sit in the middle of the band. */
+const CAP = 9.5;
 
-function at(deg: number) {
+function at(radius: number, deg: number) {
   const r = (deg * Math.PI) / 180;
-  return { x: CX + R * Math.cos(r), y: CY + R * Math.sin(r) };
+  return `${(CX + radius * Math.cos(r)).toFixed(2)} ${(CY + radius * Math.sin(r)).toFixed(2)}`;
 }
 
-const SEGMENTS = ANGLES.map((from, i) => {
-  const to = i === ANGLES.length - 1 ? ANGLES[0] + 360 : ANGLES[i + 1];
-  const a = at(from);
-  const b = at(to);
-  const mid = (from + to) / 2;
-  const m = at(mid);
-  return {
-    d: `M ${a.x.toFixed(2)} ${a.y.toFixed(2)} A ${R} ${R} 0 0 1 ${b.x.toFixed(2)} ${b.y.toFixed(2)}`,
-    // The head's tip points up at rotate(0). Going clockwise along the ring at angle
-    // `mid` means heading (-sin mid, cos mid), which is rotate(mid + 180).
-    arrow: `translate(${m.x.toFixed(2)} ${m.y.toFixed(2)}) rotate(${mid + 180})`,
-    // A line runs today only when the stages at both ends of it can be bought today.
-    solid: FLYWHEEL[i].solid && FLYWHEEL[(i + 1) % FLYWHEEL.length].solid,
-  };
+const SEGMENTS = [
+  { from: -150, to: -30, top: true, c0: "#9A6BF5", c1: "#6A2BE0" },
+  { from: -30, to: 90, top: false, c0: "#6A2BE0", c1: "#4316A0" },
+  { from: 90, to: 210, top: false, c0: "#4316A0", c1: "#2A0E7A" },
+].map((s, i) => {
+  const start = s.from - TIP / 2 + GAP / 2;
+  const notch = s.from + TIP / 2 + GAP / 2;
+  const end = s.to - TIP / 2 - GAP / 2;
+  const tip = s.to + TIP / 2 - GAP / 2;
+  const d = [
+    `M ${at(OUTER, start)}`,
+    `A ${OUTER} ${OUTER} 0 0 1 ${at(OUTER, end)}`,
+    `L ${at(MID, tip)}`,
+    `L ${at(INNER, end)}`,
+    `A ${INNER} ${INNER} 0 0 0 ${at(INNER, start)}`,
+    `L ${at(MID, notch)}`,
+    "Z",
+  ].join(" ");
+  // The label runs clockwise over the top and the other way under it, so it never reads upside down.
+  const label = s.top
+    ? `M ${at(MID - CAP, s.from)} A ${MID - CAP} ${MID - CAP} 0 0 1 ${at(MID - CAP, s.to)}`
+    : `M ${at(MID + CAP, s.to)} A ${MID + CAP} ${MID + CAP} 0 0 0 ${at(MID + CAP, s.from)}`;
+  return { ...s, d, label, id: `flywheel-${i}` };
 });
 
-/** Where each stage sits on the ring, as a share of the box. On a phone the side boxes wrap taller, so they sit a little lower to clear the top one. */
-const PLACE = [
-  "min-[360px]:left-1/2 min-[360px]:top-[13.9%] min-[360px]:-translate-x-1/2 min-[360px]:-translate-y-1/2",
-  "min-[360px]:right-0 min-[360px]:top-[43%] min-[360px]:-translate-y-1/2 sm:top-[40.2%]",
-  "min-[360px]:left-[72%] min-[360px]:top-[82.6%] min-[360px]:-translate-x-1/2 min-[360px]:-translate-y-1/2",
-  "min-[360px]:left-[28%] min-[360px]:top-[82.6%] min-[360px]:-translate-x-1/2 min-[360px]:-translate-y-1/2",
-  "min-[360px]:left-0 min-[360px]:top-[43%] min-[360px]:-translate-y-1/2 sm:top-[40.2%]",
-];
-
 export function Flywheel({ className }: { className?: string }) {
+  const stages = HOW_WE_DO_IT.map((s) => s.title);
   return (
-    <figure className={cn("mx-auto w-full max-w-[30rem]", className)}>
-      <div className="relative min-[360px]:aspect-[400/395]">
-        <svg aria-hidden="true" viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 hidden h-full w-full min-[360px]:block">
+    <figure className={cn("mx-auto w-full max-w-[34rem]", className)}>
+      <svg
+        viewBox="0 0 520 520"
+        role="img"
+        aria-label={`A ring of three stages, turning clockwise, each feeding the next: ${stages.join(", ")}. In the middle: clicks into clients.`}
+        className="block h-auto w-full"
+        style={{ fontFamily: "var(--font-inter), ui-sans-serif, sans-serif" }}
+      >
+        <defs>
           {SEGMENTS.map((s) => (
-            <g key={s.d}>
-              <path
-                d={s.d}
-                fill="none"
-                stroke="#5A1FBF"
-                strokeOpacity={s.solid ? 0.8 : 0.55}
-                strokeWidth="2.5"
-                strokeDasharray={s.solid ? undefined : "2 7"}
-                strokeLinecap="round"
-              />
-              <path d="M -5 6 L 0 -7 L 5 6 Z" transform={s.arrow} fill="#5A1FBF" />
-            </g>
+            <linearGradient key={s.id} id={`${s.id}-fill`} x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stopColor={s.c0} />
+              <stop offset="1" stopColor={s.c1} />
+            </linearGradient>
           ))}
-        </svg>
-
-        <ol className="space-y-2 min-[360px]:space-y-0">
-          {FLYWHEEL.map((stage, i) => (
-            <li
-              key={stage.title}
-              className={cn(
-                "w-full rounded-xl bg-white px-3 py-2 shadow-[0_8px_20px_-14px_rgba(28,42,57,0.5)] min-[360px]:absolute min-[360px]:w-[36%] min-[360px]:px-1.5 min-[360px]:text-center sm:px-3",
-                stage.solid ? "border border-[var(--color-ink)]/25" : "border-2 border-dashed border-[var(--color-brand)]/45",
-                PLACE[i]
-              )}
-            >
-              <p className="font-[family-name:var(--font-display)] text-[0.875rem] font-medium leading-tight tracking-tight text-[var(--color-ink)] sm:text-base">
-                <span className="min-[360px]:sr-only">Stage {i + 1}: </span>
-                {stage.title}
-              </p>
-              <p className="mt-0.5 text-[0.6875rem] leading-snug text-[var(--color-ink-soft)] sm:text-xs">{stage.sub}</p>
-              <p className={cn("mt-1 text-[0.6875rem] font-medium leading-tight", stage.solid ? "text-[#1F7A45]" : "text-[var(--color-brand)]")}>
-                {stage.tag}
-              </p>
-            </li>
+          {SEGMENTS.map((s) => (
+            <path key={s.id} id={s.id} d={s.label} />
           ))}
-        </ol>
+        </defs>
 
-        <p className="mt-4 text-center font-[family-name:var(--font-display)] text-[0.95rem] leading-tight tracking-tight text-[var(--color-ink)] min-[360px]:absolute min-[360px]:left-1/2 min-[360px]:top-[52%] min-[360px]:mt-0 min-[360px]:w-[26%] min-[360px]:-translate-x-1/2 min-[360px]:-translate-y-1/2 min-[360px]:text-[0.8rem] sm:text-[0.95rem]">
-          Without adding headcount
-          <span className="mt-1 block font-[family-name:var(--font-sans)] text-[0.6875rem] tracking-normal text-[var(--color-ink-soft)]">the aim</span>
-        </p>
-      </div>
-      <figcaption className="mt-4 text-center text-sm text-[var(--color-ink-soft)]">
-        Solid: you can buy it today. Dashed: not all on sale yet. In pilot means no client is on it.
-      </figcaption>
+        <circle cx={CX} cy={CY} r={254} fill="none" stroke="var(--color-brand)" strokeOpacity="0.28" strokeWidth="1.5" strokeDasharray="2 9" strokeLinecap="round" />
+        <circle cx={CX} cy={CY} r={INNER - 16} fill="none" stroke="var(--color-brand)" strokeOpacity="0.18" strokeWidth="1.5" />
+
+        {SEGMENTS.map((s) => (
+          <path key={s.id} d={s.d} fill={`url(#${s.id}-fill)`} />
+        ))}
+
+        {SEGMENTS.map((s, i) => (
+          <text key={s.id} fill="#fff" fontSize="26" fontWeight="800" letterSpacing="2.4" textAnchor="middle">
+            <textPath href={`#${s.id}`} startOffset="50%">
+              {stages[i].toUpperCase()}
+            </textPath>
+          </text>
+        ))}
+
+        <text textAnchor="middle" fill="var(--color-ink)" fontSize="42" fontWeight="800" letterSpacing="-1.5">
+          <tspan x={CX} y={CY - 24}>Clicks</tspan>
+          <tspan x={CX} y={CY + 22}>into</tspan>
+          <tspan x={CX} y={CY + 68}>clients</tspan>
+        </text>
+      </svg>
     </figure>
   );
 }

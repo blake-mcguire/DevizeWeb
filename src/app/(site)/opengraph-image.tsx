@@ -26,11 +26,11 @@ export default async function Image() {
       >
         <div style={{ fontSize: 40, fontWeight: 600, letterSpacing: "-0.02em" }}>devize</div>
         <div style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
-          <div style={{ fontSize: 84, fontWeight: 500, lineHeight: 1.05, letterSpacing: "-0.025em", maxWidth: 1000 }}>
+          <div style={{ fontSize: 84, fontWeight: 800, lineHeight: 1.03, letterSpacing: "-0.035em", maxWidth: 1000 }}>
             Convert clicks into clients without adding headcount.
           </div>
           <div style={{ fontSize: 28, color: "rgba(255,255,255,0.72)", fontWeight: 400 }}>
-            SEO and ad management for service businesses. Start with a free map audit.
+            SEO, reviews and ads for local service businesses.
           </div>
         </div>
       </div>

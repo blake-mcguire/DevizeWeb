@@ -2,12 +2,14 @@
 
 import { useCallback, useEffect, useRef, useState, type FocusEvent, type KeyboardEvent } from "react";
 import Link from "next/link";
+import { TradeIcon } from "@/components/trade-icon";
 
 export type IndustryCard = {
   href: string;
+  slug: string;
   name: string;
   hook: string;
-  search: string;
+  line: string;
 };
 
 function prefersReducedMotion() {
@@ -15,12 +17,14 @@ function prefersReducedMotion() {
 }
 
 /**
- * One card per trade. The track is a native scroller with snap points, so it
- * swipes on a phone and every link works with no JavaScript at all. The script
- * only adds the buttons, the arrow keys and the "2 of 6" line. Nothing moves on
- * its own, and a button press jumps instead of glides when reduced motion is on.
- * The track bleeds to the page edge on a phone through its own negative margin,
- * so it never widens the page.
+ * Four white cards in a row inside the page container, one card wide on a phone: a bold
+ * title, a short line that fades out, and a small round icon with the trade's name. They
+ * link to the six trade pages. Our cards hold no quotes, no stars and no names of people.
+ *
+ * The track is a native scroller with snap points, so it swipes on a phone and every link
+ * works with no JavaScript at all. The script only adds the chevrons, the arrow keys and a
+ * spoken "2 of 6" line. Nothing moves on its own, and a press jumps instead of glides when
+ * reduced motion is on. The cards fit inside the track, so it never widens the page.
  */
 export function IndustryCarousel({ cards }: { cards: IndustryCard[] }) {
   const track = useRef<HTMLUListElement>(null);
@@ -31,19 +35,18 @@ export function IndustryCarousel({ cards }: { cards: IndustryCard[] }) {
     if (!el) return;
     const slides = Array.from(el.children) as HTMLElement[];
     if (!slides.length) return;
-    const pad = parseFloat(getComputedStyle(el).scrollPaddingLeft) || 0;
-    const view = el.scrollLeft + pad;
+    const view = el.scrollLeft;
     let first = 0;
     let best = Infinity;
     slides.forEach((slide, i) => {
-      const gap = Math.abs(slide.offsetLeft - view);
+      const gap = Math.abs(slide.offsetLeft - el.offsetLeft - view);
       if (gap < best) {
         best = gap;
         first = i;
       }
     });
     const step = slides.length > 1 ? slides[1].offsetLeft - slides[0].offsetLeft : slides[0].offsetWidth;
-    const visible = Math.max(1, Math.floor((el.clientWidth - pad) / step));
+    const visible = Math.max(1, Math.round((el.clientWidth + (step - slides[0].offsetWidth)) / step));
     const max = el.scrollWidth - el.clientWidth;
     const atEnd = el.scrollLeft >= max - 2;
     setState({
@@ -80,8 +83,7 @@ export function IndustryCarousel({ cards }: { cards: IndustryCard[] }) {
     const slides = Array.from(el.children) as HTMLElement[];
     const slide = slides[Math.max(0, Math.min(index, slides.length - 1))];
     if (!slide) return;
-    const pad = parseFloat(getComputedStyle(el).scrollPaddingLeft) || 0;
-    el.scrollTo({ left: slide.offsetLeft - pad, behavior: prefersReducedMotion() ? "auto" : "smooth" });
+    el.scrollTo({ left: slide.offsetLeft - el.offsetLeft, behavior: prefersReducedMotion() ? "auto" : "smooth" });
   }, []);
 
   // Tabbing to a link in a card that's cut off brings the card into view. A card
@@ -117,6 +119,9 @@ export function IndustryCarousel({ cards }: { cards: IndustryCard[] }) {
   const showing =
     state.visible > 1 ? `Showing ${state.first + 1} to ${last} of ${cards.length}` : `Showing ${state.first + 1} of ${cards.length}`;
 
+  const chevron =
+    "grid h-11 w-11 place-items-center rounded-full text-[var(--color-brand)] transition-opacity aria-disabled:opacity-30 hover:bg-[var(--color-surface-raised)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand)]";
+
   return (
     <div role="region" aria-roledescription="carousel" aria-label="Industries">
       <ul
@@ -125,60 +130,48 @@ export function IndustryCarousel({ cards }: { cards: IndustryCard[] }) {
         aria-label="Industry pages. Swipe, or use the left and right arrow keys."
         onFocus={onFocus}
         onKeyDown={onKeyDown}
-        className="relative -mx-6 flex snap-x snap-mandatory scroll-pl-6 gap-4 overflow-x-auto overscroll-x-contain px-6 pb-3 pt-1 [scrollbar-width:none] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand)] lg:mx-0 lg:scroll-pl-0 lg:gap-5 lg:px-0 [&::-webkit-scrollbar]:hidden"
+        className="flex snap-x snap-mandatory gap-5 overflow-x-auto overscroll-x-contain py-1 [scrollbar-width:none] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-brand)] [&::-webkit-scrollbar]:hidden"
       >
         {cards.map((card) => (
-          <li key={card.href} className="w-[82%] shrink-0 snap-start sm:w-[46%] lg:w-[31%]">
-            <div className="group relative flex h-full min-h-[17rem] flex-col rounded-2xl border border-[var(--color-border)] bg-white p-6 transition-shadow hover:shadow-[0_18px_40px_-24px_rgba(28,42,57,0.45)] focus-within:ring-2 focus-within:ring-[var(--color-brand)]">
-              <h3 className="text-xs font-medium uppercase tracking-[0.14em] text-[var(--color-ink-muted)]">{card.name}</h3>
-              <p className="mt-4 font-[family-name:var(--font-display)] text-2xl font-medium leading-[1.15] tracking-tight text-[var(--color-ink)]">
-                {card.hook}
-              </p>
-              <p className="mt-4 self-start rounded-full border border-[var(--color-border)] bg-[var(--color-surface-raised)] px-3 py-1 text-sm text-[var(--color-ink-soft)]">
-                <span className="sr-only">Example search: </span>
-                {card.search}
-              </p>
-              <p className="mt-auto pt-6">
+          <li key={card.href} className="w-full shrink-0 snap-start sm:w-[calc((100%-1.25rem)/2)] lg:w-[calc((100%-3.75rem)/4)]">
+            <div className="group relative flex h-full min-h-[21rem] flex-col border border-[var(--color-border)] bg-white p-6 transition-[border-color,box-shadow] hover:border-[var(--color-brand)] hover:shadow-[0_24px_40px_-28px_rgba(18,7,57,0.5)] focus-within:border-[var(--color-brand)] focus-within:ring-1 focus-within:ring-[var(--color-brand)]">
+              <h3 className="min-h-[3.54em] text-[1.3125rem] font-extrabold leading-[1.18] tracking-[-0.025em] text-[var(--color-ink)]">{card.hook}</h3>
+              <p className="fade-out mt-3 overflow-hidden text-base leading-relaxed text-[var(--color-ink-soft)] sm:h-[8.5rem]">{card.line}</p>
+              <p className="mt-auto flex items-center gap-3 pt-3">
+                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-[var(--color-surface-raised)] text-[var(--color-brand)] transition-colors group-hover:bg-[var(--color-brand)] group-hover:text-white">
+                  <TradeIcon slug={card.slug} className="h-6 w-6" />
+                </span>
                 <Link
                   href={card.href}
-                  className="text-sm font-medium text-[var(--color-brand)] underline underline-offset-4 decoration-[var(--color-brand)]/30 outline-none after:absolute after:inset-0 after:rounded-2xl group-hover:decoration-[var(--color-brand)]"
+                  className="text-[0.8125rem] font-bold uppercase leading-snug tracking-[0.1em] text-[var(--color-ink)] outline-none after:absolute after:inset-0"
                 >
-                  Read the {card.name} page
+                  {card.name}
                 </Link>
+                <span aria-hidden="true" className="ml-auto grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[var(--color-panel)] text-white transition-transform duration-200 group-hover:translate-x-0.5">
+                  <svg width="14" height="14" viewBox="0 0 18 18" fill="none">
+                    <path d="M2.5 9h12.5M10 3.75 15.25 9 10 14.25" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </span>
               </p>
             </div>
           </li>
         ))}
       </ul>
 
-      <div className={state.ready ? "mt-4 flex items-center justify-between gap-4" : "invisible mt-4 flex items-center justify-between gap-4"}>
-        <p aria-live="polite" className="text-sm text-[var(--color-ink-soft)]">
-          {showing}
-        </p>
-        <div className="flex gap-2">
-          <button
-            type="button"
-            aria-label="Previous industries"
-            aria-disabled={state.atStart}
-            onClick={() => goTo(state.first - 1)}
-            className="flex h-11 w-11 items-center justify-center rounded-full border border-[var(--color-ink)]/20 bg-white text-[var(--color-ink)] transition-opacity aria-disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand)]"
-          >
-            <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M10 3 5 8l5 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
-          <button
-            type="button"
-            aria-label="Next industries"
-            aria-disabled={state.atEnd}
-            onClick={() => goTo(state.first + 1)}
-            className="flex h-11 w-11 items-center justify-center rounded-full border border-[var(--color-ink)]/20 bg-white text-[var(--color-ink)] transition-opacity aria-disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand)]"
-          >
-            <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="m6 3 5 5-5 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
-        </div>
+      <p aria-live="polite" className="sr-only">
+        {state.ready ? showing : ""}
+      </p>
+      <div className={state.ready ? "mt-5 flex items-center justify-center gap-3" : "invisible mt-5 flex items-center justify-center gap-3"}>
+        <button type="button" aria-label="Previous industries" aria-disabled={state.atStart} onClick={() => goTo(state.first - 1)} className={chevron}>
+          <svg aria-hidden="true" width="14" height="24" viewBox="0 0 14 24" fill="none">
+            <path d="M12 2 2 12l10 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
+        <button type="button" aria-label="Next industries" aria-disabled={state.atEnd} onClick={() => goTo(state.first + 1)} className={chevron}>
+          <svg aria-hidden="true" width="14" height="24" viewBox="0 0 14 24" fill="none">
+            <path d="m2 2 10 10L2 22" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
       </div>
     </div>
   );

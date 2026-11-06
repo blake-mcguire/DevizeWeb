@@ -2,9 +2,9 @@ import type { MarkKey } from "@/lib/marks";
 
 /**
  * The public sample audit, on INVENTED data (2026-11-04, the brief: "rebuilt on
- * invented data, marked SAMPLE on every page"). The business, its rivals and
+ * invented data, marked SAMPLE on every page"). The business, its competitors and
  * every number are made up. Nothing here comes from a real scan, because taking
- * a name off a real one isn't enough: the pattern of pins and the nearby rivals
+ * a name off a real one isn't enough: the pattern of pins and the nearby competitors
  * can still identify a business. The earlier sample, built from a real scan, is
  * gone from this branch (public/sample/ and src/data/sample.json).
  *
@@ -16,8 +16,10 @@ import type { MarkKey } from "@/lib/marks";
  * miles. If that stays the standard, change RADIUS_MI and SPACING_MI to match.
  */
 
+// TODO(Blake): "the date we ran it" depends on fixing the mixed read dates fault in the
+// pipeline (2026-11-04 journal).
 export const SAMPLE_NOTE =
-  "An invented business with invented numbers. It shows what an audit looks like. It is nobody's result.";
+  "This is a sample with a made-up business and made-up numbers. Yours uses your real listing, your real competitors and the date we ran it.";
 
 const RADIUS_MI = 5;
 const SPACING_MI = 1;
@@ -109,7 +111,7 @@ export const SAMPLE_CHECKS: { group: string; rows: { check: string; result: Chec
       { check: "A photo of its own in the last year", result: "gap", finding: "Newest owner photo is 2 years old." },
       { check: "Hours for all seven days", result: "pass", finding: "Set for all seven days." },
       { check: "A description", result: "pass", finding: "Present." },
-      { check: "Posts", result: "gap", finding: "0 posts. Noted for the reader. We don't sell posts as a way up the map." },
+      { check: "Posts", result: "gap", finding: "0 posts." },
       { check: "No customer question left unanswered", result: "pass", finding: "None open." },
     ],
   },
@@ -128,7 +130,7 @@ export const SAMPLE_CHECKS: { group: string; rows: { check: string; result: Chec
 /** Invented, and in order: facts that lose a customer come before anything slow. */
 export const SAMPLE_FIXES: string[] = [
   "Make the phone number on the site match the listing. It's wrong today, and it costs nothing to fix.",
-  "Ask every patient for a review, the same way, after each visit. A privacy contract comes first.",
+  "Sign a privacy contract first, then ask every patient for a review, the same way, after each visit.",
   "Reply to reviews within a week, without confirming anyone is a patient.",
   "Add a current photo of the office and the people in it.",
   "Write one better page, about the treatment the practice wants more of.",
@@ -138,6 +140,6 @@ export const SAMPLE_FIXES: string[] = [
 export const SAMPLE_SKIPS: string[] = [
   "Directory packages. Check the main ones and correct them. Don't pay for hundreds.",
   "Town pages with the name swapped. They give a reader nothing.",
-  "Posting just to post. A post is fine when there's news. It isn't map work.",
+  "Posts as a way to rank higher on the map. They're for the people reading your listing, so each one should say something real.",
   "Google Ads, for now. Fix the phone number and the reviews before paying for clicks.",
 ];

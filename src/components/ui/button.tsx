@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { ComponentProps, ReactNode } from "react";
 import { cn } from "@/lib/cn";
 
-type Variant = "primary" | "secondary" | "ghost" | "glass";
+type Variant = "primary" | "white" | "outline" | "outlineLight" | "secondary" | "ghost" | "glass";
 type Size = "sm" | "md" | "lg";
 
 type CommonProps = {
@@ -13,32 +13,35 @@ type CommonProps = {
 };
 
 const base =
-  "inline-flex items-center justify-center gap-2 rounded-full font-medium transition-[transform,box-shadow,background-color,color] duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-surface-soft)] focus-visible:ring-[var(--color-brand)] disabled:opacity-60 disabled:cursor-not-allowed";
+  "inline-flex items-center justify-center gap-2 rounded-full font-bold tracking-[-0.01em] transition-[transform,box-shadow,background-color,color,border-color] duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--color-brand)] disabled:opacity-60 disabled:cursor-not-allowed";
 
 const variants: Record<Variant, string> = {
-  primary:
-    "text-white bg-[image:var(--gradient-brand)] shadow-[0_6px_18px_-6px_rgba(51,0,153,0.55)] hover:shadow-[0_10px_26px_-8px_rgba(51,0,153,0.65)] hover:-translate-y-[1px]",
+  primary: "text-white bg-[var(--color-panel)] hover:bg-[#4A17A3] hover:-translate-y-[1px]",
+  white: "text-[#330099] bg-white hover:bg-[#EDE6FF] hover:-translate-y-[1px]",
+  outline:
+    "text-[var(--color-brand)] border-2 border-[var(--color-brand)] bg-transparent hover:bg-[var(--color-brand)] hover:text-white",
+  outlineLight: "text-white border-2 border-white/80 bg-transparent hover:bg-white hover:text-[#330099]",
   secondary:
-    "text-[var(--color-ink)] bg-white border border-[var(--color-border)] hover:border-[var(--color-ink)]/25 hover:-translate-y-[1px]",
-  ghost:
-    "text-[var(--color-ink)] hover:bg-[var(--color-ink)]/5",
-  glass:
-    "text-white bg-white/10 backdrop-blur border border-white/20 hover:bg-white/15 hover:border-white/30 hover:-translate-y-[1px]",
+    "text-[var(--color-ink)] bg-white border-2 border-[var(--color-border)] hover:border-[var(--color-ink)]/40 hover:-translate-y-[1px]",
+  ghost: "text-[var(--color-ink)] hover:bg-[var(--color-ink)]/5",
+  glass: "text-white bg-white/10 border-2 border-white/25 hover:bg-white/15 hover:border-white/40 hover:-translate-y-[1px]",
 };
 
 const sizes: Record<Size, string> = {
-  sm: "h-9 px-4 text-sm",
-  md: "h-11 px-5 text-[0.95rem]",
-  lg: "h-12 px-6 text-base",
+  sm: "h-10 px-5 text-sm",
+  md: "h-12 px-6 text-base",
+  lg: "h-14 px-8 text-[1.0625rem]",
 };
 
 type LinkButtonProps = CommonProps &
   Omit<ComponentProps<typeof Link>, "className" | "children"> & {
     href: string;
     /**
-     * Render a plain <a> instead of next/link. For in-page anchors that must
-     * set the URL's :target and fire hashchange (the header's audit button
-     * opens the hero form that way); next/link's own scroll does neither.
+     * Render a plain <a> instead of next/link. For a mailto link, and for an
+     * anchor that has to behave as the browser's own: it sets the URL's :target,
+     * fires hashchange, and scrolls on every click, where next/link does none of
+     * those and scrolls only the first time. The header's "Get in touch" uses it
+     * to reach /#contact.
      */
     native?: boolean;
   };

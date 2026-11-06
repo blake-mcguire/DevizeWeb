@@ -35,14 +35,20 @@ const nextConfig: NextConfig = {
       // so send those URLs home instead of to a 404.
       { source: "/articles", destination: "/", permanent: true },
       { source: "/articles/:path*", destination: "/", permanent: true },
-      // 2026-11-04: one Services page replaced the separate service pages, and
-      // What We Do replaced How We Work. Specific paths first, then anything else
-      // under /services, including the old live site's service pages.
+      // What We Do replaced How We Work on 2026-11-04. On 2026-11-05 each line of work got
+      // its own page under /services, and the /services overview went the same day (Blake:
+      // no picking off a menu), so it redirects to /what-we-do. That rule is exact, so the
+      // seven pages keep their URLs. The old pages go to their closest new page, and any
+      // other old address under /services is a plain 404. Old #fragments (#menu, #tiers,
+      // #tier-1, #google-ads, #free-audit, #open-to, #if-you-leave) never reach a server
+      // redirect, and the browser carries them across, so /what-we-do keeps them as anchors.
+      // The free audit has no page or section of its own since 2026-11-05, so its old address
+      // goes to the form on the home page. Every destination here is a final page: no chains.
       { source: "/how-we-work", destination: "/what-we-do", permanent: true },
-      { source: "/services/free-audit", destination: "/services#free-audit", permanent: true },
-      { source: "/services/seo-and-reviews", destination: "/services#tier-1", permanent: true },
-      { source: "/services/google-ads", destination: "/services#google-ads", permanent: true },
-      { source: "/services/:path+", destination: "/services", permanent: true },
+      { source: "/services", destination: "/what-we-do", permanent: true },
+      { source: "/services/free-audit", destination: "/#contact", permanent: true },
+      { source: "/services/seo-and-reviews", destination: "/services/seo-and-review-management", permanent: true },
+      { source: "/services/google-ads", destination: "/services/google-search-ads", permanent: true },
     ];
   },
   async headers() {

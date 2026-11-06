@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { CtaBand, Eyebrow, H2, H3, PageHero, Section } from "@/components/page-parts";
+import { Eyebrow, GetInTouch, H2, H3, PageHero, Section } from "@/components/page-parts";
 import { SampleMap, SampleMapLegend, SampleTag, WhoCameUpTable } from "@/components/sections/sample-audit";
 import { cn } from "@/lib/cn";
 import { MARKS } from "@/lib/marks";
@@ -9,7 +8,7 @@ import { SAMPLE, SAMPLE_CHECKS, SAMPLE_FIXES, SAMPLE_NOTE, SAMPLE_SKIPS, type Ch
 export const metadata: Metadata = {
   title: "Sample Audit",
   description:
-    "What a Devize Google Listing and Map Audit looks like, on an invented business with invented numbers. Marked as a sample throughout. It is nobody's result.",
+    "What a Devize Google Listing and Map Audit looks like: the map, who came up instead, the 21 checks and the fixes in order. The business and the numbers are made up, and every part is marked as a sample.",
   alternates: { canonical: "/sample-audit" },
 };
 
@@ -30,7 +29,7 @@ function CardHead({ title }: { title: string }) {
 
 function CheckGroup({ group }: { group: (typeof SAMPLE_CHECKS)[number] }) {
   return (
-    <div className="rounded-2xl border border-[var(--color-border)] bg-white p-5 md:p-6">
+    <div className="rounded-lg border border-[var(--color-border)] bg-white p-5 md:p-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-xs uppercase tracking-[0.14em] text-[var(--color-ink-muted)] font-medium">
           {group.group} ({group.rows.length})
@@ -70,17 +69,14 @@ export default function SampleAuditPage() {
       <PageHero
         eyebrow="Sample audit"
         title="What an audit looks like."
-        lead="Every number on this page is invented, and so is the business. We built it this way so that no real business can be picked out."
+        subhead="It shows the map, who came up instead, the 21 checks and the fixes in order."
       >
-        <SampleTag className="text-sm px-3 py-1 bg-white border-white" />
+        <SampleTag className="border-white bg-white px-3 py-1 text-sm" />
       </PageHero>
 
       <Section className="pb-0 md:pb-0">
-        <div className="rounded-2xl border border-[#B3261E]/30 bg-[#B3261E]/[0.05] p-6 md:p-7">
-          <p className="text-lg text-[var(--color-ink)] leading-relaxed">
-            {SAMPLE_NOTE}{" "}
-            Devize has no client stories yet, and this isn&apos;t a before-and-after.
-          </p>
+        <div className="rounded-lg border border-[var(--color-ink)]/15 bg-[var(--color-surface-raised)] p-6 md:p-7">
+          <p className="text-lg text-[var(--color-ink)] leading-relaxed">{SAMPLE_NOTE}</p>
         </div>
       </Section>
 
@@ -91,7 +87,7 @@ export default function SampleAuditPage() {
         </div>
 
         <div className="mt-10 grid grid-cols-1 gap-6 lg:grid-cols-2 items-start">
-          <figure className="min-w-0 rounded-2xl border border-[var(--color-border)] bg-white p-5 md:p-6">
+          <figure className="min-w-0 rounded-lg border border-[var(--color-border)] bg-white p-5 md:p-6">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <p className="text-sm font-medium text-[var(--color-ink)]">
                 The &ldquo;{SAMPLE.drawnPhrase}&rdquo; searches, one at each of {spotCount} spots
@@ -101,16 +97,19 @@ export default function SampleAuditPage() {
             <SampleMap className="mt-4" />
             <figcaption className="mt-4 space-y-3">
               <SampleMapLegend />
+              {/* TODO(Blake): "says which spots and which day" must hold on every audit. Mixed
+                  read dates are one of the four faults in the 2026-11-04 journal. (This note sat
+                  on the Services page's audit block until that block came out on 5 Nov.) */}
               <p className="text-sm text-[var(--color-ink-soft)] leading-relaxed">
-                In a real audit, each dot is one Google search on a phone. Here
-                they&apos;re {spacingMi} mile apart, out to {radiusMi} miles from
-                the business. A real audit says which spots and which day.
+                In a real audit, each dot is one phone search from a set spot, and the audit
+                says which spots and which day. Here the dots are {spacingMi} mile apart, out
+                to {radiusMi} miles from the business.
               </p>
             </figcaption>
           </figure>
 
           <div className="min-w-0 space-y-6">
-            <div className="rounded-2xl border border-[var(--color-border)] bg-white p-5 md:p-6">
+            <div className="rounded-lg border border-[var(--color-border)] bg-white p-5 md:p-6">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <p className="text-sm font-medium text-[var(--color-ink)]">
                   {searches} searches: {phrases.map((p) => `“${p}”`).join(" and ")}, from {spotCount} spots
@@ -135,27 +134,28 @@ export default function SampleAuditPage() {
               </p>
             </div>
 
-            <div className="rounded-2xl border border-[var(--color-border)] bg-white p-5 md:p-6">
+            <div className="rounded-lg border border-[var(--color-border)] bg-white p-5 md:p-6">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <p className="text-sm font-medium text-[var(--color-ink)]">Who came up instead</p>
                 <SampleTag />
               </div>
               <WhoCameUpTable className="mt-3" />
               <p className="mt-3 text-sm text-[var(--color-ink-soft)] leading-relaxed">
-                In this invented case, the sample practice is rated about the same
-                as the leaders and has far fewer reviews. Real names appear in a
-                real audit.
+                The sample practice is rated about the same as the leaders and has far
+                fewer reviews. A real audit shows real names.
               </p>
             </div>
           </div>
         </div>
 
-        <div className="mt-6 rounded-2xl border border-[var(--color-ink)]/15 bg-[var(--color-surface-raised)] p-5 md:p-6">
+        <div className="mt-6 rounded-lg border border-[var(--color-ink)]/15 bg-[var(--color-surface-raised)] p-5 md:p-6">
           <p className="text-[var(--color-ink)] leading-relaxed">
-            <span className="font-medium">How to read the map.</span>{" "}
-            The dots near the business do best, and that&apos;s distance, which nobody can move.
-            A map like this tells you where you stand. It doesn&apos;t tell you
-            that any fix will move a dot, and places can shift with no edits at all.
+            <span className="font-medium">What the map shows.</span>{" "}
+            The dots near the business do best, and that comes down to distance. Nobody can
+            move your building. In our own scans, about 6 in 10 dental top-three spots went to
+            a listing within 2 miles of the searcher. Rankings also move on their own, so we
+            compare the same spots month after month. The 6 in 10 comes from 7,380 spots in
+            Houston, Dallas and San Antonio, daytime scans, 12 October to 4 November 2026.
           </p>
         </div>
       </Section>
@@ -185,7 +185,7 @@ export default function SampleAuditPage() {
           <H2 className="mt-4">What we&apos;d do first, and what we&apos;d skip.</H2>
         </div>
         <div className="mt-10 grid gap-5 md:grid-cols-2 items-start">
-          <div className="rounded-2xl border border-[var(--color-border)] bg-white p-6 md:p-8">
+          <div className="rounded-lg border border-[var(--color-border)] bg-white p-6 md:p-8">
             <CardHead title="The fixes, in order" />
             <ol className="mt-5 space-y-3 text-[0.95rem] text-[var(--color-ink-soft)] leading-relaxed">
               {SAMPLE_FIXES.map((f, i) => (
@@ -196,10 +196,10 @@ export default function SampleAuditPage() {
               ))}
             </ol>
           </div>
-          <div className="rounded-2xl border border-[var(--color-border)] bg-white p-6 md:p-8">
+          <div className="rounded-lg border border-[var(--color-border)] bg-white p-6 md:p-8">
             <CardHead title="What we'd leave alone" />
             <p className="mt-3 text-sm text-[var(--color-ink-soft)] leading-relaxed">
-              This part goes in the one-page plan, after the audit and one call.
+              You get this part after the audit and one call, in a one-page plan.
             </p>
             <ul className="mt-4 space-y-3 text-[0.95rem] text-[var(--color-ink-soft)] leading-relaxed">
               {SAMPLE_SKIPS.map((s) => (
@@ -211,18 +211,9 @@ export default function SampleAuditPage() {
             </ul>
           </div>
         </div>
-        <p className="mt-6 text-sm text-[var(--color-ink-soft)] leading-relaxed max-w-3xl">
-          Want the method behind it?{" "}
-          <Link href="/services#free-audit" className="font-medium text-[var(--color-brand)] underline underline-offset-4 decoration-[var(--color-brand)]/30 hover:decoration-[var(--color-brand)]">
-            See what the free audit covers
-          </Link>
-        </p>
       </Section>
 
-      <CtaBand
-        title="See your own map first."
-        body="Yours will have real searches and real names, and it's free. There's nothing to sign."
-      />
+      <GetInTouch />
     </>
   );
 }

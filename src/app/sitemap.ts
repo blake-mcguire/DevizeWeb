@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { INDUSTRIES } from "@/lib/industries";
+import { SERVICE_PAGES } from "@/lib/services";
 
 const SITE_URL = "https://www.devize.ai";
 
@@ -13,7 +14,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const marketing = [
     { path: "/", priority: 1.0 },
     { path: "/what-we-do", priority: 0.9 },
-    { path: "/services", priority: 0.9 },
+    ...SERVICE_PAGES.map((p) => ({ path: `/services/${p.slug}`, priority: 0.8 })),
+    { path: "/about", priority: 0.7 },
     { path: "/sample-audit", priority: 0.8 },
     { path: "/industries", priority: 0.8 },
     ...INDUSTRIES.map((i) => ({ path: `/industries/${i.slug}`, priority: 0.7 })),
@@ -29,8 +31,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // Left out on purpose: /sms-consent and /terms/v1-2 (both noindex) and
     // /thanks (the no-JavaScript form confirmation).
     ...[
-      { path: "/terms", updated: "2026-11-04" },
-      { path: "/privacy", updated: "2026-11-04" },
+      { path: "/terms", updated: "2026-11-05" },
+      { path: "/privacy", updated: "2026-11-05" },
       { path: "/sms-terms", updated: "2026-10-15" },
     ].map((page) => ({
       url: `${SITE_URL}${page.path}`,

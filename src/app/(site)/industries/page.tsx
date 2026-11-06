@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { CtaBand, PageHero, Section } from "@/components/page-parts";
-import { EMAIL } from "@/lib/offer-copy";
+import { ArrowLink, GetInTouch, H2, PageHero, Section } from "@/components/page-parts";
+import { TradeIcon } from "@/components/trade-icon";
 import { INDUSTRIES } from "@/lib/industries";
+import { EMAIL } from "@/lib/offer-copy";
 
 export const metadata: Metadata = {
   title: "Industries",
   description:
-    "HVAC, dental clinics, law firms, walk-in clinics, veterinary clinics and plumbing companies. A page for each, with what its customers search, what a missed call costs and what the rules let us sell it.",
+    "HVAC, dental clinics, law firms, walk-in clinics, veterinary clinics and plumbing companies. A page for each, with what its customers search, what a missed call costs and the rules its ads and replies have to follow.",
   alternates: { canonical: "/industries" },
 };
 
@@ -16,37 +16,46 @@ export default function IndustriesPage() {
     <>
       <PageHero
         eyebrow="Industries"
-        title="Six trades, six different problems."
-        lead="If people search for what you do before they call, Devize is built for you. Devize is new, so these pages say what we'd look at and what the rules allow. They aren't a claim that we've done it for anyone."
+        title="Every business here has its own customers and its own rules."
+        subhead="If people search for what you do before they call, Devize is built for you."
+        lead="Each page covers how your customers search, what a missed call costs, and the rules your ads and replies have to follow."
       />
 
-      <Section>
-        <ul className="divide-y divide-[var(--color-border)] border-y border-[var(--color-border)]">
-          {INDUSTRIES.map((industry) => (
-            <li key={industry.slug} className="group relative grid gap-2 py-6 md:grid-cols-[14rem_minmax(0,1fr)_auto] md:items-baseline md:gap-8">
-              <h2 className="font-[family-name:var(--font-display)] text-2xl text-[var(--color-ink)] font-medium tracking-tight">
-                <Link href={`/industries/${industry.slug}`} className="after:absolute after:inset-0 group-hover:underline underline-offset-4">
-                  {industry.name}
-                </Link>
-              </h2>
-              <p className="text-lg text-[var(--color-ink-soft)] leading-snug">{industry.hook}</p>
-              <p className="text-sm text-[var(--color-ink-muted)]">
-                {industry.compared ? "Compared with rivals: yes" : "Compared with rivals: not yet"}
-              </p>
-            </li>
-          ))}
-        </ul>
-        <p className="mt-8 max-w-3xl text-sm text-[var(--color-ink-soft)] leading-relaxed">
-          Not on the list? Other service businesses that sell to people are welcome.
-          Email{" "}
-          <a href={`mailto:${EMAIL}`} className="text-[var(--color-ink)] underline underline-offset-4 decoration-[var(--color-ink)]/30 hover:decoration-[var(--color-ink)]">
+      <div className="pt-14 md:pt-20">
+        <Section band>
+          <H2 className="sr-only">The six kinds of business</H2>
+          <ul className="grid grid-cols-1 gap-y-12 md:grid-cols-2 lg:grid-cols-3 lg:gap-y-16">
+            {INDUSTRIES.map((industry, i) => (
+              <li key={industry.slug} className={`flex min-w-0 flex-col lg:px-9 ${i % 3 === 0 ? "lg:pl-0" : "lg:border-l lg:border-[var(--color-border)]"}`}>
+                <span className="grid h-14 w-14 place-items-center rounded-full bg-white/10 text-[var(--color-lilac)]">
+                  <TradeIcon slug={industry.slug} className="h-7 w-7" />
+                </span>
+                <h2 className="mt-5 font-[family-name:var(--font-display)] text-[1.75rem] leading-[1.12] text-white">{industry.name}</h2>
+                <p className="mt-3 text-[1.1875rem] font-bold leading-snug text-[var(--color-lilac)]">{industry.hook}</p>
+                <p className="mt-3 text-[0.95rem] leading-relaxed text-white/85">{industry.line}</p>
+                <div className="mt-auto pt-6">
+                  <ArrowLink href={`/industries/${industry.slug}`} tone="light" ariaLabel={`Read the ${industry.name} page`}>
+                    Read the page
+                  </ArrowLink>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </Section>
+      </div>
+
+      {/* Full width with a capped line, so the paragraph starts on the same left edge as the strip under it. */}
+      <Section className="py-12 md:py-16">
+        <p className="max-w-3xl leading-relaxed text-[var(--color-ink-soft)]">
+          If you run another service business that serves the public, email{" "}
+          <a href={`mailto:${EMAIL}`} className="font-bold text-[var(--color-brand)] underline decoration-[var(--color-brand)]/30 underline-offset-4 hover:decoration-[var(--color-brand)]">
             {EMAIL}
           </a>{" "}
-          and tell us what you do. We&apos;ll tell you what we can and can&apos;t show you today.
+          and tell us what you do, and we&apos;ll tell you what we look at first.
         </p>
       </Section>
 
-      <CtaBand />
+      <GetInTouch />
     </>
   );
 }

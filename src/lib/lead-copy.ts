@@ -1,6 +1,6 @@
 /**
  * The homepage audit request form's messages, shared by the form's script
- * (contact.tsx), its no-JavaScript path (/api/lead's 303 to /thanks) and the
+ * (audit-form.tsx), its no-JavaScript path (/api/lead's 303 to /thanks) and the
  * /thanks page, so all three say the same thing.
  *
  * TODO(Blake): before launch, make a form request reach a person: an alert to a
@@ -12,7 +12,7 @@
  */
 
 export const LEAD_THANKS =
-  "Thanks. If we've scanned your trade and area, we'll run your searches and email your audit to you. If we haven't, we'll tell you plainly.";
+  "Thanks. We'll check your listing, your reviews and your website and email you what we find. If we've already scanned your kind of business in your area, we'll compare you with your competitors too.";
 
 export const LEAD_ERRORS = {
   fields: "Please fill in your business name, town and email.",

@@ -4,6 +4,8 @@ type LogoProps = {
   className?: string;
   markOnly?: boolean;
   monochrome?: boolean;
+  /** White wordmark and a lighter mark, for navy backgrounds. */
+  onDark?: boolean;
   title?: string;
 };
 
@@ -16,11 +18,13 @@ export default function Logo({
   className,
   markOnly = false,
   monochrome = false,
+  onDark = false,
   title = "Devize",
 }: LogoProps) {
   const viewBox = markOnly ? MARK_VIEWBOX : FULL_VIEWBOX;
-  const inkFill = monochrome ? "currentColor" : "#1C2A39";
-  const gradFill = monochrome ? "currentColor" : "url(#devize-grad)";
+  const inkFill = monochrome ? "currentColor" : onDark ? "#FFFFFF" : "#1C2A39";
+  const gradId = onDark ? "devize-grad-dark" : "devize-grad";
+  const gradFill = monochrome ? "currentColor" : `url(#${gradId})`;
 
   return (
     <svg
@@ -32,15 +36,15 @@ export default function Logo({
     >
       <defs>
         <linearGradient
-          id="devize-grad"
+          id={gradId}
           gradientUnits="userSpaceOnUse"
           x1="280"
           y1="900"
           x2="560"
           y2="600"
         >
-          <stop offset="0" stopColor="#330099" />
-          <stop offset="1" stopColor="#7A3FE5" />
+          <stop offset="0" stopColor={onDark ? "#B79CFF" : "#330099"} />
+          <stop offset="1" stopColor={onDark ? "#E4DAFF" : "#7A3FE5"} />
         </linearGradient>
       </defs>
 
