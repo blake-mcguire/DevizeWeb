@@ -220,13 +220,7 @@ export type Review = {
 // To add one, put an entry between the brackets below. Cards appear only when source and
 // permission are both filled in. Shape:
 //   { quote: "Their words.", name: "Full Name", stars: 5, photoFile: "reviews/name.jpg", source: "Email to Devize", permission: "Where their OK is on record" },
-export const REVIEWS: Review[] = [
-  { quote: "The team at devize is fantastic. I have gone through plenty of fly by night marketers who felt like they were just taking my money and throwing it at a wall but devize always shows me the exact strategies and ad spend allocation they will be using so i have clarity on where my money is going..", name: "James Moldavo", stars: 5, source: "Email to Devize", permission: "Where their OK is on record" },
-  { quote: "Love Love Love my marketing team. They are very hands on and keep me updated on absolutely everything and are always coming to me with new innovative ideas so my practice can stay ahead.", name: "Susan Rigotto", stars: 5, photoFile: "reviews/name.jpg", source: "Email to Devize", permission: "Where their OK is on record" },
-  { quote: "Devize definitely feels different to other marketers I have worked with. They are very hands on and I feel like I actually have insight into where my money is going rather than just a black box that maybe spits out a customer here and there.", name: "Daniel Walker", stars: 5, source: "Google", permission: "Where their OK is on record" },
-  
-
-];
+export const REVIEWS: Review[] = [];
 // ---------------------------------------------------------------------------
 // Fine print. All of it prints small in the footer, and the fuller versions are in
 // Terms. A footer line works only if the body doesn't create the opposite impression

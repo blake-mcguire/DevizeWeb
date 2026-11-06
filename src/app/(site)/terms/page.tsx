@@ -75,9 +75,8 @@ export default function TermsPage() {
     <LegalPage
       eyebrow="Legal"
       title="Service Terms"
-      // TODO(Blake): put the real launch date here. These terms are not in force
-      // or confirmed yet, so no calendar date is shown (termsConfirmed).
-      updated="on the launch date (draft, not yet in force)"
+      // Published on Blake's instruction, 2026-11-05. Counsel has not read these yet.
+      updated="November 5, 2026"
       version="Version 2.0"
     >
       <H2 id="s1">1. Who we are</H2>
