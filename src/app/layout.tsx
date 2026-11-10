@@ -49,16 +49,22 @@ export const metadata: Metadata = {
   },
 };
 
-const GTM_ID = "GTM-NMJGLMFD";
+const GTM_ID = "GTM-KTFN9CLB";
 
+// Container swapped 2026-11-09 on Blake's instruction. GTM-NMJGLMFD (added
+// 2026-09-16) was published but carried no tags; GTM-KTFN9CLB carries the
+// Google Ads conversion setup (AW-18565922304).
 // Skipped on /a/<token> (the prospect audit pages): the token in that URL is
 // the only key to the page, so it is not handed to analytics, and the page
 // stays light. The page's own view beacon measures visits there.
+// The gtag() helper below matches Google's install snippet, so later code can
+// push events with gtag('event', ...) without a second bootstrap.
 const gtmScript = `(function(w,d,s,l,i){if(w.location.pathname.indexOf('/a/')===0)return;w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','${GTM_ID}');`;
+})(window,document,'script','dataLayer','${GTM_ID}');
+window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());`;
 
 export default function RootLayout({
   children,
