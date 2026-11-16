@@ -3,6 +3,7 @@ import "server-only";
 import { blobUrl, getJSON, pathnameOfUrl, stat } from "@/lib/blob-store";
 import { validToken } from "@/lib/audit-validate";
 import { cleanFilename, downloadName } from "@/lib/download-name";
+import { pageKind, parseVoicePage, type VoicePage } from "@/lib/voice-page";
 
 /** One row of "who came up instead of you", exactly as the pipeline writes it. */
 export type AuditRow = {
@@ -104,11 +105,22 @@ export function pdfPathname(token: string): string {
 }
 
 /**
- * The page for a token, or null when the token is malformed, unknown,
- * expired, or the document is unreadable. Callers must treat every null the
- * same way (a plain 404), so a visitor learns nothing about which it was.
+ * What audits/<token>/page.json turned out to be: an audit page (every page
+ * before 2026-11-15, which carry no kind), or a voice demo page (kind
+ * "voice", read and checked by voice-page.ts; it has no keyword, no pins and
+ * no file).
  */
-export async function loadAuditPage(token: string): Promise<AuditPage | null> {
+export type LoadedPage = { kind: "audit"; page: AuditPage } | { kind: "voice"; page: VoicePage };
+
+/**
+ * The page for a token, of either kind, or null when the token is malformed,
+ * unknown, expired, or the document is unreadable. Callers must treat every
+ * null the same way (a plain 404), so a visitor learns nothing about which
+ * it was. Only /a/<token> itself and the view beacon take both kinds; every
+ * audit route keeps asking loadAuditPage, so a voice page has no form, no
+ * status and no file.
+ */
+export async function loadPage(token: string): Promise<LoadedPage | null> {
   if (!validToken(token)) return null;
   let raw: Record<string, unknown> | null;
   try {
@@ -120,6 +132,27 @@ export async function loadAuditPage(token: string): Promise<AuditPage | null> {
   if (!raw || typeof raw !== "object") return null;
   if (raw.token !== token) return null;
 
+  if (pageKind(raw) === "voice") {
+    const voice = parseVoicePage(raw, token, new Date());
+    return voice ? { kind: "voice", page: voice } : null;
+  }
+  const audit = auditFromRaw(raw, token);
+  return audit ? { kind: "audit", page: audit } : null;
+}
+
+/**
+ * The audit page for a token, or null when the token is malformed, unknown,
+ * expired, the document is unreadable, or the page is a voice demo. Callers
+ * must treat every null the same way (a plain 404), so a visitor learns
+ * nothing about which it was.
+ */
+export async function loadAuditPage(token: string): Promise<AuditPage | null> {
+  const loaded = await loadPage(token);
+  return loaded?.kind === "audit" ? loaded.page : null;
+}
+
+/** An audit page from its page.json (token already matched), exactly as before the voice kind existed. */
+function auditFromRaw(raw: Record<string, unknown>, token: string): AuditPage | null {
   if (isStr(raw.expires_at)) {
     const exp = Date.parse(raw.expires_at);
     if (Number.isFinite(exp) && exp < Date.now()) return null;

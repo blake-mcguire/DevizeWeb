@@ -1,12 +1,16 @@
+import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
-import { auditFile, filePlan as fileCarriesPlan, loadAuditPage } from "@/lib/audit-page";
+import { cache } from "react";
+import { auditFile, filePlan as fileCarriesPlan, loadPage } from "@/lib/audit-page";
 import { auditFileUrl, sentCookieName } from "@/lib/audit-validate";
 import { vslFor } from "@/lib/vsl";
 import AuditForm, { type Initial } from "./audit-form";
 import ViewBeacon from "./view-beacon";
+import VoiceDemo from "./voice-demo";
 import VslPlayer from "./vsl-player";
 import { copy, type ErrorCode } from "./copy";
+import { voiceCopy } from "./voice-copy";
 
 /**
  * /a/<token>: one prospect's own page, linked from their cold email.
@@ -21,6 +25,12 @@ import { copy, type ErrorCode } from "./copy";
  * The PDF is built when the page is first opened (the view beacon asks for
  * it), so it is usually ready by the time the form is sent; when it is not,
  * the form waits for it (audit-form.tsx).
+ *
+ * Since 2026-11-15 a token's page.json may instead be of kind "voice": the
+ * prospect's receptionist set up as a demo. That page is one block
+ * (voice-demo.tsx) and the same view beacon; it has no form and no file, and
+ * nothing below the branch runs for it. An audit page renders exactly as it
+ * did before.
  */
 
 type Props = {
@@ -32,10 +42,39 @@ type Props = {
 const NOSCRIPT_EVERY = 5;
 const NOSCRIPT_TRIES = 24;
 
+// One read of page.json per request, shared by the tab title and the page.
+const getPage = cache(loadPage);
+
+/**
+ * A voice demo page names itself in the tab; an audit page keeps the layout's title. The root layout's
+ * " · Devize" template stops at /a/layout.tsx (which sets a title of its own), so it is written out here.
+ */
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { token } = await params;
+  const loaded = await getPage(token);
+  return loaded?.kind === "voice" ? { title: { absolute: `${voiceCopy.pageTitle} · Devize` } } : {};
+}
+
 export default async function AuditPage({ params, searchParams }: Props) {
   const { token } = await params;
-  const page = await loadAuditPage(token);
-  if (!page) notFound();
+  const loaded = await getPage(token);
+  if (!loaded) notFound();
+  if (loaded.kind === "voice") {
+    const voice = loaded.page;
+    return (
+      <>
+        <VoiceDemo
+          token={token}
+          business={voice.business}
+          city={voice.city}
+          state={voice.state}
+          sample={voice.sample}
+        />
+        <ViewBeacon token={token} />
+      </>
+    );
+  }
+  const page = loaded.page;
 
   const sp = await searchParams;
   const bounced = typeof sp.e === "string" && Object.hasOwn(copy.errors, sp.e) ? (sp.e as ErrorCode) : null;

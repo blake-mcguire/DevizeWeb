@@ -1,5 +1,5 @@
 import type { NextRequest } from "next/server";
-import { loadAuditPage } from "@/lib/audit-page";
+import { loadPage } from "@/lib/audit-page";
 import { MACHINE_UA, validToken } from "@/lib/audit-validate";
 import { eventPath, putJSON } from "@/lib/blob-store";
 import { allow, clientIp } from "@/lib/rate-limit";
@@ -10,7 +10,8 @@ import { allow, clientIp } from "@/lib/rate-limit";
  * The page's once-per-session beacon. Writes views/<iso>-<rand>-<token>.json for
  * the pipeline. Always answers 204, whatever happened, so it says nothing
  * about which tokens exist. Skips machine user agents (mail scanners,
- * previews, headless browsers) and unknown or expired tokens.
+ * previews, headless browsers) and unknown or expired tokens. Audit pages
+ * and voice demo pages (2026-11-15) both report here, to the same views/ path.
  */
 
 const NO_CONTENT = () => new Response(null, { status: 204 });
@@ -27,7 +28,8 @@ export async function POST(req: NextRequest) {
   if (MACHINE_UA.test(req.headers.get("user-agent") ?? "")) return NO_CONTENT();
   if (!allow(`view|${clientIp(req.headers)}|${token}`, 3)) return NO_CONTENT();
 
-  const page = await loadAuditPage(token);
+  // Either kind of page: a voice demo page reports its opens the same way an audit page does.
+  const page = await loadPage(token);
   if (!page) return NO_CONTENT();
 
   const now = new Date();
