@@ -1,9 +1,12 @@
 #!/bin/bash
 # End-to-end run of the voice demo routes on this machine only. Usage: bash tests/e2e/run.sh prod | dev
-# Since 2026-11-16 it also covers the readable link /for/<slug>, the opt-out page /u/<token>, its beacon
+# Since 2026-11-16 it also covers the readable link /for/<slug>, the opt-out page /u/<t>, its beacon
 # (POST /api/optout-view) and its button (POST /api/unsubscribe), with links/ files seeded by seed.mjs. After the
 # review (2026-11-16): the /for/ miss limit, /u/ on a page.json that cannot be read, the beacon's route and key in the
-# /u/ HTML, and (prod) the built chunks that send the press and hold the view beacon's default route.
+# /u/ HTML, and (prod) the built chunks that send the press and hold the view beacon's default route. Since contract 8.6
+# (2026-11-16): /u/<t> takes the page's OPT-OUT token, resolved through optout-links/<t>.json files seeded by seed.mjs;
+# the beacon and the button send {t}; a page token is refused on all three and writes nothing; the opt-out token never
+# appears in an /a/ or /for/ answer, and the page token never in a /u/ answer (HTML or RSC payload).
 #
 #   prod  the BUILT site (run `npm run build` first), started with `next start`. A production build never
 #         uses the blob mock directory, so the real @vercel/blob SDK runs against fake-blob.mjs, a local
@@ -254,7 +257,7 @@ echo "vendor calls in all: $(vendor_log 'l.length+", key right on "+l.filter(r=>
 expect "vendor calls in all, and with the right key" "$(vendor_log 'l.length+" "+l.filter(r=>r.key==="right").length')" "13 13"
 echo
 
-# ---- contract 8.4 and 8.5 (2026-11-16): the readable link /for/<slug> and the opt-out page /u/<token> ----------------
+# ---- contract 8.4 to 8.6 (2026-11-16): the readable link /for/<slug> and the opt-out page /u/<t> ----------------------
 # Page lines: what a person sees, read off the HTML the server sends (no browser runs here). Every page carries the
 # /a/ not-found tree inside its script payload, so a 404 is told by the marker Next writes for one, not by its words.
 page_line() { # file
@@ -325,75 +328,120 @@ for i in $(seq 1 25); do HITS="$HITS$(curl -s -o /dev/null -w "%{http_code} " -A
 expect "25 opens of a real link from one address (hits never count)" "$(echo $HITS | tr ' ' '\n' | sort | uniq -c | tr -s ' ' | sed 's/^ //')" "25 200"
 echo
 
-echo "== the opt-out page: GET /u/<token>"
-code "GET /u/<live voice page>" 200 -A "$UA" "$BASE/u/$A"
-code "GET /u/<expired voice page>" 200 -A "$UA" "$BASE/u/$EXPIRED"
-curl -s -A "$UA" "$BASE/u/$A" > "$WORK/u-live.html"
-curl -s -A "$UA" "$BASE/u/$EXPIRED" > "$WORK/u-expired.html"
-echo "   /u/<live>     $(page_line "$WORK/u-live.html")"
-echo "   /u/<expired>  $(page_line "$WORK/u-expired.html")"
-expect "/u/<live> shows the caption and the one button" "$(page_line "$WORK/u-live.html")" "$OPTOUT_LINE"
-expect "/u/<expired> shows the caption and the one button" "$(page_line "$WORK/u-expired.html")" "$OPTOUT_LINE"
-expect "buttons on /u/<live>" "$(grep -o '<button' "$WORK/u-live.html" | wc -l | tr -d ' ')" 1
-expect "the Devize logo on /u/<live>" "$(grep -c -F 'aria-label="Devize"' "$WORK/u-live.html" | tr -d ' ' | sed 's/^[1-9][0-9]*$/yes/;s/^0$/no/')" "yes"
-expect "/u/<token> X-Robots-Tag" "$(header_of X-Robots-Tag "$BASE/u/$A")" "noindex, nofollow"
-expect "/u/<token> Referrer-Policy" "$(header_of Referrer-Policy "$BASE/u/$A")" "no-referrer"
-CHECKS=$((CHECKS + 1)); grep -q -F 'noindex' "$WORK/u-live.html" || miss "/u/<token> has no robots noindex meta tag"
+echo "== the opt-out page: GET /u/<t> (t is the page's opt-out token, contract 8.6)"
+code "GET /u/<t of a live voice page>" 200 -A "$UA" "$BASE/u/$OPT_A"
+code "GET /u/<t of an expired voice page>" 200 -A "$UA" "$BASE/u/$OPT_EXPIRED"
+curl -s -A "$UA" "$BASE/u/$OPT_A" > "$WORK/u-live.html"
+curl -s -A "$UA" "$BASE/u/$OPT_EXPIRED" > "$WORK/u-expired.html"
+echo "   /u/<live t>     $(page_line "$WORK/u-live.html")"
+echo "   /u/<expired t>  $(page_line "$WORK/u-expired.html")"
+expect "/u/<live t> shows the caption and the one button" "$(page_line "$WORK/u-live.html")" "$OPTOUT_LINE"
+expect "/u/<expired t> shows the caption and the one button" "$(page_line "$WORK/u-expired.html")" "$OPTOUT_LINE"
+expect "buttons on /u/<live t>" "$(grep -o '<button' "$WORK/u-live.html" | wc -l | tr -d ' ')" 1
+expect "the Devize logo on /u/<live t>" "$(grep -c -F 'aria-label="Devize"' "$WORK/u-live.html" | tr -d ' ' | sed 's/^[1-9][0-9]*$/yes/;s/^0$/no/')" "yes"
+expect "/u/<t> X-Robots-Tag" "$(header_of X-Robots-Tag "$BASE/u/$OPT_A")" "noindex, nofollow"
+expect "/u/<t> Referrer-Policy" "$(header_of Referrer-Policy "$BASE/u/$OPT_A")" "no-referrer"
+CHECKS=$((CHECKS + 1)); grep -q -F 'noindex' "$WORK/u-live.html" || miss "/u/<t> has no robots noindex meta tag"
 # The page's own visit beacon is on the page, pointed at its own route and key (a deleted or default beacon fails here).
-expect "/u/<live> hands its beacon /api/optout-view" "$(grep -c -F '/api/optout-view' "$WORK/u-live.html" | tr -d ' ' | sed 's/^[1-9][0-9]*$/yes/;s/^0$/no/')" "yes"
-expect "/u/<live> hands its beacon the devize_optout_view_ key" "$(grep -c -F 'devize_optout_view_' "$WORK/u-live.html" | tr -d ' ' | sed 's/^[1-9][0-9]*$/yes/;s/^0$/no/')" "yes"
-# A store that cannot be read (this page.json is not JSON) still shows the button; the press then says try again.
-code "GET /u/<a page.json that cannot be read>" 200 -A "$UA" "$BASE/u/$BROKEN"
-curl -s -A "$UA" "$BASE/u/$BROKEN" > "$WORK/u-broken.html"
-echo "   /u/<unreadable> $(page_line "$WORK/u-broken.html")"
-expect "/u/<unreadable> shows the caption and the one button" "$(page_line "$WORK/u-broken.html")" "$OPTOUT_LINE"
-code "GET /u/<unknown>" 404 -A "$UA" "$BASE/u/e2eNoSuchPage_00000000"
-code "GET /u/<an audit page>" 404 -A "$UA" "$BASE/u/$AUDIT"
-code "GET /u/<malformed>" 404 -A "$UA" "$BASE/u/abc"
-curl -s -A "$UA" "$BASE/u/$AUDIT" > "$WORK/u-404.html"
-expect "/u/<audit page> is the /a/ 404" "$(page_line "$WORK/u-404.html")" "$NOT_FOUND_LINE"
+expect "/u/<live t> hands its beacon /api/optout-view" "$(grep -c -F '/api/optout-view' "$WORK/u-live.html" | tr -d ' ' | sed 's/^[1-9][0-9]*$/yes/;s/^0$/no/')" "yes"
+expect "/u/<live t> hands its beacon the devize_optout_view_ key" "$(grep -c -F 'devize_optout_view_' "$WORK/u-live.html" | tr -d ' ' | sed 's/^[1-9][0-9]*$/yes/;s/^0$/no/')" "yes"
+# The browser holds t and nothing else: the page token is in neither the HTML nor the page's RSC payload.
+curl -s -A "$UA" -H "RSC: 1" "$BASE/u/$OPT_A" > "$WORK/u-live.rsc"
+curl -s -A "$UA" -H "RSC: 1" "$BASE/u/$OPT_EXPIRED" > "$WORK/u-expired.rsc"
+# (The caption is the button component's own text, so the payload carries only the component's one prop, t.)
+expect "/u/<live t>'s RSC payload is the page: the button is handed {t}" "$(grep -c -F "{\"t\":\"$OPT_A\"}" "$WORK/u-live.rsc" | tr -d ' ' | sed 's/^[1-9][0-9]*$/yes/;s/^0$/no/')" "yes"
+expect "/u/<live t>'s RSC payload: the beacon is handed t, its own route and the t body key" "$(grep -c -F "\"token\":\"$OPT_A\",\"endpoint\":\"/api/optout-view\",\"storageKey\":\"devize_optout_view_\",\"field\":\"t\"" "$WORK/u-live.rsc" | tr -d ' ' | sed 's/^[1-9][0-9]*$/yes/;s/^0$/no/')" "yes"
+expect "/u/<live t> hands the browser t" "$(grep -c -F "$OPT_A" "$WORK/u-live.html" | tr -d ' ' | sed 's/^[1-9][0-9]*$/yes/;s/^0$/no/')" "yes"
+for f in u-live.html u-live.rsc; do expect "the page token in /u/<live t> ($f)" "$(grep -c -F "$A" "$WORK/$f" | tr -d ' ')" 0; done
+for f in u-expired.html u-expired.rsc; do expect "the page token in /u/<expired t> ($f)" "$(grep -c -F "$EXPIRED" "$WORK/$f" | tr -d ' ')" 0; done
+expect "the business on /u/<live t> (HTML and RSC)" "$(cat "$WORK/u-live.html" "$WORK/u-live.rsc" | grep -c -F 'Maple Creek Family Dental' | tr -d ' ')" 0
+# A store that cannot be read (this page.json, or this link file, is not JSON) still shows the button; the press then
+# says try again.
+code "GET /u/<t whose page.json cannot be read>" 200 -A "$UA" "$BASE/u/$OPT_BROKEN"
+curl -s -A "$UA" "$BASE/u/$OPT_BROKEN" > "$WORK/u-broken.html"
+echo "   /u/<unreadable page> $(page_line "$WORK/u-broken.html")"
+expect "/u/<t whose page.json cannot be read> shows the caption and the one button" "$(page_line "$WORK/u-broken.html")" "$OPTOUT_LINE"
+expect "the page token in /u/<t whose page.json cannot be read>" "$(grep -c -F "$BROKEN" "$WORK/u-broken.html" | tr -d ' ')" 0
+code "GET /u/<t whose link file cannot be read>" 200 -A "$UA" "$BASE/u/$OPT_BADLINK"
+curl -s -A "$UA" "$BASE/u/$OPT_BADLINK" > "$WORK/u-badlink.html"
+expect "/u/<t whose link file cannot be read> shows the caption and the one button" "$(page_line "$WORK/u-badlink.html")" "$OPTOUT_LINE"
+for pair in "an unknown t:e2eNoSuchOptout0000000" "an audit page's t:$OPT_AUDIT" "a t whose page is missing:$OPT_NOPAGE" \
+            "a link file naming another t:$OPT_WRONG" "a link file naming itself as the page token:$OPT_SELF" \
+            "malformed:abc" "a t with an underscore:e2eNoSuchPage_00000000" "a t of 23:${OPT_A}0"; do
+  label="${pair%%:*}"; t="${pair#*:}"
+  code "GET /u/<$label>" 404 -A "$UA" "$BASE/u/$t"
+done
+# A page token is never accepted on /u/ (contract 8.6): the page token of every kind of real voice page is the 404.
+for pair in "live voice page A:$A" "the expired voice page:$EXPIRED" "the /for/ page (its token is in that page's HTML):$LINKED" \
+            "the page whose page.json cannot be read:$BROKEN" "a voice page with no opt-out link:$LINKED_EXPIRED"; do
+  label="${pair%%:*}"; t="${pair#*:}"
+  code "GET /u/<the page token of $label>" 404 -A "$UA" "$BASE/u/$t"
+done
+curl -s -A "$UA" "$BASE/u/$LINKED_AUDIT" > "$WORK/u-404.html"
+curl -s -A "$UA" "$BASE/u/$A" > "$WORK/u-page-token.html"
+expect "/u/<an audit page's page token> is the /a/ 404" "$(page_line "$WORK/u-404.html")" "$NOT_FOUND_LINE"
+expect "/u/<live voice page A's page token> is the /a/ 404" "$(page_line "$WORK/u-page-token.html")" "$NOT_FOUND_LINE"
 expect "opt-outs written by opening the page" "$(ls "$BLOB/optouts" 2>/dev/null | wc -l | tr -d ' ')" 0
 expect "visits written by the server render alone (only the beacon writes them)" "$(ls "$BLOB/optout-views" 2>/dev/null | wc -l | tr -d ' ')" 0
 echo
 
-echo "== the opt-out page's beacon: POST /api/optout-view"
-show "beacon, a person on the live page" 204 "" -X POST -H "Content-Type: application/json" -A "$UA" -d "{\"token\":\"$A\"}" "$BASE/api/optout-view"
-show "beacon, a machine (curl's own UA)" 204 "" -X POST -H "Content-Type: application/json" -d "{\"token\":\"$A\"}" "$BASE/api/optout-view"
-show "beacon, a mail scanner" 204 "" -X POST -H "Content-Type: application/json" -A "Mozilla/5.0 (compatible; Proofpoint Essentials)" -d "{\"token\":\"$EXPIRED\"}" "$BASE/api/optout-view"
-show "beacon, an unknown token" 204 "" -X POST -H "Content-Type: application/json" -A "$UA" -d '{"token":"e2eNoSuchPage_00000000"}' "$BASE/api/optout-view"
-show "beacon, an audit page" 204 "" -X POST -H "Content-Type: application/json" -A "$UA" -d "{\"token\":\"$AUDIT\"}" "$BASE/api/optout-view"
-show "beacon, a page.json that cannot be read" 204 "" -X POST -H "Content-Type: application/json" -A "$UA" -d "{\"token\":\"$BROKEN\"}" "$BASE/api/optout-view"
+echo "== the opt-out page's beacon: POST /api/optout-view {t}"
+OVIEW="$BASE/api/optout-view"
+show "beacon, a person on the live page" 204 "" -X POST -H "Content-Type: application/json" -A "$UA" -d "{\"t\":\"$OPT_A\"}" "$OVIEW"
+show "beacon, a machine (curl's own UA)" 204 "" -X POST -H "Content-Type: application/json" -d "{\"t\":\"$OPT_A\"}" "$OVIEW"
+show "beacon, a mail scanner" 204 "" -X POST -H "Content-Type: application/json" -A "Mozilla/5.0 (compatible; Proofpoint Essentials)" -d "{\"t\":\"$OPT_EXPIRED\"}" "$OVIEW"
+show "beacon, an unknown t" 204 "" -X POST -H "Content-Type: application/json" -A "$UA" -d '{"t":"e2eNoSuchOptout0000000"}' "$OVIEW"
+show "beacon, an audit page's t" 204 "" -X POST -H "Content-Type: application/json" -A "$UA" -d "{\"t\":\"$OPT_AUDIT\"}" "$OVIEW"
+show "beacon, a page.json that cannot be read" 204 "" -X POST -H "Content-Type: application/json" -A "$UA" -d "{\"t\":\"$OPT_BROKEN\"}" "$OVIEW"
+show "beacon, the page token of live page A as t" 204 "" -X POST -H "Content-Type: application/json" -A "$UA" -d "{\"t\":\"$A\"}" "$OVIEW"
+show "beacon, the page token of the expired page as t" 204 "" -X POST -H "Content-Type: application/json" -A "$UA" -d "{\"t\":\"$EXPIRED\"}" "$OVIEW"
+show "beacon, the page token of the /for/ page as t" 204 "" -X POST -H "Content-Type: application/json" -A "$UA" -d "{\"t\":\"$LINKED\"}" "$OVIEW"
+show "beacon, the 8.5 body {token} with a t" 204 "" -X POST -H "Content-Type: application/json" -A "$UA" -d "{\"token\":\"$OPT_EXPIRED\"}" "$OVIEW"
+show "beacon, the 8.5 body {token} with a page token" 204 "" -X POST -H "Content-Type: application/json" -A "$UA" -d "{\"token\":\"$EXPIRED\"}" "$OVIEW"
 echo "optout-views/: $(cd "$BLOB" && find optout-views -type f 2>/dev/null | tr '\n' ' ')"
-expect "optout-views/ folders (only the person's visit)" "$(ls "$BLOB/optout-views" 2>/dev/null | tr '\n' ' ')" "$A "
-expect "optout-views/<live> names are <iso>-<32 hex>.json" "$(ls "$BLOB/optout-views/$A/" | grep -c -E '^[0-9]{8}T[0-9]{6}Z-[0-9a-f]{32}\.json$')" 1
-expect "the visit's keys" "$(node -e 'const fs=require("fs"),d=process.argv[1];const f=fs.readdirSync(d)[0];const j=JSON.parse(fs.readFileSync(d+"/"+f));console.log(Object.keys(j).sort().join(",")+" "+j.ua)' "$BLOB/optout-views/$A")" "at,token,ua,v iphone"
+expect "optout-views/ folders (only the person's visit, under the page token)" "$(ls "$BLOB/optout-views" 2>/dev/null | tr '\n' ' ')" "$A "
+expect "optout-views/<page token of A>: one visit (its page token as t wrote nothing more)" "$(count "$BLOB/optout-views/$A")" 1
+expect "optout-views/<page token> names are <iso>-<32 hex>.json" "$(ls "$BLOB/optout-views/$A/" | grep -c -E '^[0-9]{8}T[0-9]{6}Z-[0-9a-f]{32}\.json$')" 1
+expect "the visit's keys, and the page token it names" "$(node -e 'const fs=require("fs"),d=process.argv[1];const f=fs.readdirSync(d)[0];const j=JSON.parse(fs.readFileSync(d+"/"+f));console.log(Object.keys(j).sort().join(",")+" "+j.ua+" "+(j.token===process.argv[2]))' "$BLOB/optout-views/$A" "$A")" "at,token,ua,v iphone true"
 expect "opt-outs written by a visit" "$(ls "$BLOB/optouts" 2>/dev/null | wc -l | tr -d ' ')" 0
 echo
 
-echo "== the button: POST /api/unsubscribe"
+echo "== the button: POST /api/unsubscribe {t}"
 UNSUB="$BASE/api/unsubscribe"
-show "a machine (curl's own UA)" 403 '"error":"forbidden"' -X POST -H "Content-Type: application/json" -d "{\"token\":\"$A\"}" "$UNSUB"
-show "a machine (python-requests)" 403 '"error":"forbidden"' -X POST -H "Content-Type: application/json" -A "python-requests/2.32" -d "{\"token\":\"$A\"}" "$UNSUB"
-show "a mail scanner" 403 '"error":"forbidden"' -X POST -H "Content-Type: application/json" -A "Mozilla/5.0 (compatible; Proofpoint Essentials)" -d "{\"token\":\"$A\"}" "$UNSUB"
+show "a machine (curl's own UA)" 403 '"error":"forbidden"' -X POST -H "Content-Type: application/json" -d "{\"t\":\"$OPT_A\"}" "$UNSUB"
+show "a machine (python-requests)" 403 '"error":"forbidden"' -X POST -H "Content-Type: application/json" -A "python-requests/2.32" -d "{\"t\":\"$OPT_A\"}" "$UNSUB"
+show "a mail scanner" 403 '"error":"forbidden"' -X POST -H "Content-Type: application/json" -A "Mozilla/5.0 (compatible; Proofpoint Essentials)" -d "{\"t\":\"$OPT_A\"}" "$UNSUB"
 expect "opt-outs written by machines" "$(ls "$BLOB/optouts" 2>/dev/null | wc -l | tr -d ' ')" 0
-show "another site's page (Sec-Fetch-Site: cross-site)" 403 '"error":"forbidden"' -X POST -H "Content-Type: application/json" -H "Sec-Fetch-Site: cross-site" -A "$UA" -d "{\"token\":\"$A\"}" "$UNSUB"
-show "not JSON content type" 400 '"error":"bad_request"' -X POST -A "$UA" -d "token=$A" "$UNSUB"
-show "a malformed token" 400 '"error":"bad_token"' -X POST -H "Content-Type: application/json" -A "$UA" -d '{"token":"../../etc/passwd"}' "$UNSUB"
-show "an unknown token" 404 '"error":"gone"' -X POST -H "Content-Type: application/json" -A "$UA" -d '{"token":"e2eNoSuchPage_00000000"}' "$UNSUB"
-show "an audit page" 404 '"error":"gone"' -X POST -H "Content-Type: application/json" -A "$UA" -d "{\"token\":\"$AUDIT\"}" "$UNSUB"
-show "a page.json that cannot be read (the button says try again)" 503 '"error":"unavailable"' -X POST -H "Content-Type: application/json" -A "$UA" -d "{\"token\":\"$BROKEN\"}" "$UNSUB"
+show "another site's page (Sec-Fetch-Site: cross-site)" 403 '"error":"forbidden"' -X POST -H "Content-Type: application/json" -H "Sec-Fetch-Site: cross-site" -A "$UA" -d "{\"t\":\"$OPT_A\"}" "$UNSUB"
+show "not JSON content type" 400 '"error":"bad_request"' -X POST -A "$UA" -d "t=$OPT_A" "$UNSUB"
+show "a malformed t" 400 '"error":"bad_token"' -X POST -H "Content-Type: application/json" -A "$UA" -d '{"t":"../../etc/passwd"}' "$UNSUB"
+show "a t with an underscore" 400 '"error":"bad_token"' -X POST -H "Content-Type: application/json" -A "$UA" -d '{"t":"e2eNoSuchPage_00000000"}' "$UNSUB"
+show "the 8.5 body {token} with the live page's t" 400 '"error":"bad_token"' -X POST -H "Content-Type: application/json" -A "$UA" -d "{\"token\":\"$OPT_A\"}" "$UNSUB"
+show "the 8.5 body {token} with the live page's page token" 400 '"error":"bad_token"' -X POST -H "Content-Type: application/json" -A "$UA" -d "{\"token\":\"$A\"}" "$UNSUB"
+show "an unknown t" 404 '"error":"gone"' -X POST -H "Content-Type: application/json" -A "$UA" -d '{"t":"e2eNoSuchOptout0000000"}' "$UNSUB"
+show "an audit page's t" 404 '"error":"gone"' -X POST -H "Content-Type: application/json" -A "$UA" -d "{\"t\":\"$OPT_AUDIT\"}" "$UNSUB"
+show "a link file naming another t" 404 '"error":"gone"' -X POST -H "Content-Type: application/json" -A "$UA" -d "{\"t\":\"$OPT_WRONG\"}" "$UNSUB"
+show "a link file naming itself as the page token" 404 '"error":"gone"' -X POST -H "Content-Type: application/json" -A "$UA" -d "{\"t\":\"$OPT_SELF\"}" "$UNSUB"
+# A page token is never accepted by the button's route (contract 8.6), whatever page it belongs to.
+for pair in "live voice page A:$A" "the expired voice page:$EXPIRED" "the /for/ page:$LINKED" "a voice page with no opt-out link:$LINKED_EXPIRED"; do
+  label="${pair%%:*}"; t="${pair#*:}"
+  show "the page token of $label as t" 404 '"error":"gone"' -X POST -H "Content-Type: application/json" -A "$UA" -d "{\"t\":\"$t\"}" "$UNSUB"
+done
+show "a page.json that cannot be read (the button says try again)" 503 '"error":"unavailable"' -X POST -H "Content-Type: application/json" -A "$UA" -d "{\"t\":\"$OPT_BROKEN\"}" "$UNSUB"
+show "a link file that cannot be read (the button says try again)" 503 '"error":"unavailable"' -X POST -H "Content-Type: application/json" -A "$UA" -d "{\"t\":\"$OPT_BADLINK\"}" "$UNSUB"
 show "GET is not allowed" 405 "" -A "$UA" "$UNSUB"
-expect "opt-outs written by the refusals" "$(ls "$BLOB/optouts" 2>/dev/null | wc -l | tr -d ' ')" 0
-show "a person presses on the live page" 200 '{"ok":true}' -X POST -H "Content-Type: application/json" -A "$UA" -d "{\"token\":\"$A\"}" "$UNSUB"
-CHECKS=$((CHECKS + 1)); grep -q -F "$A" "$WORK/body.txt" && miss "the unsubscribe answer echoes the token"
-expect "opt-out files for the live page after one press" "$(count "$BLOB/optouts/$A")" 1
+expect "opt-outs written by the refusals and the page tokens" "$(ls "$BLOB/optouts" 2>/dev/null | wc -l | tr -d ' ')" 0
+show "a person presses on the live page" 200 '{"ok":true}' -X POST -H "Content-Type: application/json" -A "$UA" -d "{\"t\":\"$OPT_A\"}" "$UNSUB"
+CHECKS=$((CHECKS + 1)); grep -q -F -e "$OPT_A" -e "$A" "$WORK/body.txt" && miss "the unsubscribe answer echoes t or names the page token"
+expect "opt-out files for the live page after one press (under its page token)" "$(count "$BLOB/optouts/$A")" 1
 expect "the opt-out's name is <iso>-<32 hex>.json" "$(ls "$BLOB/optouts/$A/" | grep -c -E '^[0-9]{8}T[0-9]{6}Z-[0-9a-f]{32}\.json$')" 1
-expect "the opt-out's keys" "$(node -e 'const fs=require("fs"),d=process.argv[1];const f=fs.readdirSync(d)[0];const j=JSON.parse(fs.readFileSync(d+"/"+f));console.log(Object.keys(j).sort().join(",")+" "+j.v+" "+j.ua+" "+(j.token===process.argv[2]))' "$BLOB/optouts/$A" "$A")" "at,token,ua,v 1 iphone true"
-show "the same person presses again" 200 '{"ok":true}' -X POST -H "Content-Type: application/json" -A "$UA" -d "{\"token\":\"$A\"}" "$UNSUB"
+expect "the opt-out's keys, and the page token it names" "$(node -e 'const fs=require("fs"),d=process.argv[1];const f=fs.readdirSync(d)[0];const j=JSON.parse(fs.readFileSync(d+"/"+f));console.log(Object.keys(j).sort().join(",")+" "+j.v+" "+j.ua+" "+(j.token===process.argv[2]))' "$BLOB/optouts/$A" "$A")" "at,token,ua,v 1 iphone true"
+show "the same person presses again" 200 '{"ok":true}' -X POST -H "Content-Type: application/json" -A "$UA" -d "{\"t\":\"$OPT_A\"}" "$UNSUB"
 expect "opt-out files for the live page after a second press" "$(count "$BLOB/optouts/$A")" 1
-show "a person presses on the expired page" 200 '{"ok":true}' -X POST -H "Content-Type: application/json" -A "$UA" -d "{\"token\":\"$EXPIRED\"}" "$UNSUB"
-expect "opt-out files for the expired page" "$(count "$BLOB/optouts/$EXPIRED")" 1
-expect "opt-out folders in all" "$(ls "$BLOB/optouts" | sort | tr '\n' ' ')" "$(printf '%s\n' "$A" "$EXPIRED" | sort | tr '\n' ' ')"
+show "a person presses on the expired page" 200 '{"ok":true}' -X POST -H "Content-Type: application/json" -A "$UA" -d "{\"t\":\"$OPT_EXPIRED\"}" "$UNSUB"
+expect "opt-out files for the expired page (under its page token)" "$(count "$BLOB/optouts/$EXPIRED")" 1
+expect "opt-out folders in all (page tokens only)" "$(ls "$BLOB/optouts" | sort | tr '\n' ' ')" "$(printf '%s\n' "$A" "$EXPIRED" | sort | tr '\n' ' ')"
+expect "optout-links/ files left as the pipeline wrote them (the site never writes there)" "$(ls "$BLOB/optout-links" | wc -l | tr -d ' ')" 9
 echo
 
 echo "== the pages that were there before, after all of it"
@@ -403,6 +451,19 @@ curl -s -A "$UA" "$BASE/a/$AUDIT" > "$WORK/audit-after.html"
 expect "the voice page /a/<A> renders as before" "$(page_line "$WORK/voice-after.html")" 'title="Your receptionist demo · Devize" maple:yes willow:no line:yes talk:yes caption:no unsubscribe-button:no done-line:no not-found:no audit-form:no vendor-name:no session-in-html:no'
 expect "the voice page /a/<A> beacon uses the default route (no opt-out route or key in its HTML)" "$(grep -c -e 'optout-view' -e 'devize_optout_view_' "$WORK/voice-after.html" | tr -d ' ')" 0
 expect "the audit page renders as before" "$(page_line "$WORK/audit-after.html")" 'title="Your audit · Devize" maple:no willow:no line:no talk:no caption:no unsubscribe-button:no done-line:no not-found:no audit-form:yes vendor-name:no session-in-html:no'
+# The opt-out token never reaches an /a/ or /for/ answer (contract 8.6), HTML or RSC payload, even for LINKED, whose
+# page.json carries its t under a stray key.
+curl -s -A "$UA" "$BASE/for/$LINK_SLUG" > "$WORK/for-after.html"
+curl -s -A "$UA" -H "RSC: 1" "$BASE/for/$LINK_SLUG" > "$WORK/for-after.rsc"
+curl -s -A "$UA" "$BASE/a/$LINKED" > "$WORK/for-a-after.html"
+curl -s -A "$UA" -H "RSC: 1" "$BASE/a/$LINKED" > "$WORK/for-a-after.rsc"
+curl -s -A "$UA" -H "RSC: 1" "$BASE/a/$A" > "$WORK/voice-after.rsc"
+curl -s -A "$UA" "$BASE/a/$EXPIRED" > "$WORK/expired-after.html"
+expect "/for/<slug>'s RSC payload is the page (it holds the business)" "$(grep -c -F 'Willow Bend Dental Studio' "$WORK/for-after.rsc" | tr -d ' ' | sed 's/^[1-9][0-9]*$/yes/;s/^0$/no/')" "yes"
+OPTS_RE="$(printf '%s|' "$OPT_A" "$OPT_EXPIRED" "$OPT_BROKEN" "$OPT_AUDIT" "$OPT_LINKED" "$OPT_NOPAGE" "$OPT_WRONG" "$OPT_BADLINK" | sed 's/|$//')"
+for f in for.html for-a.html for-after.html for-after.rsc for-a-after.html for-a-after.rsc voice.html voice-after.html voice-after.rsc expired-after.html for-404.html; do
+  expect "opt-out tokens in the /a/ or /for/ answer $f" "$(grep -c -E "$OPTS_RE" "$WORK/$f" | tr -d ' ')" 0
+done
 ROBOTS="$(curl -s "$BASE/robots.txt")"
 expect "robots.txt keeps /a/, /for/ and /u/ out" "$(echo "$ROBOTS" | grep -c -E '^Disallow: /(a|for|u)/$')" 3
 expect "the sitemap lists no prospect page" "$(curl -s "$BASE/sitemap.xml" | grep -c -E '/(a|for|u)/')" 0

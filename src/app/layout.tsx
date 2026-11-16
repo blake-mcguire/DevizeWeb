@@ -58,7 +58,8 @@ const GTM_ID = "GTM-KTFN9CLB";
 // the only key to the page, so it is not handed to analytics, and the page
 // stays light. The page's own view beacon measures visits there. The same goes,
 // since 2026-11-16, for /for/<slug> (a voice page's readable link, which leads
-// to the token) and /u/<token> (the voice email's opt-out page).
+// to the token) and /u/<t> (the voice email's opt-out page, keyed by its own
+// opt-out token).
 // The gtag() helper below matches Google's install snippet, so later code can
 // push events with gtag('event', ...) without a second bootstrap.
 const gtmScript = `(function(w,d,s,l,i){var p=w.location.pathname;if(p.indexOf('/a/')===0||p.indexOf('/for/')===0||p.indexOf('/u/')===0)return;w[l]=w[l]||[];w[l].push({'gtm.start':

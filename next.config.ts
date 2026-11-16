@@ -57,7 +57,8 @@ const nextConfig: NextConfig = {
     // The prospect pages: never indexed, and the token (or the readable link) in
     // the URL is not sent on as a referrer. /a/<token> is the audit or voice
     // page; since 2026-11-16 /for/<slug> is the voice page's readable link and
-    // /u/<token> the voice email's opt-out page, with the same two headers.
+    // /u/<t> the voice email's opt-out page (t its own opt-out token), with the
+    // same two headers.
     const prospect = [
       { key: "X-Robots-Tag", value: "noindex, nofollow" },
       { key: "Referrer-Policy", value: "no-referrer" },

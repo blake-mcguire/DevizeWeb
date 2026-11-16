@@ -5,7 +5,16 @@ import { validToken } from "@/lib/audit-validate";
 import { cleanFilename, downloadName } from "@/lib/download-name";
 import { chooseView } from "@/lib/prospect-view";
 import { allow, spent } from "@/lib/rate-limit";
-import { linkPath, linkToken, optoutAllowed, validSlug, type OptoutState } from "@/lib/voice-link";
+import {
+  linkPath,
+  linkToken,
+  optoutAllowed,
+  optoutLinkPath,
+  optoutLinkToken,
+  validOptoutToken,
+  validSlug,
+  type OptoutState,
+} from "@/lib/voice-link";
 import { pageKind, parseVoicePage, type VoicePage } from "@/lib/voice-page";
 
 /** One row of "who came up instead of you", exactly as the pipeline writes it. */
@@ -197,23 +206,57 @@ export async function loadPageForSlugFrom(slug: string, ip: string): Promise<Loa
 }
 
 /**
- * Whether a token may be opted out (/u/<token>, POST /api/unsubscribe):
- * "yes" when audits/<token>/page.json is a voice page of this token, expired
- * or not (voice-link.optoutAllowed); "no" for a malformed token, no page, or
- * a page of another kind; "error" when the store could not be read, so the
- * button can say "try again" instead of turning a real opt-out away. What the
- * page shows for each is voice-link.OPTOUT_PAGE_SHOWS.
+ * What an opt-out token t resolves to: the state (voice-link.OptoutState) and,
+ * only when it is "yes", the page token its optout-links file names.
  */
-export async function optoutPageState(token: string): Promise<OptoutState> {
-  if (!validToken(token)) return "no";
+export type OptoutResolution = { state: "yes"; token: string } | { state: "no" } | { state: "error" };
+
+const OPTOUT_NO: OptoutResolution = { state: "no" };
+const OPTOUT_ERROR: OptoutResolution = { state: "error" };
+
+/**
+ * The one resolver behind every opt-out entry point (contract 8.6): GET
+ * /u/<t>, POST /api/optout-view and POST /api/unsubscribe all call this and
+ * nothing else, so the three cannot drift.
+ *
+ * t must be 22 letters and digits (voice-link.validOptoutToken).
+ * optout-links/<t>.json must be {v: 1, optout_token: t, token: <a page token
+ * other than t>} (voice-link.optoutLinkToken). Then audits/<token>/page.json
+ * must be a voice page of that page token, EXPIRED OR NOT
+ * (voice-link.optoutAllowed). Every way that fails is "no", the plain 404. A
+ * page token sent as t has no optout-links file of its own (the pipeline
+ * makes the two apart, and a file that names its own t as the page token is
+ * refused), so it is "no" on all three. "error" when the store cannot read
+ * either file (or one cannot be parsed): the page still shows the button and
+ * the press says try again (voice-link.OPTOUT_PAGE_SHOWS).
+ *
+ * The page token comes back for the routes, which write under it. The /u/
+ * page only looks at the state, so the page token never reaches a browser.
+ */
+export async function resolveOptout(t: unknown): Promise<OptoutResolution> {
+  if (!validOptoutToken(t)) return OPTOUT_NO;
+  let link: unknown;
+  try {
+    link = await getJSON(optoutLinkPath(t));
+  } catch (err) {
+    console.error("[audit-page] opt-out link read failed", err instanceof Error ? err.message : err);
+    return OPTOUT_ERROR;
+  }
+  const token = optoutLinkToken(link, t);
+  if (!token) return OPTOUT_NO;
   let raw: unknown;
   try {
     raw = await getJSON(`audits/${token}/page.json`);
   } catch (err) {
     console.error("[audit-page] opt-out page read failed", err instanceof Error ? err.message : err);
-    return "error";
+    return OPTOUT_ERROR;
   }
-  return optoutAllowed(raw, token) ? "yes" : "no";
+  return optoutAllowed(raw, token) ? { state: "yes", token } : OPTOUT_NO;
+}
+
+/** resolveOptout's state alone, for the /u/ page: everything it needs to choose between the button and the 404. */
+export async function optoutState(t: unknown): Promise<OptoutState> {
+  return (await resolveOptout(t)).state;
 }
 
 /**

@@ -1,4 +1,5 @@
 import { timeoutSignal } from "@/app/a/[token]/voice-call";
+import { optoutBody } from "@/lib/voice-link";
 
 /**
  * The opt-out button's press (optout-button.tsx), kept apart from the
@@ -7,8 +8,9 @@ import { timeoutSignal } from "@/app/a/[token]/voice-call";
  * the browser is touched until the function is called (fixer, 2026-11-16,
  * after the review found nothing tested what the page itself sends).
  *
- * The request is the one POST /api/unsubscribe takes: JSON, {token}, nothing
- * else. The press is "done" only when the site answers ok with {ok: true};
+ * The request is the one POST /api/unsubscribe takes: JSON, {t}, nothing
+ * else, t being the opt-out token from the page's own address (contract 8.6;
+ * the route never takes a page token). The press is "done" only when the site answers ok with {ok: true};
  * every other answer, no answer, and a timeout are "failed", and the page
  * keeps the button.
  */
@@ -23,19 +25,19 @@ export type PressResult = "done" | "failed";
 /** How the press reaches the site: fetch in the browser, the route itself in a test. */
 export type Send = (url: string, init: RequestInit) => Promise<Response>;
 
-/** The press's request, as the route requires it: a JSON post of {token}. */
-export function unsubscribeInit(token: string): RequestInit {
+/** The press's request, as the route requires it: a JSON post of {t} (voice-link.optoutBody). */
+export function unsubscribeInit(t: string): RequestInit {
   return {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ token }),
+    body: optoutBody(t),
     cache: "no-store",
   };
 }
 
-export async function pressUnsubscribe(token: string, send: Send = (url, init) => fetch(url, init)): Promise<PressResult> {
+export async function pressUnsubscribe(t: string, send: Send = (url, init) => fetch(url, init)): Promise<PressResult> {
   try {
-    const res = await send(UNSUBSCRIBE_ENDPOINT, { ...unsubscribeInit(token), signal: timeoutSignal(PRESS_TIMEOUT_MS) });
+    const res = await send(UNSUBSCRIBE_ENDPOINT, { ...unsubscribeInit(t), signal: timeoutSignal(PRESS_TIMEOUT_MS) });
     const data = (await res.json().catch(() => ({}))) as { ok?: unknown } | null;
     return res.ok && data?.ok === true ? "done" : "failed";
   } catch {

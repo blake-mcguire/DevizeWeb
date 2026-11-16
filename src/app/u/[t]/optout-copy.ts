@@ -1,5 +1,5 @@
 /**
- * Every visible sentence on the opt-out page (/u/<token>), in one place, for
+ * Every visible sentence on the opt-out page (/u/<t>), in one place, for
  * Blake's review.
  *
  * Decided, word for word (voice build contract 8.5, 2026-11-16): the caption

@@ -4,7 +4,7 @@ import { SERVICE_PAGES } from "@/lib/services";
 
 const SITE_URL = "https://www.devize.ai";
 
-// Never list /a/<token>, /for/<slug> or /u/<token> here: those are private
+// Never list /a/<token>, /for/<slug> or /u/<t> here: those are private
 // prospect pages (noindex, and disallowed in robots.ts). This sitemap is an
 // explicit list, so they stay out.
 // The articles section was unpublished on 2026-10-15 (it described the old
