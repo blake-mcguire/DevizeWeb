@@ -5,16 +5,27 @@
  * What it is for: the pipeline writes one page.json per prospect ahead of the
  * email (voice build contract, section 5, 2026-11-15). It carries every call
  * variable that does not depend on the time, plus a seven-day table of the
- * business's open spans and the two spoken lines that do depend on it. At the
- * click the site works out the local weekday and minute in the business's own
- * timezone and fills the three clock keys from that table, so a link built on
- * a Monday and pressed on a Thursday still says the right day.
+ * business's open spans, each day's arrival windows and the two spoken lines
+ * that depend on the clock. At the click the site works out the local weekday
+ * and minute in the business's own timezone and fills the three clock keys
+ * from that table, so a link built on a Monday and pressed on a Thursday
+ * still says the right day.
  *
  * Who decided what: the page shape, the three clock keys and the pick rule
  * are the build contract's. The engineering defaults in this file (how strict
  * the reader is, an overnight span carrying into the next morning, how a
  * date-only expiry is read) were taken on 2026-11-15 with nobody to ask; each
  * is a named constant below.
+ *
+ * The day's windows (the same night's consistency pass): the pipeline's page
+ * writer (voice_pages.py, voice_slots.clock_days) stores each weekday's
+ * arrival windows as [start, end, words] beside the two pairs, and stores the
+ * same pair twice (the next open day), because one stored pair cannot know
+ * the minute of the click. So the windows are read first here: those of
+ * today that have not ended are offered as "today", and the stored pair
+ * speaks only when none is left. That is what the pipeline's own
+ * voice_slots.slots() says at every minute; a page written without the key
+ * is read by the pairs alone, as before.
  *
  * Pure functions: no server or browser APIs and no imports, so the page
  * loader, the route handlers and the node tests all share this file.
@@ -40,6 +51,8 @@ const VAR_NAME = /^[A-Za-z_][A-Za-z0-9_]{0,63}$/;
 
 /** A day has at most this many open spans (a lunch break makes two). */
 export const MAX_SPANS_PER_DAY = 6;
+/** What next_open_day says while a window of today has not ended (voice_slots.py says the same word). */
+export const TODAY_WORD = "today";
 const DAY_MINUTES = 1440;
 /** An overnight span may end past midnight, but never past the end of the next day. */
 const MAX_SPAN_END = 2 * DAY_MINUTES;
@@ -61,9 +74,14 @@ export const EXPIRY_DAY_TZ = "America/Chicago";
 
 export type DayPick = { next_open_day: string; appt_windows: string };
 
+/** One arrival window of a day: start and end in local minutes from midnight, and the words to say. */
+export type VoiceWindow = [number, number, string];
+
 export type VoiceDay = {
   /** Open spans in local minutes from midnight; [] when the listing says closed; null when unknown. */
   spans: Array<[number, number]> | null;
+  /** The day's arrival windows in the order of the day; [] on a closed or unknown day, or when the page has none. */
+  windows: VoiceWindow[];
   /** What to say while the day's last span has not ended. Null only on a day with no spans. */
   before_close: DayPick | null;
   /** What to say after the last span ends, and all day on a closed or unknown day. */
@@ -199,16 +217,49 @@ function readSpans(raw: unknown, where: string): Array<[number, number]> | null 
   return out;
 }
 
+/**
+ * A day's arrival windows: [start, end, words] entries inside the day (0 to
+ * 1440 minutes), with words to say. Absent or null is [] (a page written
+ * before the key existed). A window on a day with no open spans is a fault:
+ * "today" would be offered on a day the listing says is closed or does not
+ * give. Said together the words must fit one variable, which also bounds how
+ * many there can be. Every rule here is one the pipeline's own check
+ * (voice_pages.check_page) already holds a page to before it is uploaded.
+ */
+function readWindows(raw: unknown, spans: Array<[number, number]> | null, where: string): VoiceWindow[] {
+  if (raw === undefined || raw === null) return [];
+  need(Array.isArray(raw), `${where} must be a list of [start, end, words] entries, or []`);
+  const out: VoiceWindow[] = [];
+  for (const entry of raw as unknown[]) {
+    need(Array.isArray(entry) && entry.length === 3, `${where}: each window is a [start, end, words] entry`);
+    const [start, end, words] = entry as unknown[];
+    need(Number.isInteger(start) && Number.isInteger(end), `${where}: window minutes must be whole numbers`);
+    need(
+      (start as number) >= 0 && (end as number) > (start as number) && (end as number) <= DAY_MINUTES,
+      `${where}: a window must start at 0 or later, end after it starts and end by minute ${DAY_MINUTES}`,
+    );
+    need(isStr(words), `${where}: a window needs words to say`);
+    out.push([start as number, end as number, words.trim()]);
+  }
+  need(out.length === 0 || (spans !== null && spans.length > 0), `${where} offers a window on a day with no open spans`);
+  need(
+    out.map((w) => w[2]).join(", ").length <= MAX_VAR_CHARS,
+    `${where} said together is longer than ${MAX_VAR_CHARS} characters`,
+  );
+  return out;
+}
+
 function readDay(raw: unknown, where: string): VoiceDay {
   need(isObj(raw), `${where} must be an object`);
   need(raw.spans !== undefined, `${where}.spans is missing ([] for closed, null for unknown)`);
   const spans = readSpans(raw.spans, `${where}.spans`);
+  const windows = readWindows(raw.windows, spans, `${where}.windows`);
   const after = readPick(raw.after_close, `${where}.after_close`);
   // before_close can only be reached on a day with spans, so it is required only there.
   const given = raw.before_close !== undefined && raw.before_close !== null;
   const before = given ? readPick(raw.before_close, `${where}.before_close`) : null;
   need(!spans || spans.length === 0 || before, `${where}.before_close is missing on a day that has spans`);
-  return { spans, before_close: before, after_close: after };
+  return { spans, windows, before_close: before, after_close: after };
 }
 
 function readDays(raw: unknown): VoiceDay[] {
@@ -347,9 +398,13 @@ export function parseVoicePage(raw: unknown, token: string, now: Date): VoicePag
  * The three clock keys for one instant (contract section 5). Local time in
  * the page's timezone gives weekday w and minute m. after_hours is "no" when
  * a span of day w contains m (or, with OVERNIGHT_CARRIES_OVER, when the day
- * before ran past midnight and has not ended yet), else "yes". The two spoken
- * lines come from before_close while day w has spans and m is before the end
- * of its last one, else from after_close.
+ * before ran past midnight and has not ended yet), else "yes".
+ *
+ * The two spoken lines: the windows of day w that end after m are offered as
+ * "today", their words joined with ", " (what the pipeline's own
+ * voice_slots.slots() says at that minute). When none is left, or the page
+ * carries no windows, they come from before_close while day w has spans and
+ * m is before the end of its last one, else from after_close.
  */
 export function clockKeys(demo: VoiceDemo, now: Date): ClockKeys {
   const { weekday: w, minute: m } = localClock(demo.tz, now);
@@ -360,9 +415,14 @@ export function clockKeys(demo: VoiceDemo, now: Date): ClockKeys {
     const before = demo.days[(w + 6) % 7].spans ?? [];
     open = before.some(([start, end]) => end > DAY_MINUTES && start <= m + DAY_MINUTES && m + DAY_MINUTES < end);
   }
+  const after_hours = open ? "no" : "yes";
+  const left = (today.windows ?? []).filter(([, end]) => end > m);
+  if (left.length > 0) {
+    return { after_hours, next_open_day: TODAY_WORD, appt_windows: left.map(([, , words]) => words).join(", ") };
+  }
   const lastEnd = spans.reduce((latest, [, end]) => Math.max(latest, end), -1);
   const pick = spans.length > 0 && m < lastEnd && today.before_close ? today.before_close : today.after_close;
-  return { after_hours: open ? "no" : "yes", next_open_day: pick.next_open_day, appt_windows: pick.appt_windows };
+  return { after_hours, next_open_day: pick.next_open_day, appt_windows: pick.appt_windows };
 }
 
 /** Everything the session gets: the stored variables plus the three clock keys for this instant. */

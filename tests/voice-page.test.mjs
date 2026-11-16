@@ -6,7 +6,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { MAX_STATIC_VARS, checkVoicePage, pageKind, parseVoicePage, validTimeZone } from "../src/lib/voice-page.ts";
-import { auditPage, tok, voicePage } from "./fixtures.mjs";
+import { auditPage, pipelineWeekTable, tok, voicePage } from "./fixtures.mjs";
 
 const NOW = new Date("2026-11-16T16:00:00Z");
 const TOKEN = tok("page");
@@ -98,6 +98,66 @@ test("before_close is needed only on a day that has spans", () => {
     changed((r) => delete r.demo.days["0"].before_close),
     null,
   ); // Monday is open
+});
+
+test("a day's arrival windows: read when present, [] when absent, and never on a day with no open spans", () => {
+  const WINDOWS = [
+    [480, 660, "morning eight to eleven"],
+    [660, 780, "midday eleven to one"],
+    [780, 960, "afternoon one to four"],
+  ];
+  const asWritten = changed((r) => (r.demo.days = pipelineWeekTable()));
+  assert.ok(asWritten);
+  assert.deepEqual(asWritten.demo.days[0].windows, WINDOWS);
+  assert.deepEqual(asWritten.demo.days[5].windows, []);
+  // A page written before the key existed, and one that says null, have no windows.
+  assert.deepEqual(parseVoicePage(voicePage(TOKEN), TOKEN, NOW)?.demo.days[0].windows, []);
+  assert.deepEqual(changed((r) => (r.demo.days["0"].windows = null))?.demo.days[0].windows, []);
+  // Words are trimmed, as every other spoken string is.
+  assert.deepEqual(changed((r) => (r.demo.days["0"].windows = [[480, 660, " morning "]]))?.demo.days[0].windows, [[480, 660, "morning"]]);
+  const faults = {
+    "windows is a string": "morning",
+    "windows is an object": { 0: [480, 660, "morning"] },
+    "a window of two": [[480, 660]],
+    "a window of four": [[480, 660, "morning", "x"]],
+    "a window that starts before midnight": [[-60, 660, "morning"]],
+    "a window that ends after midnight": [[1380, 1500, "evening"]],
+    "a window that ends before it starts": [[660, 480, "morning"]],
+    "a window of no length": [[480, 480, "morning"]],
+    "a window with half a minute": [[480.5, 660, "morning"]],
+    "a window with minutes in text": [["480", "660", "morning"]],
+    "a window with blank words": [[480, 660, "  "]],
+    "a window whose words are a number": [[480, 660, 7]],
+    "windows that said together are too long": [
+      [480, 660, "a".repeat(600)],
+      [660, 780, "b".repeat(600)],
+    ],
+  };
+  for (const [name, windows] of Object.entries(faults)) {
+    assert.equal(
+      changed((r) => (r.demo.days["0"].windows = windows)),
+      null,
+      name,
+    );
+  }
+  // Sunday is closed and an unknown day has no hours to stand on: a window there would offer "today" falsely.
+  assert.equal(
+    changed((r) => (r.demo.days["6"].windows = [[480, 660, "morning"]])),
+    null,
+  );
+  assert.equal(
+    changed((r) => (r.demo.days["3"] = { spans: null, windows: [[480, 660, "morning"]], after_close: r.demo.days["3"].after_close })),
+    null,
+  );
+  const fault = (windows, day = "0") => {
+    const raw = voicePage(TOKEN);
+    raw.demo.days[day].windows = windows;
+    const checked = checkVoicePage(raw, TOKEN, NOW);
+    return checked.ok ? null : checked.fault;
+  };
+  assert.equal(fault("morning"), "demo.days.0.windows must be a list of [start, end, words] entries, or []");
+  assert.equal(fault([[480, 1500, "all day"]]), "demo.days.0.windows: a window must start at 0 or later, end after it starts and end by minute 1440");
+  assert.equal(fault([[480, 660, "morning"]], "6"), "demo.days.6.windows offers a window on a day with no open spans");
 });
 
 test("bad pages are refused, one fault at a time", () => {

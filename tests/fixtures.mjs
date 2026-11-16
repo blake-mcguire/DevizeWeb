@@ -19,6 +19,36 @@ export function weekTable() {
   return days;
 }
 
+/** The three arrival windows the pipeline cuts from an eight to five day, as words. */
+export const FULL_DAY_WINDOWS = "morning eight to eleven, midday eleven to one, afternoon one to four";
+
+/**
+ * A week as the pipeline's page writer stores it (voice_slots.clock_days): Monday to Friday 8 AM to 5 PM,
+ * Saturday and Sunday closed. Each open day carries its own arrival windows as [start, end, words]; both
+ * stored pairs of a day are the same pair, the next open day after it. Index 0 is Monday.
+ */
+export function pipelineWeekTable() {
+  const next = ["tomorrow, Tuesday", "tomorrow, Wednesday", "tomorrow, Thursday", "tomorrow, Friday", "Monday", "Monday", "tomorrow, Monday"];
+  const days = {};
+  for (let d = 0; d < 7; d++) {
+    const open = d < 5;
+    const later = { next_open_day: next[d], appt_windows: FULL_DAY_WINDOWS };
+    days[String(d)] = {
+      spans: open ? [[480, 1020]] : [],
+      windows: open
+        ? [
+            [480, 660, "morning eight to eleven"],
+            [660, 780, "midday eleven to one"],
+            [780, 960, "afternoon one to four"],
+          ]
+        : [],
+      before_close: { ...later },
+      after_close: { ...later },
+    };
+  }
+  return days;
+}
+
 /** A voice page as the build contract (section 5) writes it. */
 export function voicePage(token, over = {}) {
   const business = over.business ?? "Maple Creek Family Dental";

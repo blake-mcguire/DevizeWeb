@@ -6,7 +6,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { clockKeys, localClock, parseVoicePage, sessionVariables, voiceExpired } from "../src/lib/voice-page.ts";
-import { tok, voicePage, weekTable } from "./fixtures.mjs";
+import { FULL_DAY_WINDOWS, pipelineWeekTable, tok, voicePage, weekTable } from "./fixtures.mjs";
 
 const demo = (tz, days = weekTable()) => ({ vars: {}, tz, days });
 const at = (iso) => new Date(iso);
@@ -147,6 +147,75 @@ test("a timezone with no daylight saving (Phoenix) keeps one offset all year", (
   assert.equal(clockKeys(phoenix, at("2026-07-06T14:59:00Z")).after_hours, "yes");
   assert.equal(clockKeys(phoenix, at("2026-12-07T15:00:00Z")).after_hours, "no");
   assert.equal(clockKeys(phoenix, at("2026-12-07T14:59:00Z")).after_hours, "yes");
+});
+
+test("the day's windows are read first: today is offered while one of them has not ended", () => {
+  // The week as the pipeline stores it: both pairs of a day say the next open day, the windows are data.
+  const chicago = demo("America/Chicago", pipelineWeekTable());
+  const said = (iso) => clockKeys(chicago, at(iso));
+  // Monday 2026-11-16, CST (UTC-6). Open 8:00 to 17:00; windows 8 to 11, 11 to 1, 1 to 4.
+  assert.deepEqual(said("2026-11-16T13:00:00Z"), { after_hours: "yes", next_open_day: "today", appt_windows: FULL_DAY_WINDOWS }); // 7:00
+  assert.deepEqual(said("2026-11-16T16:00:00Z"), { after_hours: "no", next_open_day: "today", appt_windows: FULL_DAY_WINDOWS }); // 10:00
+  // 10:59 is still inside the morning window; at 11:00 it has ended and is no longer offered.
+  assert.equal(said("2026-11-16T16:59:00Z").appt_windows, FULL_DAY_WINDOWS);
+  assert.deepEqual(said("2026-11-16T17:00:00Z"), {
+    after_hours: "no",
+    next_open_day: "today",
+    appt_windows: "midday eleven to one, afternoon one to four",
+  });
+  assert.deepEqual(said("2026-11-16T21:59:00Z"), { after_hours: "no", next_open_day: "today", appt_windows: "afternoon one to four" }); // 15:59
+  // 16:00: still open for an hour, but every window is over, so the offer is the next open day.
+  assert.deepEqual(said("2026-11-16T22:00:00Z"), { after_hours: "no", next_open_day: "tomorrow, Tuesday", appt_windows: FULL_DAY_WINDOWS });
+  assert.deepEqual(said("2026-11-16T23:00:00Z"), { after_hours: "yes", next_open_day: "tomorrow, Tuesday", appt_windows: FULL_DAY_WINDOWS }); // 17:00
+  // Friday afternoon after the last window, and the closed weekend: Monday, never today.
+  assert.deepEqual(said("2026-11-20T22:30:00Z"), { after_hours: "no", next_open_day: "Monday", appt_windows: FULL_DAY_WINDOWS });
+  assert.deepEqual(said("2026-11-21T18:00:00Z"), { after_hours: "yes", next_open_day: "Monday", appt_windows: FULL_DAY_WINDOWS }); // Saturday noon
+  assert.deepEqual(said("2026-11-22T18:00:00Z"), { after_hours: "yes", next_open_day: "tomorrow, Monday", appt_windows: FULL_DAY_WINDOWS }); // Sunday noon
+});
+
+test("a lunch break: a window after the break is still today while the business is closed for lunch", () => {
+  const days = pipelineWeekTable();
+  days["0"].spans = [
+    [480, 720],
+    [780, 1020],
+  ];
+  days["0"].windows = [
+    [480, 660, "morning eight to eleven"],
+    [660, 720, "midday eleven to twelve"],
+    [780, 960, "afternoon one to four"],
+  ];
+  const chicago = demo("America/Chicago", days);
+  assert.deepEqual(clockKeys(chicago, at("2026-11-16T18:30:00Z")), {
+    after_hours: "yes",
+    next_open_day: "today",
+    appt_windows: "afternoon one to four",
+  }); // 12:30, at lunch
+});
+
+test("a page with no windows is read by the stored pairs alone, as before the key existed", () => {
+  const chicago = demo("America/Chicago"); // weekTable() carries no windows key at all
+  assert.deepEqual(clockKeys(chicago, at("2026-11-16T16:00:00Z")), keys("d0-before", "no"));
+  const empty = weekTable();
+  for (const day of Object.values(empty)) day.windows = [];
+  assert.deepEqual(clockKeys(demo("America/Chicago", empty), at("2026-11-16T16:00:00Z")), keys("d0-before", "no"));
+});
+
+test("session variables from a page as the pipeline writes it: today and its windows at a morning press", () => {
+  const token = tok("today");
+  const raw = voicePage(token);
+  raw.demo.days = pipelineWeekTable();
+  const page = parseVoicePage(raw, token, at("2026-11-16T16:00:00Z"));
+  assert.ok(page);
+  assert.deepEqual(page.demo.days[0].windows, [
+    [480, 660, "morning eight to eleven"],
+    [660, 780, "midday eleven to one"],
+    [780, 960, "afternoon one to four"],
+  ]);
+  const vars = sessionVariables(page, at("2026-11-16T18:00:00Z")); // Monday 12:00
+  assert.equal(vars.after_hours, "no");
+  assert.equal(vars.next_open_day, "today");
+  assert.equal(vars.appt_windows, "midday eleven to one, afternoon one to four");
+  assert.ok(Object.keys(vars).length <= 50);
 });
 
 test("session variables: the stored ones plus the three clock keys, clock keys win", () => {
