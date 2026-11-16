@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { cache } from "react";
 import VoiceView, { voiceMetadata } from "@/app/a/[token]/voice-view";
-import { loadPageForSlug } from "@/lib/audit-page";
+import { loadPageForSlugFrom } from "@/lib/audit-page";
 import { chooseView } from "@/lib/prospect-view";
+import { clientIp } from "@/lib/rate-limit";
 
 /**
  * /for/<slug>: the readable demo link the cold email carries (voice build
@@ -21,25 +23,30 @@ import { chooseView } from "@/lib/prospect-view";
  *
  * A malformed or unknown slug, a link file that is not right, and a page that
  * is missing, expired, broken or not a voice page all get the same 404 as /a/.
+ * So does every /for/ request from an address that has missed too often
+ * (audit-page.FOR_MISS_LIMIT), without a store read.
  */
 
 type Props = { params: Promise<{ slug: string }> };
 
-// One read of the link and the page per request, shared by the tab title and the page.
-const getPage = cache(loadPageForSlug);
+// One read of the link and the page per request, shared by the tab title and the page (so a miss counts once).
+const getPage = cache(loadPageForSlugFrom);
+
+async function viewFor(params: Props["params"]) {
+  const { slug } = await params;
+  return chooseView(await getPage(slug, clientIp(await headers())), "for");
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   await connection();
-  const { slug } = await params;
-  const view = chooseView(await getPage(slug), "for");
+  const view = await viewFor(params);
   return view.kind === "voice" ? voiceMetadata : {};
 }
 
 export default async function ReadableLinkPage({ params }: Props) {
   // Read at the visit, never at build time: the link and the page's expiry are the store's, not the build's.
   await connection();
-  const { slug } = await params;
-  const view = chooseView(await getPage(slug), "for");
+  const view = await viewFor(params);
   if (view.kind !== "voice") notFound();
   return <VoiceView page={view.page} />;
 }

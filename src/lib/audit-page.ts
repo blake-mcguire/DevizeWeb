@@ -3,7 +3,9 @@ import "server-only";
 import { blobUrl, getJSON, pathnameOfUrl, stat } from "@/lib/blob-store";
 import { validToken } from "@/lib/audit-validate";
 import { cleanFilename, downloadName } from "@/lib/download-name";
-import { linkPath, linkToken, optoutAllowed, validSlug } from "@/lib/voice-link";
+import { chooseView } from "@/lib/prospect-view";
+import { allow, spent } from "@/lib/rate-limit";
+import { linkPath, linkToken, optoutAllowed, validSlug, type OptoutState } from "@/lib/voice-link";
 import { pageKind, parseVoicePage, type VoicePage } from "@/lib/voice-page";
 
 /** One row of "who came up instead of you", exactly as the pipeline writes it. */
@@ -171,13 +173,38 @@ export async function loadPageForSlug(slug: string): Promise<LoadedPage | null> 
 }
 
 /**
+ * /for/ misses one address may make in FOR_MISS_WINDOW_MS before every /for/
+ * answer to that address is the plain 404, given without reading the store
+ * (engineering default, fixer, 2026-11-16, after the review). A slug is made
+ * from a public business name, so without it a script could try name after
+ * name, learn from each 200 which businesses are being emailed, and cost a
+ * Blob read a try. A link that leads to a page is a hit and never counts, so
+ * a prospect opening their own link again and again is never turned away. In
+ * memory, per server instance (rate-limit.ts): it slows one address trying
+ * names; it does not stop many addresses or one targeted guess (the readable
+ * link's trade-off, which is Blake's to decide).
+ */
+export const FOR_MISS_LIMIT = 20;
+export const FOR_MISS_WINDOW_MS = 10 * 60 * 1000;
+
+/** loadPageForSlug for one caller's address (rate-limit.clientIp), under the /for/ miss limit above. */
+export async function loadPageForSlugFrom(slug: string, ip: string): Promise<LoadedPage | null> {
+  const key = `for-miss|${ip}`;
+  if (spent(key, FOR_MISS_LIMIT, FOR_MISS_WINDOW_MS)) return null;
+  const loaded = await loadPageForSlug(slug);
+  if (chooseView(loaded, "for").kind === "missing") allow(key, FOR_MISS_LIMIT, FOR_MISS_WINDOW_MS);
+  return loaded;
+}
+
+/**
  * Whether a token may be opted out (/u/<token>, POST /api/unsubscribe):
  * "yes" when audits/<token>/page.json is a voice page of this token, expired
  * or not (voice-link.optoutAllowed); "no" for a malformed token, no page, or
  * a page of another kind; "error" when the store could not be read, so the
- * button can say "try again" instead of turning a real opt-out away.
+ * button can say "try again" instead of turning a real opt-out away. What the
+ * page shows for each is voice-link.OPTOUT_PAGE_SHOWS.
  */
-export async function optoutPageState(token: string): Promise<"yes" | "no" | "error"> {
+export async function optoutPageState(token: string): Promise<OptoutState> {
   if (!validToken(token)) return "no";
   let raw: unknown;
   try {

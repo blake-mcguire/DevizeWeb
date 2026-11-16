@@ -1,7 +1,9 @@
 #!/bin/bash
 # End-to-end run of the voice demo routes on this machine only. Usage: bash tests/e2e/run.sh prod | dev
 # Since 2026-11-16 it also covers the readable link /for/<slug>, the opt-out page /u/<token>, its beacon
-# (POST /api/optout-view) and its button (POST /api/unsubscribe), with links/ files seeded by seed.mjs.
+# (POST /api/optout-view) and its button (POST /api/unsubscribe), with links/ files seeded by seed.mjs. After the
+# review (2026-11-16): the /for/ miss limit, /u/ on a page.json that cannot be read, the beacon's route and key in the
+# /u/ HTML, and (prod) the built chunks that send the press and hold the view beacon's default route.
 #
 #   prod  the BUILT site (run `npm run build` first), started with `next start`. A production build never
 #         uses the blob mock directory, so the real @vercel/blob SDK runs against fake-blob.mjs, a local
@@ -304,6 +306,23 @@ expect "the vendor was asked once, for the page token" "$(vendor_log "l.slice($V
 expect "one demo marker for the linked page" "$(count "$BLOB/demos/$LINKED")" 1
 show "view beacon from the /for/ page" 204 "" -X POST -H "Content-Type: application/json" -A "$UA" -d "{\"token\":\"$LINKED\"}" "$BASE/api/audit-view"
 expect "views/ for the linked page (under its token)" "$(ls "$BLOB/views" | grep -c -E -- "-$LINKED\.json$")" 1
+expect "the /for/ page's beacon uses the default route (no opt-out route or key in its HTML)" "$(grep -c -e 'optout-view' -e 'devize_optout_view_' "$WORK/for.html" | tr -d ' ')" 0
+# The miss limit (audit-page.FOR_MISS_LIMIT, review 2026-11-16): one address trying names gets the 404 for every /for/
+# link once it has missed 20 times, without a store read; a real link never counts. Its own addresses, so nothing above
+# or below shares the count.
+GUESSER="10.20.30.40"
+MISSES=""
+for i in $(seq 1 20); do MISSES="$MISSES$(curl -s -o /dev/null -w "%{http_code} " -A "$UA" -H "X-Forwarded-For: $GUESSER" "$BASE/for/guess-dental-$i")"; done
+expect "20 guesses at /for/ from one address" "$(echo $MISSES | tr ' ' '\n' | sort | uniq -c | tr -s ' ' | sed 's/^ //')" "20 404"
+[ "$MODE" = "prod" ] && GETS_BEFORE=$(curl -s "http://127.0.0.1:$BLOBPORT/__log" | node -e 'let s="";process.stdin.on("data",c=>s+=c).on("end",()=>console.log(JSON.parse(s).get))')
+code "GET /for/<real link> from that address, after 20 misses" 404 -A "$UA" -H "X-Forwarded-For: $GUESSER" "$BASE/for/$LINK_SLUG"
+if [ "$MODE" = "prod" ]; then
+  expect "store reads for that answer" "$(curl -s "http://127.0.0.1:$BLOBPORT/__log" | node -e 'let s="";process.stdin.on("data",c=>s+=c).on("end",()=>console.log(JSON.parse(s).get-Number(process.argv[1])))' "$GETS_BEFORE")" 0
+fi
+code "GET /for/<real link> from another address" 200 -A "$UA" -H "X-Forwarded-For: 10.20.30.41" "$BASE/for/$LINK_SLUG"
+HITS=""
+for i in $(seq 1 25); do HITS="$HITS$(curl -s -o /dev/null -w "%{http_code} " -A "$UA" -H "X-Forwarded-For: 10.20.30.42" "$BASE/for/$LINK_SLUG")"; done
+expect "25 opens of a real link from one address (hits never count)" "$(echo $HITS | tr ' ' '\n' | sort | uniq -c | tr -s ' ' | sed 's/^ //')" "25 200"
 echo
 
 echo "== the opt-out page: GET /u/<token>"
@@ -320,6 +339,14 @@ expect "the Devize logo on /u/<live>" "$(grep -c -F 'aria-label="Devize"' "$WORK
 expect "/u/<token> X-Robots-Tag" "$(header_of X-Robots-Tag "$BASE/u/$A")" "noindex, nofollow"
 expect "/u/<token> Referrer-Policy" "$(header_of Referrer-Policy "$BASE/u/$A")" "no-referrer"
 CHECKS=$((CHECKS + 1)); grep -q -F 'noindex' "$WORK/u-live.html" || miss "/u/<token> has no robots noindex meta tag"
+# The page's own visit beacon is on the page, pointed at its own route and key (a deleted or default beacon fails here).
+expect "/u/<live> hands its beacon /api/optout-view" "$(grep -c -F '/api/optout-view' "$WORK/u-live.html" | tr -d ' ' | sed 's/^[1-9][0-9]*$/yes/;s/^0$/no/')" "yes"
+expect "/u/<live> hands its beacon the devize_optout_view_ key" "$(grep -c -F 'devize_optout_view_' "$WORK/u-live.html" | tr -d ' ' | sed 's/^[1-9][0-9]*$/yes/;s/^0$/no/')" "yes"
+# A store that cannot be read (this page.json is not JSON) still shows the button; the press then says try again.
+code "GET /u/<a page.json that cannot be read>" 200 -A "$UA" "$BASE/u/$BROKEN"
+curl -s -A "$UA" "$BASE/u/$BROKEN" > "$WORK/u-broken.html"
+echo "   /u/<unreadable> $(page_line "$WORK/u-broken.html")"
+expect "/u/<unreadable> shows the caption and the one button" "$(page_line "$WORK/u-broken.html")" "$OPTOUT_LINE"
 code "GET /u/<unknown>" 404 -A "$UA" "$BASE/u/e2eNoSuchPage_00000000"
 code "GET /u/<an audit page>" 404 -A "$UA" "$BASE/u/$AUDIT"
 code "GET /u/<malformed>" 404 -A "$UA" "$BASE/u/abc"
@@ -335,6 +362,7 @@ show "beacon, a machine (curl's own UA)" 204 "" -X POST -H "Content-Type: applic
 show "beacon, a mail scanner" 204 "" -X POST -H "Content-Type: application/json" -A "Mozilla/5.0 (compatible; Proofpoint Essentials)" -d "{\"token\":\"$EXPIRED\"}" "$BASE/api/optout-view"
 show "beacon, an unknown token" 204 "" -X POST -H "Content-Type: application/json" -A "$UA" -d '{"token":"e2eNoSuchPage_00000000"}' "$BASE/api/optout-view"
 show "beacon, an audit page" 204 "" -X POST -H "Content-Type: application/json" -A "$UA" -d "{\"token\":\"$AUDIT\"}" "$BASE/api/optout-view"
+show "beacon, a page.json that cannot be read" 204 "" -X POST -H "Content-Type: application/json" -A "$UA" -d "{\"token\":\"$BROKEN\"}" "$BASE/api/optout-view"
 echo "optout-views/: $(cd "$BLOB" && find optout-views -type f 2>/dev/null | tr '\n' ' ')"
 expect "optout-views/ folders (only the person's visit)" "$(ls "$BLOB/optout-views" 2>/dev/null | tr '\n' ' ')" "$A "
 expect "optout-views/<live> names are <iso>-<32 hex>.json" "$(ls "$BLOB/optout-views/$A/" | grep -c -E '^[0-9]{8}T[0-9]{6}Z-[0-9a-f]{32}\.json$')" 1
@@ -353,6 +381,7 @@ show "not JSON content type" 400 '"error":"bad_request"' -X POST -A "$UA" -d "to
 show "a malformed token" 400 '"error":"bad_token"' -X POST -H "Content-Type: application/json" -A "$UA" -d '{"token":"../../etc/passwd"}' "$UNSUB"
 show "an unknown token" 404 '"error":"gone"' -X POST -H "Content-Type: application/json" -A "$UA" -d '{"token":"e2eNoSuchPage_00000000"}' "$UNSUB"
 show "an audit page" 404 '"error":"gone"' -X POST -H "Content-Type: application/json" -A "$UA" -d "{\"token\":\"$AUDIT\"}" "$UNSUB"
+show "a page.json that cannot be read (the button says try again)" 503 '"error":"unavailable"' -X POST -H "Content-Type: application/json" -A "$UA" -d "{\"token\":\"$BROKEN\"}" "$UNSUB"
 show "GET is not allowed" 405 "" -A "$UA" "$UNSUB"
 expect "opt-outs written by the refusals" "$(ls "$BLOB/optouts" 2>/dev/null | wc -l | tr -d ' ')" 0
 show "a person presses on the live page" 200 '{"ok":true}' -X POST -H "Content-Type: application/json" -A "$UA" -d "{\"token\":\"$A\"}" "$UNSUB"
@@ -372,6 +401,7 @@ code "GET /a/<voice A> (unchanged by its opt-out; the pipeline stops the emails,
 curl -s -A "$UA" "$BASE/a/$A" > "$WORK/voice-after.html"
 curl -s -A "$UA" "$BASE/a/$AUDIT" > "$WORK/audit-after.html"
 expect "the voice page /a/<A> renders as before" "$(page_line "$WORK/voice-after.html")" 'title="Your receptionist demo · Devize" maple:yes willow:no line:yes talk:yes caption:no unsubscribe-button:no done-line:no not-found:no audit-form:no vendor-name:no session-in-html:no'
+expect "the voice page /a/<A> beacon uses the default route (no opt-out route or key in its HTML)" "$(grep -c -e 'optout-view' -e 'devize_optout_view_' "$WORK/voice-after.html" | tr -d ' ')" 0
 expect "the audit page renders as before" "$(page_line "$WORK/audit-after.html")" 'title="Your audit · Devize" maple:no willow:no line:no talk:no caption:no unsubscribe-button:no done-line:no not-found:no audit-form:yes vendor-name:no session-in-html:no'
 ROBOTS="$(curl -s "$BASE/robots.txt")"
 expect "robots.txt keeps /a/, /for/ and /u/ out" "$(echo "$ROBOTS" | grep -c -E '^Disallow: /(a|for|u)/$')" 3
@@ -398,6 +428,18 @@ if [ "$MODE" = "prod" ]; then
   expect "an SDK chunk exists in the build" "$([ -s "$WORK/sdk-chunks.txt" ] && echo yes || echo no)" yes
   expect "times the SDK chunk is named in the page's HTML (it loads only after the press)" "$SDK_NAMED" 0
   echo "   script files the page does load at open: $(grep -o '/_next/static/chunks/[^"\\]*\.js' "$WORK/voice.html" | sort -u | wc -l | tr -d ' ')"
+  # What the opt-out page and the view beacon run in the browser, read off the built chunks (review, 2026-11-16).
+  grep -rlF "/api/unsubscribe" "$WEB/.next/static" > "$WORK/press-chunks.txt"
+  expect "built client chunks that send the press" "$(wc -l < "$WORK/press-chunks.txt" | tr -d ' ')" 1
+  PRESS_CHUNK="$(head -1 "$WORK/press-chunks.txt")"
+  for want in "application/json" "Not interested in how AI can help your business? Unsubscribe here:" "You're unsubscribed. You won't get any more emails from us."; do
+    CHECKS=$((CHECKS + 1)); [ -n "$PRESS_CHUNK" ] && grep -q -F -- "$want" "$PRESS_CHUNK" || miss "the press's chunk does not hold: $want"
+  done
+  grep -rlF "devize_view_" "$WEB/.next/static" > "$WORK/beacon-chunks.txt"
+  expect "built client chunks that hold the view beacon" "$([ -s "$WORK/beacon-chunks.txt" ] && echo yes || echo no)" yes
+  while IFS= read -r chunk; do
+    CHECKS=$((CHECKS + 1)); grep -q -F '"/api/audit-view"' "$chunk" || miss "the view beacon's chunk $(basename "$chunk") does not default to /api/audit-view"
+  done < "$WORK/beacon-chunks.txt"
   echo "client bundles (.next/static) that name the vendor: $(grep -rIli "autocalls" "$WEB/.next/static" | wc -l | tr -d ' ')"
   expect "client bundles that name the vendor" "$(grep -rIli "autocalls" "$WEB/.next/static" | wc -l | tr -d ' ')" 0
   echo "client bundles that hold a key name, the vendor's API path or the test key: $(grep -rIl -e "AUTOCALLS_" -e "api/user/realtime" -e "$KEY" "$WEB/.next/static" | wc -l | tr -d ' ')"

@@ -80,6 +80,26 @@ export function optoutAllowed(raw: unknown, token: string): boolean {
   return isObj(raw) && raw.kind === "voice" && typeof raw.token === "string" && raw.token === token;
 }
 
+/**
+ * What audit-page.optoutPageState answers for a token: "yes" (a voice page of
+ * this token, expired or not), "no" (a malformed token, no page, or a page of
+ * another kind), "error" (the store could not be read, or page.json could not
+ * be parsed).
+ */
+export type OptoutState = "yes" | "no" | "error";
+
+/**
+ * Whether GET /u/<token> shows the caption and the button for each answer.
+ * Only "no" is the /a/ 404. "error" shows the button too (fixer, 2026-11-16,
+ * after the review): a real recipient who opens the link while the store
+ * cannot be read would otherwise be told the page is gone and lose the
+ * opt-out. The press asks the store again: it answers 503 and the button says
+ * try again, or it goes through once the store is back. Nothing leaks: a
+ * store fault is not something a visitor can cause, and POST /api/unsubscribe
+ * still decides 404 against ok on its own read.
+ */
+export const OPTOUT_PAGE_SHOWS: Readonly<Record<OptoutState, boolean>> = { yes: true, error: true, no: false };
+
 /** UTC in basic ISO 8601 to the second (20261116T031500Z), the form every other event name uses. */
 function isoCompact(d: Date): string {
   return d.toISOString().replace(/\.\d{3}Z$/, "Z").replace(/[-:]/g, "");

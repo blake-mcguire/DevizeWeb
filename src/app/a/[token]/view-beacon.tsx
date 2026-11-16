@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { VIEW_ENDPOINT, VIEW_KEY, viewBeaconBody } from "./view-beacon-target";
 
 /**
  * One POST /api/audit-view per browser session, sent once the page is
@@ -9,12 +10,13 @@ import { useEffect } from "react";
  *
  * The opt-out page (/u/<token>, 2026-11-16) reports its own visits the same
  * way to its own route: `endpoint` and `storageKey` say where, and both
- * default to exactly what the audit and voice pages have always used.
+ * default to exactly what the audit and voice pages have always used
+ * (view-beacon-target.ts, which the node tests pin).
  */
 export default function ViewBeacon({
   token,
-  endpoint = "/api/audit-view",
-  storageKey = "devize_view_",
+  endpoint = VIEW_ENDPOINT,
+  storageKey = VIEW_KEY,
 }: {
   token: string;
   endpoint?: string;
@@ -32,7 +34,7 @@ export default function ViewBeacon({
       try {
         sessionStorage.setItem(key, "1");
       } catch {}
-      const body = JSON.stringify({ token });
+      const body = viewBeaconBody(token);
       const sent =
         typeof navigator.sendBeacon === "function" &&
         navigator.sendBeacon(endpoint, new Blob([body], { type: "application/json" }));

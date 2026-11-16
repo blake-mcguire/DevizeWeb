@@ -30,6 +30,10 @@ for (const [name, doc] of Object.entries(pages)) {
   await put(`audits/${doc.token}/page.json`, doc);
   out[name] = doc.token;
 }
+// A token whose page.json cannot be parsed: the store "error" state, where /u/ still shows the button (review, 2026-11-16).
+out.BROKEN = tok("e2eBroken");
+await mkdir(path.join(dir, "audits", out.BROKEN), { recursive: true });
+await writeFile(path.join(dir, "audits", out.BROKEN, "page.json"), "{not json");
 // Page E has used all six of its calls on earlier days.
 for (let i = 0; i < 6; i++) {
   await put(`demos/${out.E}/2026010${i + 1}T180000Z-${"e".repeat(31)}${i}.json`, { v: 1, token: out.E });

@@ -4,7 +4,7 @@ import { connection } from "next/server";
 import { cache } from "react";
 import ViewBeacon from "@/app/a/[token]/view-beacon";
 import { optoutPageState } from "@/lib/audit-page";
-import { OPTOUT_VIEW_ENDPOINT, OPTOUT_VIEW_KEY } from "@/lib/voice-link";
+import { OPTOUT_PAGE_SHOWS, OPTOUT_VIEW_ENDPOINT, OPTOUT_VIEW_KEY } from "@/lib/voice-link";
 import OptOutButton from "./optout-button";
 import { optoutCopy } from "./optout-copy";
 
@@ -20,8 +20,10 @@ import { optoutCopy } from "./optout-copy";
  * (POST /api/unsubscribe). The visit is recorded by the same once-per-session
  * beacon the demo page uses, sent to /api/optout-view, which skips machines.
  *
- * A missing, malformed or non-voice token, or a store that cannot be read,
- * gets the same 404 as /a/. Nothing here names the voice vendor or the
+ * A missing, malformed or non-voice token gets the same 404 as /a/. A store
+ * that cannot be read shows the button all the same (voice-link
+ * OPTOUT_PAGE_SHOWS): the press then says try again, so a real recipient is
+ * never told the page is gone. Nothing here names the voice vendor or the
  * business: a forwarded link shows only the caption and the button.
  */
 
@@ -33,14 +35,14 @@ const getState = cache(optoutPageState);
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   await connection();
   const { token } = await params;
-  return (await getState(token)) === "yes" ? { title: { absolute: `${optoutCopy.pageTitle} · Devize` } } : {};
+  return OPTOUT_PAGE_SHOWS[await getState(token)] ? { title: { absolute: `${optoutCopy.pageTitle} · Devize` } } : {};
 }
 
 export default async function OptOutPage({ params }: Props) {
   // Read at the visit, never at build time.
   await connection();
   const { token } = await params;
-  if ((await getState(token)) !== "yes") notFound();
+  if (!OPTOUT_PAGE_SHOWS[await getState(token)]) notFound();
   return (
     <div className="mx-auto max-w-2xl px-5 sm:px-6 pt-6 pb-16 lg:pt-10">
       <section className="mt-2">

@@ -5,10 +5,15 @@
  */
 import assert from "node:assert/strict";
 import { test } from "node:test";
+import { VIEW_ENDPOINT, VIEW_KEY, viewBeaconBody } from "../src/app/a/[token]/view-beacon-target.ts";
+import { optoutCopy } from "../src/app/u/[token]/optout-copy.ts";
+import { UNSUBSCRIBE_ENDPOINT, unsubscribeInit } from "../src/app/u/[token]/optout-press.ts";
 import { ROUTE_SHOWS, chooseView } from "../src/lib/prospect-view.ts";
 import {
   LINK_TOKEN_RE,
+  OPTOUT_PAGE_SHOWS,
   OPTOUT_VIEW_ENDPOINT,
+  OPTOUT_VIEW_KEY,
   SLUG_MAX,
   SLUG_RE,
   linkPath,
@@ -141,4 +146,44 @@ test("opt-out: the two paths, a random part of 32 hex, and one token never match
     assert.throws(() => optoutViewPath(TOKEN, at, bad), /32 random hex/, bad);
   }
   assert.equal(OPTOUT_VIEW_ENDPOINT, "/api/optout-view");
+});
+
+test("opt-out page: the caption and button for a voice page and for a store that cannot be read; the 404 only for no", () => {
+  // "error" shows the button: the press asks the store again and says try again, so a real recipient is never told
+  // the page is gone while the store is down (the review, 2026-11-16).
+  assert.deepEqual(OPTOUT_PAGE_SHOWS, { yes: true, error: true, no: false });
+});
+
+/** The en dash and the em dash, built from their code points so this file holds neither. */
+const DASHES = new RegExp(`[${String.fromCharCode(0x2013, 0x2014)}]`);
+
+test("opt-out copy: the caption, the button and the done line are contract 8.5's, word for word", () => {
+  assert.equal(optoutCopy.caption, "Not interested in how AI can help your business? Unsubscribe here:");
+  assert.equal(optoutCopy.button, "Unsubscribe");
+  assert.equal(optoutCopy.done, "You're unsubscribed. You won't get any more emails from us.");
+  for (const line of Object.values(optoutCopy)) {
+    assert.equal(DASHES.test(line), false, `no em or en dash: ${line}`);
+    assert.equal(/autocalls/i.test(line), false, `no vendor name: ${line}`);
+  }
+});
+
+test("the press: a JSON post of {token} and nothing else, to the route that records it", () => {
+  const token = TOKEN;
+  assert.equal(UNSUBSCRIBE_ENDPOINT, "/api/unsubscribe");
+  const init = unsubscribeInit(token);
+  assert.equal(init.method, "POST");
+  assert.deepEqual(init.headers, { "Content-Type": "application/json" });
+  assert.deepEqual(JSON.parse(init.body), { token });
+  assert.equal(init.cache, "no-store");
+});
+
+test("view beacon: /a/ and /for/ report to /api/audit-view by default; /u/ to its own route under its own key", () => {
+  assert.equal(VIEW_ENDPOINT, "/api/audit-view");
+  assert.equal(VIEW_KEY, "devize_view_");
+  assert.equal(OPTOUT_VIEW_ENDPOINT, "/api/optout-view");
+  assert.equal(OPTOUT_VIEW_KEY, "devize_optout_view_");
+  // The two once-per-session keys never hold each other back, whatever the token.
+  assert.equal(`${OPTOUT_VIEW_KEY}${TOKEN}`.startsWith(`${VIEW_KEY}${TOKEN}`), false);
+  assert.equal(`${VIEW_KEY}${TOKEN}`.startsWith(`${OPTOUT_VIEW_KEY}${TOKEN}`), false);
+  assert.deepEqual(JSON.parse(viewBeaconBody(TOKEN)), { token: TOKEN });
 });

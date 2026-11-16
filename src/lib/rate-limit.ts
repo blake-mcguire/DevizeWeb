@@ -30,6 +30,16 @@ export function allow(key: string, limit = 5, windowMs = 10 * 60 * 1000): boolea
   return true;
 }
 
+/**
+ * True when `key` already has `limit` hits within `windowMs`. Records nothing:
+ * for a caller that checks first and counts only some outcomes with allow()
+ * (the /for/ page counts its misses, never its hits).
+ */
+export function spent(key: string, limit = 5, windowMs = 10 * 60 * 1000): boolean {
+  const now = Date.now();
+  return (hits.get(key) ?? []).filter((t) => now - t < windowMs).length >= limit;
+}
+
 /** The caller's IP as Vercel reports it, or "unknown". */
 export function clientIp(headers: Headers): string {
   const fwd = headers.get("x-forwarded-for");

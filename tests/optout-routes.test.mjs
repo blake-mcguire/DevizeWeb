@@ -11,7 +11,10 @@ import { mkdir, mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promis
 import os from "node:os";
 import path from "node:path";
 import { after, before, beforeEach, test } from "node:test";
+import { VIEW_ENDPOINT, viewBeaconBody } from "../src/app/a/[token]/view-beacon-target.ts";
+import { pressUnsubscribe } from "../src/app/u/[token]/optout-press.ts";
 import { chooseView } from "../src/lib/prospect-view.ts";
+import { OPTOUT_VIEW_ENDPOINT } from "../src/lib/voice-link.ts";
 import { alnumTok, auditPage, linkFile, tok, voicePage } from "./fixtures.mjs";
 
 const BROWSER =
@@ -356,4 +359,105 @@ test("opt-out beacon: three visits a window from one browser, like the demo page
   const same = { headers: { "x-forwarded-for": "10.78.0.1" } };
   for (let i = 0; i < 5; i++) assert.equal((await beacon(token, same)).status, 204);
   assert.equal((await under(`optout-views/${token}`)).length, 3);
+});
+
+// ---- what the pages themselves send (the review, 2026-11-16) -------------------------------------------------------
+// The button's press (optout-press.ts) and the view beacon's body (view-beacon-target.ts) are sent here exactly as the
+// page sends them, through a stand-in for the browser: it adds only what a browser adds (its user agent, same-origin)
+// and hands the request to whichever route the page's own URL names. A URL with no route is the 404 a browser would get.
+
+function browser({ ua = BROWSER, ip } = {}) {
+  const sent = [];
+  const routes = { "/api/unsubscribe": unsubscribe, "/api/optout-view": optoutView, "/api/audit-view": auditView };
+  const send = async (url, init) => {
+    sent.push({ url, init });
+    const headers = new Headers(init.headers);
+    headers.set("user-agent", ua);
+    headers.set("sec-fetch-site", "same-origin");
+    headers.set("x-forwarded-for", ip ?? `10.8.${++caller >> 8}.${caller & 255}`);
+    const route = routes[url];
+    if (!route) return new Response("Not found", { status: 404 });
+    return route(new Request(new URL(url, "http://localhost"), { method: init.method, headers, body: init.body }));
+  };
+  return { send, sent };
+}
+
+test("the button: the page's own press is the route's ok and one opt-out file; pressing again is still done", async () => {
+  const token = alnumTok("pressGood");
+  await putPage(token, voicePage(token));
+  const page = browser();
+  assert.equal(await pressUnsubscribe(token, page.send), "done");
+  assert.equal(page.sent.length, 1);
+  assert.equal(page.sent[0].url, "/api/unsubscribe");
+  const files = await under(`optouts/${token}`);
+  assert.equal(files.length, 1);
+  assert.equal((await read(`optouts/${token}/${files[0]}`)).token, token);
+  assert.equal(await pressUnsubscribe(token, page.send), "done", "a second press");
+  assert.equal((await under(`optouts/${token}`)).length, 1);
+  // An expired page's press goes through the same way.
+  const expired = alnumTok("pressExpired");
+  await putPage(expired, voicePage(expired, { top: { expires_at: "2026-01-01" } }));
+  assert.equal(await pressUnsubscribe(expired, browser().send), "done");
+  assert.equal((await under(`optouts/${expired}`)).length, 1);
+});
+
+test("the button: a refusal, a store fault, no answer or a strange answer is failed, never done", async () => {
+  const live = alnumTok("pressLive");
+  await putPage(live, voicePage(live));
+  const corrupt = alnumTok("pressCorrupt");
+  await putPage(corrupt, "{not json");
+  const cases = [
+    ["an unknown token (404)", alnumTok("pressNobody"), browser().send],
+    ["a store that cannot be read (503)", corrupt, browser().send],
+    ["a machine (403)", live, browser({ ua: "curl/8.7.1" }).send],
+    ["no answer at all", live, async () => { throw new TypeError("network down"); }],
+    ["an answer that is not JSON", live, async () => new Response("<html>", { status: 200 })],
+    ["ok without ok: true", live, async () => Response.json({ ok: false })],
+    ["ok: true on an error status", live, async () => Response.json({ ok: true }, { status: 500 })],
+    ["a null body", live, async () => Response.json(null)],
+  ];
+  for (const [label, token, send] of cases) assert.equal(await pressUnsubscribe(token, send), "failed", label);
+  assert.deepEqual(await under("optouts"), []);
+});
+
+test("the view beacon: its body reaches both routes, as sendBeacon or fetch sends it, and lands in each one's own folder", async () => {
+  const token = alnumTok("beaconBody");
+  await putPage(token, voicePage(token));
+  for (const type of ["application/json", "text/plain;charset=UTF-8"]) {
+    const page = browser();
+    const init = { method: "POST", headers: { "Content-Type": type }, body: viewBeaconBody(token) };
+    assert.equal((await page.send(VIEW_ENDPOINT, init)).status, 204, `${VIEW_ENDPOINT} ${type}`);
+    assert.equal((await page.send(OPTOUT_VIEW_ENDPOINT, init)).status, 204, `${OPTOUT_VIEW_ENDPOINT} ${type}`);
+  }
+  assert.equal((await under("views")).filter((name) => name.endsWith(`-${token}.json`)).length, 2, "the demo page's opens");
+  assert.equal((await under(`optout-views/${token}`)).length, 2, "the opt-out page's visits");
+  assert.deepEqual(await under("optouts"), [], "a visit is not an opt-out");
+});
+
+// ---- the readable link's miss limit (the review, 2026-11-16) -------------------------------------------------------
+
+test("link: an address that keeps missing gets the 404 for every /for/ link; a real link never counts as a miss", async () => {
+  assert.equal(pages.FOR_MISS_LIMIT, 20);
+  assert.equal(pages.FOR_MISS_WINDOW_MS, 10 * 60 * 1000);
+  const token = alnumTok("missLinked");
+  await putPage(token, voicePage(token));
+  await put("links/willow-bend-dental-studio.json", linkFile("willow-bend-dental-studio", token));
+  const audit = alnumTok("missAudit");
+  await putPage(audit, auditPage(audit));
+  await put("links/audit-linked.json", linkFile("audit-linked", audit));
+
+  // A prospect opening their own link again and again is never turned away.
+  for (let i = 0; i < pages.FOR_MISS_LIMIT + 5; i++) {
+    assert.equal((await pages.loadPageForSlugFrom("willow-bend-dental-studio", "10.60.0.1"))?.kind, "voice", `open ${i + 1}`);
+  }
+  // An address trying names: unknown slugs, a malformed one and a link to an audit page are all misses.
+  const guesses = ["Bad_Slug", "audit-linked", ...Array.from({ length: pages.FOR_MISS_LIMIT - 2 }, (_, i) => `guess-dental-${i}`)];
+  const shown = async (slug, ip) => chooseView(await pages.loadPageForSlugFrom(slug, ip), "for").kind;
+  for (const slug of guesses) assert.equal(await shown(slug, "10.60.0.2"), "missing", slug);
+  // From then on even a real link is the 404 for that address, and only for that address.
+  assert.equal(await pages.loadPageForSlugFrom("willow-bend-dental-studio", "10.60.0.2"), null);
+  assert.equal((await pages.loadPageForSlugFrom("willow-bend-dental-studio", "10.60.0.3"))?.kind, "voice");
+  // One miss short of the limit still gets the page.
+  for (let i = 0; i < pages.FOR_MISS_LIMIT - 1; i++) await pages.loadPageForSlugFrom(`near-miss-${i}`, "10.60.0.4");
+  assert.equal((await pages.loadPageForSlugFrom("willow-bend-dental-studio", "10.60.0.4"))?.kind, "voice");
 });
