@@ -250,6 +250,18 @@ function readOptional(raw: Record<string, unknown>, key: string): string {
   return value.trim();
 }
 
+/**
+ * An optional yes or no: true and false, and also 1 and 0, because the
+ * pipeline's voice_pages table holds its flags as integers and a writer may
+ * pass the column straight through. Absent or null is false. Anything else
+ * is null (a fault): a word like "yes" is not guessed at.
+ */
+function readFlag(value: unknown): boolean | null {
+  if (value === undefined || value === null || value === false || value === 0) return false;
+  if (value === true || value === 1) return true;
+  return null;
+}
+
 function readVoicePage(raw: unknown, token: string, now: Date): VoicePage {
   need(isObj(raw), "page.json is not an object");
   need(raw.v === 1, "v must be 1");
@@ -267,7 +279,8 @@ function readVoicePage(raw: unknown, token: string, now: Date): VoicePage {
   const city = readOptional(raw, "city");
   const state = readOptional(raw, "state");
   const persona = readOptional(raw, "persona");
-  need(raw.sample === undefined || typeof raw.sample === "boolean", "sample must be true or false when present");
+  const sample = readFlag(raw.sample);
+  need(sample !== null, "sample must be true or false (or 1 or 0) when present");
 
   need(isObj(raw.demo), "demo is missing");
   const vars = readVars(raw.demo.vars);
@@ -291,7 +304,7 @@ function readVoicePage(raw: unknown, token: string, now: Date): VoicePage {
     state,
     trade,
     persona,
-    sample: raw.sample === true,
+    sample,
     expires_at: (raw.expires_at as string).trim(),
     demo: { vars, tz: tz.trim(), days },
   };

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { AgentState, RealtimeSession } from "@voice-session/web";
+import { FIRST_STATE, JOIN_TIMEOUT_MS, agentJoined, joinWatch, timeoutSignal, type JoinWatch } from "./voice-call";
 import { VOICE_FINAL_ERRORS, voiceCopy, voiceErrorFor, type VoiceErrorCode } from "./voice-copy";
 
 /**
@@ -19,6 +20,8 @@ import { VOICE_FINAL_ERRORS, voiceCopy, voiceErrorFor, type VoiceErrorCode } fro
  *      (POST /api/demo-session) fetched, side by side.
  *   3. The call starts. The line under the name follows the session's own
  *      agent_state events: connecting, listening, thinking, speaking, ended.
+ *      The SDK starts out in "connecting" and so never announces it; the
+ *      block shows it itself from the moment the SDK is started.
  *
  * Nothing loads and nothing is minted when the page opens. The server keeps
  * the API key, the assistant and every call variable; the browser only ever
@@ -26,9 +29,18 @@ import { VOICE_FINAL_ERRORS, voiceCopy, voiceErrorFor, type VoiceErrorCode } fro
  *
  * The call is ended when the visitor presses End call, when the assistant
  * hangs up, when the page is left or closed, and after MAX_CALL_MS whatever
- * else happens, so a tab left open cannot keep a call running. End call is
- * offered once the call is fully up (the SDK's start has finished), so a
- * press can never race the SDK while it is still taking the microphone.
+ * else happens, so a tab left open cannot keep a call running. It is also
+ * ended, with the did-not-connect sentence, when no assistant has joined
+ * JOIN_TIMEOUT_MS after it began to connect (voice-call.ts): a network that
+ * blocks the call's media would otherwise leave a spinner and nothing else.
+ * End call is offered once the call is fully up (the SDK's start has
+ * finished), so a press can never race the SDK while it is still taking the
+ * microphone.
+ *
+ * Known and left as it is: a call that fails to connect has already used one
+ * of the page's sessions for the day, because the session has to exist
+ * before the browser can try to connect. Whether such a press should count
+ * is part of the caps decision, which is Blake's.
  */
 
 type Props = {
@@ -85,7 +97,7 @@ async function mint(token: string): Promise<{ url: string; token: string }> {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ token }),
       cache: "no-store",
-      signal: AbortSignal.timeout(MINT_TIMEOUT_MS),
+      signal: timeoutSignal(MINT_TIMEOUT_MS),
     });
   } catch {
     throw new DemoError("unavailable");
@@ -148,12 +160,16 @@ export default function VoiceDemo({ token, business, city, state, sample }: Prop
   const sessionRef = useRef<RealtimeSession | null>(null);
   const pressing = useRef(false);
   const limit = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  /** The wait for the assistant to join the call that is starting. */
+  const joining = useRef<JoinWatch | null>(null);
   /** True once the block has left the page: a press still in flight must not start a call nobody can see. */
   const gone = useRef(false);
 
   /** Ends the running call, if there is one, and shows `next` when given. Safe to call at any time. */
   const finish = useCallback(async (next: Status | null) => {
     clearTimeout(limit.current);
+    joining.current?.cancel();
+    joining.current = null;
     const session = sessionRef.current;
     sessionRef.current = null; // from here on this session's own events are ignored
     if (session) await session.end().catch(() => {});
@@ -199,13 +215,28 @@ export default function VoiceDemo({ token, business, city, state, sample }: Prop
       if (gone.current) return; // an unused session costs nothing and expires by itself
       const session = new sdk.RealtimeSession(minted);
       sessionRef.current = session;
+      // The SDK is already in this state when it starts, so it never says so.
+      setStatus(FIRST_STATE);
+      // No assistant on the call in time: hang up and say it did not connect, whatever the SDK is doing.
+      joining.current = joinWatch(JOIN_TIMEOUT_MS, () => {
+        if (sessionRef.current !== session) return;
+        void finish(null).then(() => {
+          setUp(false);
+          setStatus("idle");
+          setError("failed");
+        });
+      });
       session.on("agent_state", (next) => {
-        if (sessionRef.current === session && next !== "ended") setStatus(next);
+        if (sessionRef.current !== session || next === "ended") return;
+        if (agentJoined(next)) joining.current?.joined();
+        setStatus(next);
       });
       session.on("ended", () => {
         if (sessionRef.current !== session) return;
         sessionRef.current = null;
         clearTimeout(limit.current);
+        joining.current?.cancel();
+        joining.current = null;
         setUp(false);
         setStatus("ended");
       });

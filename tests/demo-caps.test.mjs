@@ -7,15 +7,18 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
   CALL_ID,
+  CALL_TAG,
   DEMO_CAPS,
   callPath,
   capDay,
   capReached,
   countCaps,
+  demoAlertPath,
   demoDayPath,
   demoDayPrefix,
   demoPath,
   demosPrefix,
+  isCallFile,
   isoCompact,
   timeOfPath,
   uaClass,
@@ -24,6 +27,8 @@ import { tok } from "./fixtures.mjs";
 
 const TOKEN = tok("caps");
 const RAND = "0123456789abcdef0123456789abcdef";
+/** A call file's unguessable part, as the webhook route makes it (32 hex). */
+const TAG = "1d0f361a7b43f3f05a60316dc80d4701";
 const at = (iso) => new Date(iso);
 const marker = (iso, n = 0) => demoPath(TOKEN, at(iso), RAND.slice(0, 31) + (n % 16).toString(16));
 
@@ -37,12 +42,40 @@ test("paths: the contract's shapes, and a name gives its time back", () => {
   assert.equal(demoPath(TOKEN, when, RAND), `demos/${TOKEN}/20261116T031509Z-${RAND}.json`);
   // 03:15 UTC on the 16th is still the 15th in Central time.
   assert.equal(demoDayPath(when, RAND), `demo-days/2026-11-15/20261116T031509Z-${RAND}.json`);
-  assert.equal(callPath(when, "48211"), "calls/20261116T031509Z-48211.json");
+  assert.equal(callPath(when, "48211", TAG), `calls/20261116T031509Z-48211-${TAG}.json`);
   assert.equal(demosPrefix(TOKEN), `demos/${TOKEN}/`);
   assert.equal(demoDayPrefix("2026-11-15"), "demo-days/2026-11-15/");
   assert.equal(timeOfPath(demoPath(TOKEN, when, RAND))?.toISOString(), "2026-11-16T03:15:09.000Z");
-  assert.equal(timeOfPath(callPath(when, "48211"))?.toISOString(), "2026-11-16T03:15:09.000Z");
+  assert.equal(timeOfPath(callPath(when, "48211", TAG))?.toISOString(), "2026-11-16T03:15:09.000Z");
   assert.equal(timeOfPath(`demos/${TOKEN}/notes.json`), null);
+  // The all-pages alert: one fixed name per reason per Central day (03:15 UTC on the 16th is the 15th there).
+  assert.equal(demoAlertPath(when, "balance"), "demo-alerts/2026-11-15/balance.json");
+  assert.equal(demoAlertPath(when, "day_full"), "demo-alerts/2026-11-15/day_full.json");
+});
+
+test("a call's file name always carries its 32 hex secret part: there is no way to make one without it", () => {
+  const when = at("2026-11-16T03:15:09Z");
+  // The store is public by path and the file holds a mobile, so a name made of only a time and a call id (both
+  // guessable) must be impossible to produce.
+  for (const bad of [undefined, null, "", "abc", TAG.slice(1), `${TAG}0`, TAG.toUpperCase(), "g".repeat(32), "../x"]) {
+    assert.throws(() => callPath(when, "48211", bad), /tag/, `tag ${JSON.stringify(bad)}`);
+  }
+  assert.equal(CALL_TAG.test(TAG), true);
+  assert.equal(callPath(when, "48211", TAG).length, "calls/".length + 16 + 1 + 5 + 1 + 32 + ".json".length);
+});
+
+test("a stored name is a call's own file only when the whole name after the time matches", () => {
+  const when = at("2026-11-16T03:15:09Z");
+  const other = "f".repeat(32);
+  assert.equal(isCallFile(callPath(when, "777", TAG), "777", TAG), true);
+  assert.equal(isCallFile(callPath(at("2026-01-02T00:00:00Z"), "777", TAG), "777", TAG), true, "under any time");
+  // An id that only ends the same way is another call.
+  assert.equal(isCallFile(callPath(when, "a-777", TAG), "777", TAG), false);
+  assert.equal(isCallFile(callPath(when, "1777", TAG), "777", TAG), false);
+  assert.equal(isCallFile(callPath(when, "777", other), "777", TAG), false, "another secret part");
+  assert.equal(isCallFile(`calls/20261116T031509Z-777.json`, "777", TAG), false, "the old name without a secret part");
+  assert.equal(isCallFile(`demos/20261116T031509Z-777-${TAG}.json`, "777", TAG), false, "another folder");
+  assert.equal(isCallFile(`calls/notes-777-${TAG}.json`, "777", TAG), false, "no time in the name");
 });
 
 test("the cap day is the Central calendar day, across midnight and both clock changes", () => {
@@ -80,7 +113,8 @@ test("which cap is reached", () => {
   assert.equal(capReached(ok), null);
   assert.equal(capReached({ ...ok, pageToday: 3 }), "page_day");
   assert.equal(capReached({ ...ok, pageLife: 6 }), "page_life");
-  assert.equal(capReached({ ...ok, globalToday: 25 }), "busy");
+  // Its own reason, so the page can say "tomorrow" and not "in a few minutes".
+  assert.equal(capReached({ ...ok, globalToday: 25 }), "day_full");
   // The one that will not clear by itself is named first.
   assert.equal(capReached({ pageToday: 3, pageLife: 6, globalToday: 25 }), "page_life");
   assert.equal(capReached({ pageToday: 3, pageLife: 5, globalToday: 25 }), "page_day");
@@ -99,7 +133,7 @@ test("a page's fourth press today, its seventh ever, and the twenty-sixth of the
   assert.equal(capReached(countCaps([...earlier(5)], day(0), now)), null);
   assert.equal(capReached(countCaps([...earlier(4), ...today(2)], day(2), now)), "page_life");
   assert.equal(capReached(countCaps([], day(24), now)), null);
-  assert.equal(capReached(countCaps([], day(25), now)), "busy");
+  assert.equal(capReached(countCaps([], day(25), now)), "day_full");
 });
 
 test("call ids that may go in a blob name", () => {

@@ -2,8 +2,19 @@ import { randomBytes } from "node:crypto";
 import { VOICE_ERRORS, type VoiceErrorCode } from "@/app/a/[token]/voice-copy";
 import { loadPage } from "@/lib/audit-page";
 import { MACHINE_UA, validToken } from "@/lib/audit-validate";
-import { list, putJSON } from "@/lib/blob-store";
-import { capDay, capReached, countCaps, demoDayPath, demoDayPrefix, demoPath, demosPrefix, uaClass } from "@/lib/demo-caps";
+import { list, putJSON, stat } from "@/lib/blob-store";
+import {
+  capDay,
+  capReached,
+  countCaps,
+  demoAlertPath,
+  demoDayPath,
+  demoDayPrefix,
+  demoPath,
+  demosPrefix,
+  uaClass,
+  type DemoAlert,
+} from "@/lib/demo-caps";
 import { allow, clientIp } from "@/lib/rate-limit";
 import { sessionVariables } from "@/lib/voice-page";
 import { mintSession, publicError } from "@/lib/voice-upstream";
@@ -33,8 +44,21 @@ import { mintSession, publicError } from "@/lib/voice-upstream";
  * Errors are {ok: false, error, message}. 404 gone (bad token, unknown or
  * expired page, an audit page: all the same, as everywhere on /a/), 403
  * forbidden (a machine, or another site's page), 400 bad_request, 429
- * rate | page_day | page_life | busy, 402 balance, 503 unavailable. What the
- * vendor answered is logged here as a status number and never passed on.
+ * rate | page_day | page_life | day_full | busy, 402 balance, 503
+ * unavailable. What the vendor answered is logged here as a status number
+ * and never passed on.
+ *
+ * Two refusals turn every prospect away until someone acts or the day ends:
+ * the vendor's 402 (the minutes have run out) and the all-pages daily cap
+ * (day_full). For each, one small file is left for the pipeline, so it can
+ * text Blake; nothing about the visitor or the page is in it:
+ *
+ *   demo-alerts/<YYYY-MM-DD>/<balance | day_full>.json  {v, reason, at}
+ *
+ * The caps are checked before the session is asked for and the markers are
+ * written after, so they hold for a person pressing a button but not for a
+ * script that sends many presses at once (demo-caps.ts says what bounds
+ * that, and why it is left as it is).
  */
 
 /** Seconds the platform lets this route run: the vendor's eight at most, plus the store reads and writes. */
@@ -51,6 +75,20 @@ const HEADERS = { "Cache-Control": "no-store", "X-Robots-Tag": "noindex, nofollo
 
 function fail(code: VoiceErrorCode, status: number): Response {
   return Response.json({ ok: false, error: code, message: VOICE_ERRORS[code] }, { status, headers: HEADERS });
+}
+
+/**
+ * Leaves the day's one alert file for a reason, if it is not there yet. The visitor's answer never waits on the
+ * outcome: a store that refuses, or another instance writing the same name first, is a log line and nothing more.
+ */
+async function leaveAlert(reason: DemoAlert, now: Date): Promise<void> {
+  const pathname = demoAlertPath(now, reason);
+  try {
+    if (await stat(pathname)) return;
+    await putJSON(pathname, { v: 1, reason, at: now.toISOString() });
+  } catch (err) {
+    console.error("[demo-session] alert not written", reason, err instanceof Error ? err.message : err);
+  }
 }
 
 /** Every path under a prefix. More than one listing page is already far over any cap, so it is not followed. */
@@ -99,11 +137,18 @@ export async function POST(req: Request) {
       console.error("[demo-session] cap count failed", err instanceof Error ? err.message : err);
       return fail("unavailable", 503);
     }
-    if (reached) return fail(reached, 429);
+    if (reached) {
+      if (reached === "day_full") {
+        console.error("[demo-session] the all-pages daily cap is reached");
+        await leaveAlert("day_full", now);
+      }
+      return fail(reached, 429);
+    }
 
     const minted = await mintSession(sessionVariables(page, now), token);
     if (!minted.ok) {
       console.error("[demo-session] no session", minted.reason, minted.status ?? "no answer");
+      if (minted.reason === "balance") await leaveAlert("balance", now);
       const { status, code } = publicError(minted.reason);
       return fail(code, status);
     }

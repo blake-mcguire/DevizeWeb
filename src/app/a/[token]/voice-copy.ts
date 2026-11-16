@@ -28,6 +28,8 @@ export const VOICE_ERRORS = {
   // The server's answers (the HTTP status is in the comment).
   balance: "The demo line is not taking calls right now. Reply to the email and we will call you.", // 402
   busy: "The demo line is busy right now. Please try again in a few minutes.", // 429
+  // The all-pages daily cap. Not "busy": nothing changes until tomorrow (Central time), so it must not say minutes.
+  day_full: "The demo line has taken all of its calls for today. Please try again tomorrow, or reply to the email.", // 429
   page_day: "That is all the demo calls for today. Please try again tomorrow.", // 429
   page_life: "This demo has had all of its calls. Reply to the email and we will set up another.", // 429
   rate: "That is a few tries in a row. Please wait a few minutes.", // 429
@@ -35,8 +37,9 @@ export const VOICE_ERRORS = {
   gone: "This page has expired. Reply to the email and we will send a new one.", // 404
   forbidden: "The demo could not start from this browser. Open the link in Safari or Chrome.", // 403
   bad_request: "The demo could not start. Please reload the page and try again.", // 400
-  // The call itself did not connect, or dropped while connecting.
-  failed: "The call did not connect. Please try again.",
+  // The call itself did not connect, dropped while connecting, or nobody joined it in time. Each try uses one of
+  // the page's calls for the day, so the sentence points at the usual cause (an office network that blocks calls).
+  failed: "The call did not connect. Please try again. If it keeps happening, open the link on your phone using mobile data.",
 } as const;
 
 export type VoiceErrorCode = keyof typeof VOICE_ERRORS;
@@ -67,7 +70,7 @@ export const voiceCopy = {
   talkAgain: "Talk to it again",
   /** Under the button, before the first press. */
   micHint: "Your browser will ask to use your microphone.",
-  /** Between the press and the first word from the call. */
+  /** Between the press and the moment the call begins to connect (the microphone prompt, the session). */
   starting: "Starting",
   /** The call's live states, as the session reports them. */
   states: {

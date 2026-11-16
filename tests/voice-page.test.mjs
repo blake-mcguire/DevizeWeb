@@ -64,10 +64,17 @@ test("optional fields: absent is fine, the wrong type is not", () => {
   assert.ok(bare);
   assert.deepEqual([bare.city, bare.state, bare.persona, bare.sample], ["", "", "", false]);
   assert.equal(changed((r) => (r.sample = true))?.sample, true);
-  assert.equal(
-    changed((r) => (r.sample = "yes")),
-    null,
-  );
+  // The pipeline's voice_pages table holds sample as 0 or 1, and a column read straight through may be null.
+  assert.equal(changed((r) => (r.sample = 1))?.sample, true);
+  assert.equal(changed((r) => (r.sample = 0))?.sample, false);
+  assert.equal(changed((r) => (r.sample = null))?.sample, false);
+  for (const odd of ["yes", "1", "true", 2, -1, 0.5, [], {}]) {
+    assert.equal(
+      changed((r) => (r.sample = odd)),
+      null,
+      `sample ${JSON.stringify(odd)}`,
+    );
+  }
   assert.equal(
     changed((r) => (r.city = 77)),
     null,

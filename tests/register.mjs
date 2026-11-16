@@ -10,12 +10,21 @@
  * Files under src/ are ES modules, as the bundler treats them; saying so here
  * saves node from guessing.
  *
+ * It also makes sure nothing loaded this way can reach a real Blob store,
+ * whatever the shell exported: the run is marked as a test (the store
+ * wrapper drops its mock directory when NODE_ENV is production) and the
+ * Blob credentials are removed from this process before any test file runs.
+ * tests/routes.test.mjs does the same for itself and checks it.
+ *
  * Used as: node --import ./tests/register.mjs --test tests/
  */
 import { existsSync, statSync } from "node:fs";
 import { registerHooks } from "node:module";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+
+process.env.NODE_ENV = "test";
+for (const name of ["BLOB_READ_WRITE_TOKEN", "BLOB_STORE_ID", "VERCEL_BLOB_API_URL", "VERCEL"]) delete process.env[name];
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const src = path.join(root, "src");

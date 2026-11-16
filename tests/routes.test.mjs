@@ -1,10 +1,12 @@
 /**
  * The two voice routes and the page loader, run in-process against a blob
  * mock directory and a small local stand-in for the voice vendor. No request
- * leaves this machine: a tripwire on fetch fails the test if one tries.
+ * leaves this machine: the store is forced to the mock directory below, and a
+ * tripwire on fetch fails the test if the routes' own fetch tries.
  * Run with: npm test
  */
 import assert from "node:assert/strict";
+import { createHmac } from "node:crypto";
 import { mkdir, mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import http from "node:http";
 import os from "node:os";
@@ -19,6 +21,20 @@ const SECRET = "test-webhook-secret-0123456789";
 const UPSTREAM_TEXT = "UPSTREAM-BODY-TEXT-THAT-MUST-NOT-LEAK";
 const BROWSER =
   "Mozilla/5.0 (iPhone; CPU iPhone OS 18_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.1 Mobile/15E148 Safari/604.1";
+
+// ---- this run can only ever touch the mock store ----------------------------------------------------------------
+// The store wrapper (src/lib/blob-store.ts) drops the mock directory when NODE_ENV is production and then uses
+// the real Blob SDK with whatever credentials the shell holds. The fetch tripwire further down cannot see that:
+// the SDK calls undici's own fetch, not globalThis.fetch. So, whatever the shell exported, this file runs as a
+// test with no Blob credentials at all, and before() checks the wrapper agrees before any route is loaded.
+const BLOB_ENV = ["BLOB_READ_WRITE_TOKEN", "BLOB_STORE_ID", "VERCEL_BLOB_API_URL", "VERCEL"];
+process.env.NODE_ENV = "test";
+for (const name of BLOB_ENV) delete process.env[name];
+
+/** The secret part of a call's file name, worked out here on its own: HMAC-SHA256(secret, id), first 32 hex. */
+const tagOf = (id, secret = SECRET) => createHmac("sha256", secret).update(String(id)).digest("hex").slice(0, 32);
+/** The file a call with the fixtures' created_at (21:04:11 +02:00) is stored under. */
+const callFile = (id) => `20261116T190411Z-${id}-${tagOf(id)}.json`;
 
 // ---- the stand-in vendor ---------------------------------------------------------------------------------------
 
@@ -68,6 +84,9 @@ before(async () => {
   process.env.AUTOCALLS_API_BASE = `http://127.0.0.1:${vendor.port}`;
   process.env.AUTOCALLS_WEBHOOK_SECRET = SECRET;
   process.env.BLOB_MOCK_DIR = path.join(root, "unset");
+  const blobStore = await import("../src/lib/blob-store.ts");
+  assert.equal(blobStore.isMock(), true, "the routes must run on the mock directory, never on a real store");
+  assert.ok(await blobStore.mockFs(), "the mock directory module must be the one in use");
   ({ POST: mint } = await import("../src/app/api/demo-session/route.ts"));
   ({ POST: webhook } = await import("../src/app/api/autocalls-webhook/route.ts"));
   ({ POST: view } = await import("../src/app/api/audit-view/route.ts"));
@@ -136,6 +155,21 @@ function noLeak(text, label) {
   }
   assert.equal(/autocalls/i.test(text), false, `${label}: the answer must not name the vendor`);
 }
+
+// ---- the store ---------------------------------------------------------------------------------------------------
+
+test("store: this file runs on the mock directory whatever the shell exported", async () => {
+  // Run it the dangerous way to see why: NODE_ENV=production with a Blob token in the shell. Before this guard the
+  // webhook tests then wrote their made-up consult calls through the real SDK, and the fetch tripwire saw nothing.
+  assert.equal(process.env.NODE_ENV, "test");
+  for (const name of BLOB_ENV) assert.equal(name in process.env, false, `${name} must not reach the routes`);
+  const blobStore = await import("../src/lib/blob-store.ts");
+  assert.equal(blobStore.isMock(), true);
+  assert.equal(blobStore.blobUrl("audits/x/page.json"), "/blob-mock/audits/x/page.json");
+  // What a route writes lands in this test's own folder and nowhere else.
+  await blobStore.putJSON("probe/one.json", { v: 1 });
+  assert.deepEqual(await under("probe"), ["one.json"]);
+});
 
 // ---- the page loader ---------------------------------------------------------------------------------------------
 
@@ -358,11 +392,55 @@ test("mint: the all-pages daily cap is twenty-five", async () => {
   await putPage(first, voicePage(first));
   await putPage(second, voicePage(second));
   assert.equal((await press(first)).status, 200, "the twenty-fifth of the day");
+  assert.deepEqual(await under("demo-alerts"), [], "no alert while there is room");
   const refused = await answer(await press(second));
   assert.equal(refused.status, 429);
-  assert.equal(refused.json.error, "busy");
+  // Its own code and words: the line is not "busy for a few minutes", it is done until tomorrow.
+  assert.equal(refused.json.error, "day_full");
+  assert.match(refused.json.message, /tomorrow/i);
+  assert.equal(/few minutes/i.test(refused.json.message), false);
   assert.equal(vendor.calls.length, 1, "the twenty-sixth never reached the vendor");
   assert.deepEqual(await under(`demos/${second}`), []);
+  // One small file tells the pipeline (so it can text Blake): once a day, however many presses are refused.
+  const day = capDay(now);
+  assert.deepEqual(await under("demo-alerts"), [`${day}/day_full.json`]);
+  const alert = await read(`demo-alerts/${day}/day_full.json`);
+  assert.deepEqual(Object.keys(alert).sort(), ["at", "reason", "v"]);
+  assert.equal(alert.reason, "day_full");
+  assert.equal((await answer(await press(second))).json.error, "day_full");
+  assert.equal((await answer(await press(first))).json.error, "day_full");
+  assert.deepEqual(await under("demo-alerts"), [`${day}/day_full.json`]);
+  assert.equal((await read(`demo-alerts/${day}/day_full.json`)).at, alert.at, "the first one is kept");
+});
+
+test("mint: a page's own caps raise no alert (only the all-pages cap and an empty balance do)", async () => {
+  const token = tok("noalert");
+  await putPage(token, voicePage(token));
+  for (let i = 1; i <= 3; i++) assert.equal((await press(token)).status, 200);
+  assert.equal((await answer(await press(token))).json.error, "page_day");
+  assert.deepEqual(await under("demo-alerts"), []);
+});
+
+test("mint: the vendor's 402 (no minutes left) leaves one alert for the pipeline, with nothing private in it", async () => {
+  const first = tok("nominutes1");
+  const second = tok("nominutes2");
+  await putPage(first, voicePage(first));
+  await putPage(second, voicePage(second));
+  vendor.next = { status: 402, body: { error: UPSTREAM_TEXT, message: `Bearer ${KEY} has no balance` } };
+  const started = new Date();
+  for (const token of [first, second, first]) {
+    const got = await answer(await press(token));
+    assert.equal(got.status, 402);
+    assert.equal(got.json.error, "balance");
+    noLeak(got.text, "402");
+  }
+  const names = await under("demo-alerts");
+  assert.equal(names.length, 1);
+  assert.ok([capDay(started), capDay(new Date())].some((day) => names[0] === `${day}/balance.json`), names[0]);
+  const text = await readFile(path.join(store, "demo-alerts", names[0]), "utf8");
+  assert.deepEqual(Object.keys(JSON.parse(text)).sort(), ["at", "reason", "v"]);
+  for (const secret of [first, second, KEY, UPSTREAM_TEXT, ASSISTANT]) assert.equal(text.includes(secret), false);
+  assert.deepEqual(await under("demos"), [], "no session marker for a press that got no session");
 });
 
 test("mint: every vendor error becomes a safe answer and no marker", async () => {
@@ -394,6 +472,13 @@ test("mint: every vendor error becomes a safe answer and no marker", async () =>
     assert.equal(vendor.calls.length, 1, `vendor ${upstream}: asked once, a redirect is not followed`);
     assert.deepEqual(await under(`demos/${token}`), [], `vendor ${upstream}: no marker`);
     assert.deepEqual(await under("demo-days"), [], `vendor ${upstream}: no day marker`);
+    const alerts = await under("demo-alerts");
+    assert.deepEqual(
+      alerts.map((name) => name.split("/")[1]),
+      upstream === 402 ? ["balance.json"] : [],
+      `vendor ${upstream}: an alert only when the minutes have run out`,
+    );
+    await rm(path.join(store, "demo-alerts"), { recursive: true, force: true });
   }
 });
 
@@ -529,9 +614,10 @@ test("webhook: the right secret stores the call once, without the transcript", a
   const got = await answer(await hook(callPayload("48211")));
   assert.equal(got.status, 200);
   assert.deepEqual(got.json, { ok: true, stored: true });
-  // The name is the call's own start time in UTC, then its id.
-  assert.deepEqual(await under("calls"), ["20261116T190411Z-48211.json"]);
-  const stored = await read("calls/20261116T190411Z-48211.json");
+  // The name is the call's own start time in UTC, then its id, then 32 hex that only the webhook secret can make.
+  assert.equal(tagOf("48211"), "1d0f361a7b43f3f05a60316dc80d4701");
+  assert.deepEqual(await under("calls"), ["20261116T190411Z-48211-1d0f361a7b43f3f05a60316dc80d4701.json"]);
+  const stored = await read(`calls/${callFile("48211")}`);
   assert.equal(stored.v, 1);
   assert.equal(stored.id, "48211");
   assert.equal(stored.type, "web");
@@ -548,6 +634,36 @@ test("webhook: the right secret stores the call once, without the transcript", a
     assert.equal(key in stored, false, `${key} is not stored`);
   }
   assert.equal(JSON.stringify(stored).includes("Thanks for calling"), false);
+  // The secret part is in the name only, never in the file.
+  assert.equal(JSON.stringify(stored).includes(tagOf("48211")), false);
+});
+
+test("webhook: a call's file cannot be found from its id and its time (the store is public by path)", async () => {
+  // The file holds consult_phone, caller_name and the page's lead_token. Call ids look sequential and the time
+  // is to the second, so a name made of only those two could be walked by anyone who knows the store's host.
+  for (const id of ["48311", "48312", "48313"]) {
+    assert.deepEqual((await answer(await hook(callPayload(id)))).json, { ok: true, stored: true });
+  }
+  const names = await under("calls");
+  assert.equal(names.length, 3);
+  const tags = new Set();
+  for (const name of names) {
+    const m = /^20261116T190411Z-(\d+)-([0-9a-f]{32})\.json$/.exec(name);
+    assert.ok(m, `${name} has a 32 hex part after the id`);
+    assert.equal(m[2], tagOf(m[1]), "made from the webhook secret and the id");
+    tags.add(m[2]);
+  }
+  assert.equal(tags.size, 3, "neighbouring ids share no part of it");
+  for (const id of ["48311", "48312", "48313"]) {
+    await assert.rejects(readFile(path.join(store, "calls", `20261116T190411Z-${id}.json`)), { code: "ENOENT" });
+  }
+  // Another secret gives another name: the part cannot be worked out without the secret in use.
+  process.env.AUTOCALLS_WEBHOOK_SECRET = "another-webhook-secret-9876543210";
+  const other = await answer(await hook(callPayload("48314"), { k: "another-webhook-secret-9876543210" }));
+  assert.deepEqual(other.json, { ok: true, stored: true });
+  const added = (await under("calls")).filter((name) => name.includes("-48314-"));
+  assert.deepEqual(added, [`20261116T190411Z-48314-${tagOf("48314", "another-webhook-secret-9876543210")}.json`]);
+  assert.notEqual(tagOf("48314", "another-webhook-secret-9876543210"), tagOf("48314"));
 });
 
 test("webhook: a repeated id is answered 200 and stored once, by this instance and by a fresh one", async () => {
@@ -559,8 +675,8 @@ test("webhook: a repeated id is answered 200 and stored once, by this instance a
   const again = await answer(await hook(callPayload("500", { top: { status: "ended", duration: 999 } }), { route: cold }));
   assert.equal(again.status, 200);
   assert.deepEqual(again.json, { ok: true, stored: false, duplicate: true });
-  assert.deepEqual(await under("calls"), ["20261116T190411Z-500.json"]);
-  assert.equal((await read("calls/20261116T190411Z-500.json")).duration, 184, "the first copy is kept");
+  assert.deepEqual(await under("calls"), [callFile("500")]);
+  assert.equal((await read(`calls/${callFile("500")}`)).duration, 184, "the first copy is kept");
   // A different id is a different call.
   assert.deepEqual((await answer(await hook(callPayload("501"), { route: cold }))).json, { ok: true, stored: true });
   assert.equal((await under("calls")).length, 2);
@@ -571,10 +687,111 @@ test("webhook: a call with no time of its own is stored under the arrival time a
   assert.deepEqual((await answer(await hook(bare()))).json, { ok: true, stored: true });
   const names = await under("calls");
   assert.equal(names.length, 1);
-  assert.match(names[0], /^\d{8}T\d{6}Z-600\.json$/);
+  assert.match(names[0], /^\d{8}T\d{6}Z-600-[0-9a-f]{32}\.json$/);
+  assert.ok(names[0].endsWith(`-600-${tagOf("600")}.json`));
   const { POST: cold } = await import("../src/app/api/autocalls-webhook/route.ts?instance=3");
   assert.deepEqual((await answer(await hook(bare(), { route: cold }))).json, { ok: true, stored: false, duplicate: true });
   assert.equal((await under("calls")).length, 1);
+});
+
+test("webhook: a call with no time is not taken for another call whose id only ends the same way", async () => {
+  const bare = (id) => callPayload(id, { top: { created_at: undefined, finished_at: undefined } });
+  assert.deepEqual((await answer(await hook(bare("a-777")))).json, { ok: true, stored: true });
+  assert.deepEqual((await answer(await hook(bare("1777")))).json, { ok: true, stored: true });
+  // 777 is its own call: before the fix it was answered "duplicate" (the name a-777 ends in -777) and never stored.
+  const { POST: cold } = await import("../src/app/api/autocalls-webhook/route.ts?instance=4");
+  assert.deepEqual((await answer(await hook(bare("777"), { route: cold }))).json, { ok: true, stored: true });
+  assert.equal((await under("calls")).length, 3);
+  // And its own repeat is still a repeat, on a fresh instance too.
+  const { POST: colder } = await import("../src/app/api/autocalls-webhook/route.ts?instance=5");
+  assert.deepEqual((await answer(await hook(bare("777"), { route: colder }))).json, { ok: true, stored: false, duplicate: true });
+  assert.equal((await under("calls")).length, 3);
+});
+
+test("webhook: a first copy with no extracted variables is replaced by a later copy that has them", async () => {
+  // The vendor can send a call before its evaluation is done and again after (or Blake resends it by hand).
+  // Before the fix the empty first copy always won, so the consult request in the second copy was dropped
+  // while the vendor was told 200 and never tried again.
+  const early = (id, top = {}) => callPayload(id, { top: { extracted_variables: {}, ...top } });
+  assert.deepEqual((await answer(await hook(early("950")))).json, { ok: true, stored: true });
+  assert.deepEqual((await read(`calls/${callFile("950")}`)).extracted_variables, {});
+  // The same empty copy again is a plain repeat.
+  assert.deepEqual((await answer(await hook(early("950")))).json, { ok: true, stored: false, duplicate: true });
+  // The evaluation arrives, on the same warm instance.
+  const late = await answer(await hook(callPayload("950")));
+  assert.equal(late.status, 200);
+  assert.deepEqual(late.json, { ok: true, stored: true, updated: true });
+  assert.deepEqual(await under("calls"), [callFile("950")], "still one file, under the same name");
+  let stored = await read(`calls/${callFile("950")}`);
+  assert.equal(stored.extracted_variables.wants_consult, true);
+  assert.equal(stored.extracted_variables.consult_phone, "2815550142");
+  // From here on the stored copy is kept: a repeat with other values changes nothing, warm or cold.
+  const other = callPayload("950", { top: { extracted_variables: { wants_consult: false, summary: "changed" } } });
+  assert.deepEqual((await answer(await hook(other))).json, { ok: true, stored: false, duplicate: true });
+  const { POST: cold } = await import("../src/app/api/autocalls-webhook/route.ts?instance=6");
+  assert.deepEqual((await answer(await hook(other, { route: cold }))).json, { ok: true, stored: false, duplicate: true });
+  stored = await read(`calls/${callFile("950")}`);
+  assert.equal(stored.extracted_variables.wants_consult, true);
+  assert.equal(stored.extracted_variables.summary, "Asked about a chipped tooth and wanted a consultant to call.");
+
+  // The same, when the second copy reaches an instance that has never seen the id.
+  assert.deepEqual((await answer(await hook(early("951")))).json, { ok: true, stored: true });
+  const { POST: fresh } = await import("../src/app/api/autocalls-webhook/route.ts?instance=7");
+  assert.deepEqual((await answer(await hook(callPayload("951"), { route: fresh }))).json, { ok: true, stored: true, updated: true });
+  assert.equal((await read(`calls/${callFile("951")}`)).extracted_variables.consult_phone, "2815550142");
+
+  // And for a call that carries no time: the copy stored under its arrival time is the one replaced.
+  const noTime = { created_at: undefined, finished_at: undefined };
+  assert.deepEqual((await answer(await hook(early("952", noTime)))).json, { ok: true, stored: true });
+  const before = (await under("calls")).filter((name) => name.includes("-952-"));
+  assert.equal(before.length, 1);
+  const { POST: third } = await import("../src/app/api/autocalls-webhook/route.ts?instance=8");
+  const fixed = await answer(await hook(callPayload("952", { top: noTime }), { route: third }));
+  assert.deepEqual(fixed.json, { ok: true, stored: true, updated: true });
+  assert.deepEqual(
+    (await under("calls")).filter((name) => name.includes("-952-")),
+    before,
+    "no second file",
+  );
+  assert.equal((await read(`calls/${before[0]}`)).extracted_variables.wants_consult, true);
+  assert.equal((await under("calls")).length, 3);
+});
+
+test("webhook: our own demo call is still kept when its variables arrive as a JSON string or demo_mode as true", async () => {
+  const token = tok("called");
+  const vars = { business_name: "Maple Creek Family Dental", lead_token: token, demo_mode: "yes" };
+  const cases = [
+    ["input_variables as a JSON string", "960", { input_variables: JSON.stringify(vars) }],
+    ["extracted_variables as a JSON string", "961", { extracted_variables: JSON.stringify({ wants_consult: true, consult_phone: "2815550142" }) }],
+    ["demo_mode true", "962", { input_variables: { ...vars, demo_mode: true } }],
+    ['demo_mode "true"', "963", { input_variables: { ...vars, demo_mode: "true" } }],
+    ['demo_mode "Yes"', "964", { input_variables: { ...vars, demo_mode: " Yes " } }],
+  ];
+  for (const [label, id, top] of cases) {
+    const got = await answer(await hook(callPayload(id, { top })));
+    assert.deepEqual(got.json, { ok: true, stored: true }, label);
+    const stored = await read(`calls/${callFile(id)}`);
+    assert.equal(stored.lead_token, token, label);
+    assert.equal(stored.input_variables.business_name, "Maple Creek Family Dental", label);
+    assert.equal(stored.extracted_variables.wants_consult, true, label);
+    assert.equal(stored.extracted_variables.consult_phone, "2815550142", label);
+  }
+  // Still dropped: anything that does not say it is a demo call of our own assistant.
+  const dropped = [
+    ["the assistant's number, not its uuid", "970", { assistant_id: 16877 }],
+    ["the assistant's number as text", "971", { assistant_id: "16877" }],
+    ['demo_mode "no"', "972", { input_variables: { ...vars, demo_mode: "no" } }],
+    ["demo_mode false", "973", { input_variables: { ...vars, demo_mode: false } }],
+    ["demo_mode 1", "974", { input_variables: { ...vars, demo_mode: 1 } }],
+    ["input_variables a string that is not JSON", "975", { input_variables: "demo_mode=yes" }],
+    ["input_variables a JSON list", "976", { input_variables: '["yes"]' }],
+  ];
+  for (const [label, id, top] of dropped) {
+    const got = await answer(await hook(callPayload(id, { top })));
+    assert.equal(got.status, 200, label);
+    assert.deepEqual(got.json, { ok: true, stored: false, ignored: true }, label);
+  }
+  assert.equal((await under("calls")).length, cases.length);
 });
 
 test("webhook: only our own demo calls are kept", async () => {
@@ -613,7 +830,7 @@ test("webhook: a body that is not a call is 400, and an id can never be a path",
   }
   // A numeric id is fine.
   assert.deepEqual((await answer(await hook(callPayload(801)))).json, { ok: true, stored: true });
-  assert.deepEqual(await under("calls"), ["20261116T190411Z-801.json"]);
+  assert.deepEqual(await under("calls"), [callFile("801")]);
   // Too large is refused before it is parsed.
   const big = await answer(await hook(null, { raw: JSON.stringify({ ...callPayload("802"), formatted_transcript: "x".repeat(1024 * 1024 + 10) }) }));
   assert.equal(big.status, 413);
