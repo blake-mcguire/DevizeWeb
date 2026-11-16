@@ -1,5 +1,7 @@
 #!/bin/bash
 # End-to-end run of the voice demo routes on this machine only. Usage: bash tests/e2e/run.sh prod | dev
+# Since 2026-11-16 it also covers the readable link /for/<slug>, the opt-out page /u/<token>, its beacon
+# (POST /api/optout-view) and its button (POST /api/unsubscribe), with links/ files seeded by seed.mjs.
 #
 #   prod  the BUILT site (run `npm run build` first), started with `next start`. A production build never
 #         uses the blob mock directory, so the real @vercel/blob SDK runs against fake-blob.mjs, a local
@@ -248,6 +250,134 @@ code "GET /a/<unknown>" 404 -A "$UA" "$BASE/a/e2eNoSuchPage_00000000"
 echo
 echo "vendor calls in all: $(vendor_log 'l.length+", key right on "+l.filter(r=>r.key==="right").length')"
 expect "vendor calls in all, and with the right key" "$(vendor_log 'l.length+" "+l.filter(r=>r.key==="right").length')" "13 13"
+echo
+
+# ---- contract 8.4 and 8.5 (2026-11-16): the readable link /for/<slug> and the opt-out page /u/<token> ----------------
+# Page lines: what a person sees, read off the HTML the server sends (no browser runs here). Every page carries the
+# /a/ not-found tree inside its script payload, so a 404 is told by the marker Next writes for one, not by its words.
+page_line() { # file
+  node -e '
+    const h=require("fs").readFileSync(process.argv[1],"utf8");
+    const has=(s)=>h.includes(s)?"yes":"no";
+    const title=(h.match(/<title>([^<]*)<\/title>/)||[])[1];
+    console.log(`title="${title}" maple:${has("Maple Creek Family Dental")} willow:${has("Willow Bend Dental Studio")} line:${has("This is your receptionist, set up as a demo.")} talk:${has("Talk to it")} caption:${has("Not interested in how AI can help your business? Unsubscribe here:")} unsubscribe-button:${/<button[^>]*>Unsubscribe<\/button>/.test(h)?"yes":"no"} done-line:${/unsubscribed/i.test(h)?"yes":"no"} not-found:${has("NEXT_HTTP_ERROR_FALLBACK;404")} audit-form:${has("Your name")} vendor-name:${/autocalls/i.test(h)?"YES":"no"} session-in-html:${/fake-session|wss:/.test(h)?"YES":"no"}`);
+  ' "$1"
+}
+header_of() { # name, url: the value of one response header
+  curl -s -D - -o /dev/null -A "$UA" "$2" | tr -d '\r' | awk -v k="$(echo "$1" | tr 'A-Z' 'a-z')" -F': ' 'tolower($1)==k{print $2}'
+}
+VOICE_LINE_WILLOW='title="Your receptionist demo · Devize" maple:no willow:yes line:yes talk:yes caption:no unsubscribe-button:no done-line:no not-found:no audit-form:no vendor-name:no session-in-html:no'
+OPTOUT_LINE='title="Unsubscribe · Devize" maple:no willow:no line:no talk:no caption:yes unsubscribe-button:yes done-line:no not-found:no audit-form:no vendor-name:no session-in-html:no'
+NOT_FOUND_LINE='title="Your audit · Devize" maple:no willow:no line:no talk:no caption:no unsubscribe-button:no done-line:no not-found:yes audit-form:no vendor-name:no session-in-html:no'
+
+echo "== the readable link: GET /for/<slug>"
+code "GET /for/$LINK_SLUG" 200 -A "$UA" "$BASE/for/$LINK_SLUG"
+curl -s -A "$UA" "$BASE/for/$LINK_SLUG" > "$WORK/for.html"
+curl -s -A "$UA" "$BASE/a/$LINKED" > "$WORK/for-a.html"
+echo "   /for/$LINK_SLUG  $(page_line "$WORK/for.html")"
+echo "   /a/<its token>   $(page_line "$WORK/for-a.html")"
+expect "/for/<slug> shows the voice page of its token" "$(page_line "$WORK/for.html")" "$VOICE_LINE_WILLOW"
+expect "/for/<slug> and /a/<its token> show the same page" "$(page_line "$WORK/for.html")" "$(page_line "$WORK/for-a.html")"
+expect "the token /for/<slug> hands the demo block is the page's own" "$(grep -c -F "$LINKED" "$WORK/for.html" | tr -d ' ' | sed 's/^0$/none/;s/^[1-9][0-9]*$/some/')" "some"
+expect "/for/<slug> is not a redirect (no Location header)" "$(header_of Location "$BASE/for/$LINK_SLUG")" ""
+expect "/for/<slug> X-Robots-Tag" "$(header_of X-Robots-Tag "$BASE/for/$LINK_SLUG")" "noindex, nofollow"
+expect "/for/<slug> Referrer-Policy" "$(header_of Referrer-Policy "$BASE/for/$LINK_SLUG")" "no-referrer"
+CHECKS=$((CHECKS + 1)); grep -q -F 'noindex' "$WORK/for.html" || miss "/for/<slug> has no robots noindex meta tag"
+for pair in "unknown slug:no-such-business" "slug in capitals:Willow-Bend-Dental-Studio" "slug with an underscore:willow_bend" \
+            "slug of 61 characters:$(printf 'x%.0s' $(seq 1 61))" "slug ending in a hyphen:willow-" \
+            "a link file naming another slug:$LINK_WRONG_SLUG" "a link to an expired page:$LINK_EXPIRED_SLUG" \
+            "a link to an audit page:$LINK_AUDIT_SLUG"; do
+  label="${pair%%:*}"; slug="${pair#*:}"
+  code "GET /for/<$label>" 404 -A "$UA" "$BASE/for/$slug"
+done
+curl -s -A "$UA" "$BASE/for/no-such-business" > "$WORK/for-404.html"
+curl -s -A "$UA" "$BASE/a/e2eNoSuchPage_00000000" > "$WORK/a-404.html"
+expect "/for/<unknown> is the /a/ 404" "$(page_line "$WORK/for-404.html")" "$NOT_FOUND_LINE"
+expect "/a/<unknown> is the same 404" "$(page_line "$WORK/a-404.html")" "$NOT_FOUND_LINE"
+expect "/for/<unknown> X-Robots-Tag" "$(header_of X-Robots-Tag "$BASE/for/no-such-business")" "noindex, nofollow"
+VENDOR_BEFORE=$(vendor_log 'l.length')
+# The all-pages cap was filled above (25 today); one seeded marker is taken out so the linked page has room.
+rm -f "$BLOB/demo-days/$DAY/"*cccccccccccccccccccccccccccccc01.json
+expect "markers under demo-days/<today> with room for one" "$(count "$BLOB/demo-days/$DAY")" 24
+mint "a press on the /for/ page (it mints with the page token)" 200 "$GOOD" "$LINKED"
+expect "the vendor was asked once, for the page token" "$(vendor_log "l.slice($VENDOR_BEFORE).map(r=>r.external_identifier).join(' ')")" "$LINKED"
+expect "one demo marker for the linked page" "$(count "$BLOB/demos/$LINKED")" 1
+show "view beacon from the /for/ page" 204 "" -X POST -H "Content-Type: application/json" -A "$UA" -d "{\"token\":\"$LINKED\"}" "$BASE/api/audit-view"
+expect "views/ for the linked page (under its token)" "$(ls "$BLOB/views" | grep -c -E -- "-$LINKED\.json$")" 1
+echo
+
+echo "== the opt-out page: GET /u/<token>"
+code "GET /u/<live voice page>" 200 -A "$UA" "$BASE/u/$A"
+code "GET /u/<expired voice page>" 200 -A "$UA" "$BASE/u/$EXPIRED"
+curl -s -A "$UA" "$BASE/u/$A" > "$WORK/u-live.html"
+curl -s -A "$UA" "$BASE/u/$EXPIRED" > "$WORK/u-expired.html"
+echo "   /u/<live>     $(page_line "$WORK/u-live.html")"
+echo "   /u/<expired>  $(page_line "$WORK/u-expired.html")"
+expect "/u/<live> shows the caption and the one button" "$(page_line "$WORK/u-live.html")" "$OPTOUT_LINE"
+expect "/u/<expired> shows the caption and the one button" "$(page_line "$WORK/u-expired.html")" "$OPTOUT_LINE"
+expect "buttons on /u/<live>" "$(grep -o '<button' "$WORK/u-live.html" | wc -l | tr -d ' ')" 1
+expect "the Devize logo on /u/<live>" "$(grep -c -F 'aria-label="Devize"' "$WORK/u-live.html" | tr -d ' ' | sed 's/^[1-9][0-9]*$/yes/;s/^0$/no/')" "yes"
+expect "/u/<token> X-Robots-Tag" "$(header_of X-Robots-Tag "$BASE/u/$A")" "noindex, nofollow"
+expect "/u/<token> Referrer-Policy" "$(header_of Referrer-Policy "$BASE/u/$A")" "no-referrer"
+CHECKS=$((CHECKS + 1)); grep -q -F 'noindex' "$WORK/u-live.html" || miss "/u/<token> has no robots noindex meta tag"
+code "GET /u/<unknown>" 404 -A "$UA" "$BASE/u/e2eNoSuchPage_00000000"
+code "GET /u/<an audit page>" 404 -A "$UA" "$BASE/u/$AUDIT"
+code "GET /u/<malformed>" 404 -A "$UA" "$BASE/u/abc"
+curl -s -A "$UA" "$BASE/u/$AUDIT" > "$WORK/u-404.html"
+expect "/u/<audit page> is the /a/ 404" "$(page_line "$WORK/u-404.html")" "$NOT_FOUND_LINE"
+expect "opt-outs written by opening the page" "$(ls "$BLOB/optouts" 2>/dev/null | wc -l | tr -d ' ')" 0
+expect "visits written by the server render alone (only the beacon writes them)" "$(ls "$BLOB/optout-views" 2>/dev/null | wc -l | tr -d ' ')" 0
+echo
+
+echo "== the opt-out page's beacon: POST /api/optout-view"
+show "beacon, a person on the live page" 204 "" -X POST -H "Content-Type: application/json" -A "$UA" -d "{\"token\":\"$A\"}" "$BASE/api/optout-view"
+show "beacon, a machine (curl's own UA)" 204 "" -X POST -H "Content-Type: application/json" -d "{\"token\":\"$A\"}" "$BASE/api/optout-view"
+show "beacon, a mail scanner" 204 "" -X POST -H "Content-Type: application/json" -A "Mozilla/5.0 (compatible; Proofpoint Essentials)" -d "{\"token\":\"$EXPIRED\"}" "$BASE/api/optout-view"
+show "beacon, an unknown token" 204 "" -X POST -H "Content-Type: application/json" -A "$UA" -d '{"token":"e2eNoSuchPage_00000000"}' "$BASE/api/optout-view"
+show "beacon, an audit page" 204 "" -X POST -H "Content-Type: application/json" -A "$UA" -d "{\"token\":\"$AUDIT\"}" "$BASE/api/optout-view"
+echo "optout-views/: $(cd "$BLOB" && find optout-views -type f 2>/dev/null | tr '\n' ' ')"
+expect "optout-views/ folders (only the person's visit)" "$(ls "$BLOB/optout-views" 2>/dev/null | tr '\n' ' ')" "$A "
+expect "optout-views/<live> names are <iso>-<32 hex>.json" "$(ls "$BLOB/optout-views/$A/" | grep -c -E '^[0-9]{8}T[0-9]{6}Z-[0-9a-f]{32}\.json$')" 1
+expect "the visit's keys" "$(node -e 'const fs=require("fs"),d=process.argv[1];const f=fs.readdirSync(d)[0];const j=JSON.parse(fs.readFileSync(d+"/"+f));console.log(Object.keys(j).sort().join(",")+" "+j.ua)' "$BLOB/optout-views/$A")" "at,token,ua,v iphone"
+expect "opt-outs written by a visit" "$(ls "$BLOB/optouts" 2>/dev/null | wc -l | tr -d ' ')" 0
+echo
+
+echo "== the button: POST /api/unsubscribe"
+UNSUB="$BASE/api/unsubscribe"
+show "a machine (curl's own UA)" 403 '"error":"forbidden"' -X POST -H "Content-Type: application/json" -d "{\"token\":\"$A\"}" "$UNSUB"
+show "a machine (python-requests)" 403 '"error":"forbidden"' -X POST -H "Content-Type: application/json" -A "python-requests/2.32" -d "{\"token\":\"$A\"}" "$UNSUB"
+show "a mail scanner" 403 '"error":"forbidden"' -X POST -H "Content-Type: application/json" -A "Mozilla/5.0 (compatible; Proofpoint Essentials)" -d "{\"token\":\"$A\"}" "$UNSUB"
+expect "opt-outs written by machines" "$(ls "$BLOB/optouts" 2>/dev/null | wc -l | tr -d ' ')" 0
+show "another site's page (Sec-Fetch-Site: cross-site)" 403 '"error":"forbidden"' -X POST -H "Content-Type: application/json" -H "Sec-Fetch-Site: cross-site" -A "$UA" -d "{\"token\":\"$A\"}" "$UNSUB"
+show "not JSON content type" 400 '"error":"bad_request"' -X POST -A "$UA" -d "token=$A" "$UNSUB"
+show "a malformed token" 400 '"error":"bad_token"' -X POST -H "Content-Type: application/json" -A "$UA" -d '{"token":"../../etc/passwd"}' "$UNSUB"
+show "an unknown token" 404 '"error":"gone"' -X POST -H "Content-Type: application/json" -A "$UA" -d '{"token":"e2eNoSuchPage_00000000"}' "$UNSUB"
+show "an audit page" 404 '"error":"gone"' -X POST -H "Content-Type: application/json" -A "$UA" -d "{\"token\":\"$AUDIT\"}" "$UNSUB"
+show "GET is not allowed" 405 "" -A "$UA" "$UNSUB"
+expect "opt-outs written by the refusals" "$(ls "$BLOB/optouts" 2>/dev/null | wc -l | tr -d ' ')" 0
+show "a person presses on the live page" 200 '{"ok":true}' -X POST -H "Content-Type: application/json" -A "$UA" -d "{\"token\":\"$A\"}" "$UNSUB"
+CHECKS=$((CHECKS + 1)); grep -q -F "$A" "$WORK/body.txt" && miss "the unsubscribe answer echoes the token"
+expect "opt-out files for the live page after one press" "$(count "$BLOB/optouts/$A")" 1
+expect "the opt-out's name is <iso>-<32 hex>.json" "$(ls "$BLOB/optouts/$A/" | grep -c -E '^[0-9]{8}T[0-9]{6}Z-[0-9a-f]{32}\.json$')" 1
+expect "the opt-out's keys" "$(node -e 'const fs=require("fs"),d=process.argv[1];const f=fs.readdirSync(d)[0];const j=JSON.parse(fs.readFileSync(d+"/"+f));console.log(Object.keys(j).sort().join(",")+" "+j.v+" "+j.ua+" "+(j.token===process.argv[2]))' "$BLOB/optouts/$A" "$A")" "at,token,ua,v 1 iphone true"
+show "the same person presses again" 200 '{"ok":true}' -X POST -H "Content-Type: application/json" -A "$UA" -d "{\"token\":\"$A\"}" "$UNSUB"
+expect "opt-out files for the live page after a second press" "$(count "$BLOB/optouts/$A")" 1
+show "a person presses on the expired page" 200 '{"ok":true}' -X POST -H "Content-Type: application/json" -A "$UA" -d "{\"token\":\"$EXPIRED\"}" "$UNSUB"
+expect "opt-out files for the expired page" "$(count "$BLOB/optouts/$EXPIRED")" 1
+expect "opt-out folders in all" "$(ls "$BLOB/optouts" | sort | tr '\n' ' ')" "$(printf '%s\n' "$A" "$EXPIRED" | sort | tr '\n' ' ')"
+echo
+
+echo "== the pages that were there before, after all of it"
+code "GET /a/<voice A> (unchanged by its opt-out; the pipeline stops the emails, not the page)" 200 -A "$UA" "$BASE/a/$A"
+curl -s -A "$UA" "$BASE/a/$A" > "$WORK/voice-after.html"
+curl -s -A "$UA" "$BASE/a/$AUDIT" > "$WORK/audit-after.html"
+expect "the voice page /a/<A> renders as before" "$(page_line "$WORK/voice-after.html")" 'title="Your receptionist demo · Devize" maple:yes willow:no line:yes talk:yes caption:no unsubscribe-button:no done-line:no not-found:no audit-form:no vendor-name:no session-in-html:no'
+expect "the audit page renders as before" "$(page_line "$WORK/audit-after.html")" 'title="Your audit · Devize" maple:no willow:no line:no talk:no caption:no unsubscribe-button:no done-line:no not-found:no audit-form:yes vendor-name:no session-in-html:no'
+ROBOTS="$(curl -s "$BASE/robots.txt")"
+expect "robots.txt keeps /a/, /for/ and /u/ out" "$(echo "$ROBOTS" | grep -c -E '^Disallow: /(a|for|u)/$')" 3
+expect "the sitemap lists no prospect page" "$(curl -s "$BASE/sitemap.xml" | grep -c -E '/(a|for|u)/')" 0
+echo "vendor calls in all, with the press on the /for/ page: $(vendor_log 'l.length')"
+expect "vendor calls in all, with the press on the /for/ page" "$(vendor_log 'l.length+" "+l.filter(r=>r.key==="right").length')" "14 14"
 echo "server log lines from the voice routes:"
 grep -E "\[demo-session\]|\[voice-webhook\]" "$LOG" | sed 's/^/   /' | head -30
 echo "key or vendor text in the server log: $(grep -c -e "$KEY" -e "VENDOR-TEXT" "$LOG")"

@@ -7,6 +7,16 @@ export function tok(label) {
   return `${label}_${"0".repeat(22)}`.slice(0, 22);
 }
 
+/** A token exactly as the pipeline makes one (22 letters and digits, no underscore), from a short label of letters and digits. */
+export function alnumTok(label) {
+  return `${label}${"0".repeat(22)}`.slice(0, 22);
+}
+
+/** links/<slug>.json as the pipeline writes it (voice build contract 8.4). */
+export function linkFile(slug, token) {
+  return { v: 1, slug, token };
+}
+
 const pick = (label) => ({ next_open_day: `next-${label}`, appt_windows: `windows-${label}` });
 
 /** Monday to Friday 8 AM to 5 PM, Saturday 9 AM to 1 PM, Sunday closed. Index 0 is Monday. */

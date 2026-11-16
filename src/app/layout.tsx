@@ -56,10 +56,12 @@ const GTM_ID = "GTM-KTFN9CLB";
 // Google Ads conversion setup (AW-18565922304).
 // Skipped on /a/<token> (the prospect audit pages): the token in that URL is
 // the only key to the page, so it is not handed to analytics, and the page
-// stays light. The page's own view beacon measures visits there.
+// stays light. The page's own view beacon measures visits there. The same goes,
+// since 2026-11-16, for /for/<slug> (a voice page's readable link, which leads
+// to the token) and /u/<token> (the voice email's opt-out page).
 // The gtag() helper below matches Google's install snippet, so later code can
 // push events with gtag('event', ...) without a second bootstrap.
-const gtmScript = `(function(w,d,s,l,i){if(w.location.pathname.indexOf('/a/')===0)return;w[l]=w[l]||[];w[l].push({'gtm.start':
+const gtmScript = `(function(w,d,s,l,i){var p=w.location.pathname;if(p.indexOf('/a/')===0||p.indexOf('/for/')===0||p.indexOf('/u/')===0)return;w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);

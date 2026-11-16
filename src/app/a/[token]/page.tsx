@@ -4,13 +4,13 @@ import { notFound } from "next/navigation";
 import { cache } from "react";
 import { auditFile, filePlan as fileCarriesPlan, loadPage } from "@/lib/audit-page";
 import { auditFileUrl, sentCookieName } from "@/lib/audit-validate";
+import { chooseView } from "@/lib/prospect-view";
 import { vslFor } from "@/lib/vsl";
 import AuditForm, { type Initial } from "./audit-form";
 import ViewBeacon from "./view-beacon";
-import VoiceDemo from "./voice-demo";
+import VoiceView, { voiceMetadata } from "./voice-view";
 import VslPlayer from "./vsl-player";
 import { copy, type ErrorCode } from "./copy";
-import { voiceCopy } from "./voice-copy";
 
 /**
  * /a/<token>: one prospect's own page, linked from their cold email.
@@ -31,6 +31,11 @@ import { voiceCopy } from "./voice-copy";
  * (voice-demo.tsx) and the same view beacon; it has no form and no file, and
  * nothing below the branch runs for it. An audit page renders exactly as it
  * did before.
+ *
+ * Since 2026-11-16 the same voice page is also reached by its readable link,
+ * /for/<slug> (src/app/for/[slug]/page.tsx). Both pages decide what to show
+ * with prospect-view.chooseView and render the voice page with the one
+ * VoiceView (voice-view.tsx), so the two addresses cannot drift.
  */
 
 type Props = {
@@ -51,30 +56,16 @@ const getPage = cache(loadPage);
  */
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { token } = await params;
-  const loaded = await getPage(token);
-  return loaded?.kind === "voice" ? { title: { absolute: `${voiceCopy.pageTitle} · Devize` } } : {};
+  const view = chooseView(await getPage(token), "a");
+  return view.kind === "voice" ? voiceMetadata : {};
 }
 
 export default async function AuditPage({ params, searchParams }: Props) {
   const { token } = await params;
-  const loaded = await getPage(token);
-  if (!loaded) notFound();
-  if (loaded.kind === "voice") {
-    const voice = loaded.page;
-    return (
-      <>
-        <VoiceDemo
-          token={token}
-          business={voice.business}
-          city={voice.city}
-          state={voice.state}
-          sample={voice.sample}
-        />
-        <ViewBeacon token={token} />
-      </>
-    );
-  }
-  const page = loaded.page;
+  const view = chooseView(await getPage(token), "a");
+  if (view.kind === "missing") notFound();
+  if (view.kind === "voice") return <VoiceView page={view.page} />;
+  const page = view.page;
 
   const sp = await searchParams;
   const bounced = typeof sp.e === "string" && Object.hasOwn(copy.errors, sp.e) ? (sp.e as ErrorCode) : null;

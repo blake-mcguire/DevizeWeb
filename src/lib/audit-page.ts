@@ -3,6 +3,7 @@ import "server-only";
 import { blobUrl, getJSON, pathnameOfUrl, stat } from "@/lib/blob-store";
 import { validToken } from "@/lib/audit-validate";
 import { cleanFilename, downloadName } from "@/lib/download-name";
+import { linkPath, linkToken, optoutAllowed, validSlug } from "@/lib/voice-link";
 import { pageKind, parseVoicePage, type VoicePage } from "@/lib/voice-page";
 
 /** One row of "who came up instead of you", exactly as the pipeline writes it. */
@@ -118,7 +119,8 @@ export type LoadedPage = { kind: "audit"; page: AuditPage } | { kind: "voice"; p
  * null the same way (a plain 404), so a visitor learns nothing about which
  * it was. Only /a/<token> itself and the view beacon take both kinds; every
  * audit route keeps asking loadAuditPage, so a voice page has no form, no
- * status and no file.
+ * status and no file. (/for/<slug> reads through here as well and shows
+ * voice pages only: prospect-view.ts.)
  */
 export async function loadPage(token: string): Promise<LoadedPage | null> {
   if (!validToken(token)) return null;
@@ -138,6 +140,53 @@ export async function loadPage(token: string): Promise<LoadedPage | null> {
   }
   const audit = auditFromRaw(raw, token);
   return audit ? { kind: "audit", page: audit } : null;
+}
+
+/**
+ * The token a readable link (/for/<slug>) names, or null when the slug is
+ * malformed, has no links/<slug>.json, or the file is not {v: 1, slug, token}
+ * for this very slug (voice-link.ts). Callers treat every null as the plain
+ * 404, as /a/ does.
+ */
+export async function tokenForSlug(slug: string): Promise<string | null> {
+  if (!validSlug(slug)) return null;
+  let raw: unknown;
+  try {
+    raw = await getJSON(linkPath(slug));
+  } catch (err) {
+    console.error("[audit-page] link read failed", err instanceof Error ? err.message : err);
+    return null;
+  }
+  return linkToken(raw, slug);
+}
+
+/**
+ * The page a readable link leads to: the token from links/<slug>.json, then
+ * exactly the loadPage /a/<token> uses, so the two addresses read the same
+ * page under the same rules (an expired or broken page is null on both).
+ */
+export async function loadPageForSlug(slug: string): Promise<LoadedPage | null> {
+  const token = await tokenForSlug(slug);
+  return token ? loadPage(token) : null;
+}
+
+/**
+ * Whether a token may be opted out (/u/<token>, POST /api/unsubscribe):
+ * "yes" when audits/<token>/page.json is a voice page of this token, expired
+ * or not (voice-link.optoutAllowed); "no" for a malformed token, no page, or
+ * a page of another kind; "error" when the store could not be read, so the
+ * button can say "try again" instead of turning a real opt-out away.
+ */
+export async function optoutPageState(token: string): Promise<"yes" | "no" | "error"> {
+  if (!validToken(token)) return "no";
+  let raw: unknown;
+  try {
+    raw = await getJSON(`audits/${token}/page.json`);
+  } catch (err) {
+    console.error("[audit-page] opt-out page read failed", err instanceof Error ? err.message : err);
+    return "error";
+  }
+  return optoutAllowed(raw, token) ? "yes" : "no";
 }
 
 /**
