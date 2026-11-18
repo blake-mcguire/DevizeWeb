@@ -253,6 +253,47 @@ test("view beacon: a voice page reports an open like an audit page does", async 
   assert.equal((await under("views")).length, 1);
 });
 
+test("view beacon: a desktop Linux browser is a mail scanner's check, not a person (2026-11-17)", async () => {
+  const { isMachineOpen } = await import("../src/lib/audit-validate.ts");
+  const cases = [
+    // [what it is, user agent, opens recorded]
+    ["Proofpoint's link check, as seen on 2026-11-17",
+      "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36", 0],
+    ["Firefox on Ubuntu", "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0", 0],
+    ["an ARM Linux desktop",
+      "Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36", 0],
+    ["a bot word, as before", "Mozilla/5.0 HeadlessChrome/131.0", 0],
+    ["the person after the check: Windows Chrome",
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36", 1],
+    ["an old Windows 7 front desk PC",
+      "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36", 1],
+    ["an Android phone",
+      "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Mobile Safari/537.36", 1],
+    ["a Samsung phone's own browser",
+      "Mozilla/5.0 (Linux; Android 14; SM-S921U) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/28.0 Chrome/130.0.0.0 Mobile Safari/537.36", 1],
+    ["a Chromebook",
+      "Mozilla/5.0 (X11; CrOS x86_64 14541.0.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36", 1],
+    ["a Mac", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.1 Safari/605.1.15", 1],
+    ["an iPhone", BROWSER, 1],
+  ];
+  let i = 0;
+  for (const [label, ua, want] of cases) {
+    assert.equal(isMachineOpen(ua), want === 0, `${label}: isMachineOpen`);
+    const token = tok(`lnx${i++}`);
+    await putPage(token, voicePage(token));
+    const res = await view(
+      new Request("http://localhost/api/audit-view", {
+        method: "POST",
+        headers: { "user-agent": ua, "x-forwarded-for": `10.3.0.${i}` },
+        body: JSON.stringify({ token }),
+      }),
+    );
+    assert.equal(res.status, 204, `${label}: always 204`);
+    const mine = (await under("views")).filter((name) => name.endsWith(`-${token}.json`));
+    assert.equal(mine.length, want, `${label}: opens recorded`);
+  }
+});
+
 // ---- POST /api/demo-session ----------------------------------------------------------------------------------------
 
 test("mint: refused before anything is read or asked for", async () => {

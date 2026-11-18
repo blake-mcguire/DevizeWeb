@@ -35,6 +35,24 @@ export const FIELD_TEL = "tel";
 export const MACHINE_UA =
   /bot|crawl|spider|slurp|preview|headless|python|curl|wget|httpclient|okhttp|scanner|monitor|proofpoint|mimecast|barracuda|facebookexternalhit|lighthouse/i;
 
+/**
+ * A desktop Linux browser: "X11; Linux x86_64", "X11; Ubuntu; Linux x86_64", "Linux aarch64" and the like. Mail
+ * scanners that pose as a browser run on Linux servers: Proofpoint's link check opened two voice demo pages on
+ * 2026-11-17 as "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0
+ * Safari/537.36", with no bot word for MACHINE_UA to catch, and each one texted the owner a false page open.
+ * Phones and tablets (Android) and Chromebooks (CrOS) name Linux too and stay people. Known blind spot: an Android
+ * tablet in desktop mode sends this same desktop string and is read as a scanner. The owner's call (2026-11-17):
+ * nobody in these trades opens the email on desktop Linux.
+ */
+export const LINUX_DESKTOP_UA = /\bX11\b|\bLinux (?:x86_64|i[3-6]86|aarch64|armv\d+l?)\b/i;
+const PHONE_OR_CHROMEBOOK_UA = /Android|CrOS/i;
+
+/** A page open that a machine made, not a person: MACHINE_UA's bot words, or a desktop Linux browser. */
+export function isMachineOpen(userAgent: string): boolean {
+  if (MACHINE_UA.test(userAgent)) return true;
+  return LINUX_DESKTOP_UA.test(userAgent) && !PHONE_OR_CHROMEBOOK_UA.test(userAgent);
+}
+
 /** A cleaned name (1-80 chars, whitespace collapsed), or null when it is missing or obvious junk. */
 export function cleanName(input: unknown): string | null {
   if (typeof input !== "string") return null;
