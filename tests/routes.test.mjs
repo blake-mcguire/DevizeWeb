@@ -275,6 +275,13 @@ test("view beacon: a desktop Linux browser is a mail scanner's check, not a pers
       "Mozilla/5.0 (X11; CrOS x86_64 14541.0.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36", 1],
     ["a Mac", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.1 Safari/605.1.15", 1],
     ["an iPhone", BROWSER, 1],
+    ["a Samsung tablet in its desktop mode",
+      "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/28.0 Chrome/130.0.0.0 Safari/537.36", 1],
+    ["an Amazon Fire tablet in desktop view",
+      "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Silk/131.4.1 like Chrome/131.0.6778.135 Safari/537.36", 1],
+    ["a desktop Linux string with a Microsoft word in it",
+      "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 Microsoft-Scan/1.0", 0],
+    ["no user agent at all", "", 0],
   ];
   let i = 0;
   for (const [label, ua, want] of cases) {
